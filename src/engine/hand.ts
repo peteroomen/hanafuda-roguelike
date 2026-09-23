@@ -25,7 +25,7 @@ export type HandPhase =
   'play' | 'playChoice' | 'flip' | 'frogDecide' | 'flipChoice' | 'decide' | 'over';
 
 export interface HandBossRules {
-  /** Tengu: steals the first Bright this seat captures each hand. */
+  /** Tengu: snatches the first Bright this seat captures each hand and hides it under the pile. */
   readonly stealFirstBrightFrom?: Seat;
   /** Yuki-onna: after each turn of `by`, one field card freezes; at most `max` stay frozen. */
   readonly freeze?: { readonly by: Seat; readonly max: number };
@@ -146,7 +146,7 @@ export type HandEvent =
   | { readonly t: 'koikoi'; readonly seat: Seat; readonly calls: number }
   | { readonly t: 'stop'; readonly seat: Seat; readonly points: number }
   | { readonly t: 'exhausted' }
-  | { readonly t: 'steal'; readonly from: Seat; readonly to: Seat; readonly card: CardId }
+  | { readonly t: 'steal'; readonly from: Seat; readonly card: CardId }
   | { readonly t: 'freeze'; readonly card: CardId }
   | { readonly t: 'thaw'; readonly card: CardId }
   | { readonly t: 'disguise'; readonly card: CardId; readonly as: Month }
@@ -462,11 +462,12 @@ function capture(s: HandState, seat: Seat, ids: readonly CardId[], events: HandE
   if (thiefVictim === seat && !s.stolen) {
     const bright = ids.find((id) => CARDS[id]?.type === 'bright');
     if (bright !== undefined) {
+      // The Tengu snatches it and hides it at the bottom of the draw pile.
       s.stolen = true;
       const pile = s.captured[seat];
       pile.splice(pile.indexOf(bright), 1);
-      s.captured[other(seat)].push(bright);
-      events.push({ t: 'steal', from: seat, to: other(seat), card: bright });
+      s.pile.unshift(bright);
+      events.push({ t: 'steal', from: seat, card: bright });
     }
   }
 }

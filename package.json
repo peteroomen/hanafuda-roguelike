@@ -16,7 +16,7 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sim": "tsx src/sim/cli.ts",
+    "sim": "tsx --tsconfig tsconfig.sim.json src/sim/cli.ts",
     "e2e": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

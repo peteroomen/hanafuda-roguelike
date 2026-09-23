@@ -262,7 +262,7 @@ describe('enhancements', () => {
 });
 
 describe('boss mechanics', () => {
-  it('Tengu steals the first Bright you capture each hand', () => {
+  it('Tengu snatches the first Bright you capture each hand and hides it under the pile', () => {
     const s0 = handWith(
       {
         hands: [
@@ -277,7 +277,8 @@ describe('boss mechanics', () => {
     const r = step(s0, { type: 'play', card: janChaffA });
     expect(r.events.some((e: HandEvent) => e.t === 'steal')).toBe(true);
     expect(r.state.captured[0]).toEqual([janChaffA]);
-    expect(r.state.captured[1]).toEqual([crane]);
+    expect(r.state.captured[1]).toEqual([]);
+    expect(r.state.pile[0]).toBe(crane);
     let s = run(r.state, [{ type: 'flip' }, { type: 'play', card: febChaffA }, { type: 'flip' }]);
     s = step(s, { type: 'play', card: 10 }).state;
     expect(s.captured[0]).toContain(tag('curtain'));
