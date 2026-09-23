@@ -51,10 +51,10 @@ export interface Balance {
 }
 
 export const BALANCE: Balance = {
-  playerHp: 60,
+  playerHp: 80,
   startMon: 4,
   monthHp: [100, 150, 210, 280, 370, 480, 620, 800, 1000, 1250, 1550, 1900],
-  monthFerocity: [1, 1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2, 2.1, 2.3, 2.5],
+  monthFerocity: [1, 1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.85, 1.95, 2.1, 2.25],
   bossHp: 1.35,
   bossFerocity: 1.25,
   handFerocityGrowth: 0.2,

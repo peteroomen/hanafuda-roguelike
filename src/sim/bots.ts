@@ -295,7 +295,18 @@ function rank(c: CardId): number {
 }
 
 /** Fight-aware koi-koi decision for the smart bot. */
-export function decide(run: RunState, p: DecidePolicy): 'stop' | 'koikoi' {
+export function decide(run: RunState, base: DecidePolicy): 'stop' | 'koikoi' {
+  // A player holding koi-koi charms leans into the gamble.
+  const greed = run.omamori.filter((o) => omamoriDef(o.id).archetype === 'greed').length;
+  const p: DecidePolicy = greed
+    ? {
+        minCards: base.minCards,
+        maxThreat: base.maxThreat + 0.1 * greed,
+        enoughFraction: base.enoughFraction + 0.4 * greed,
+        hpRisk: base.hpRisk + 0.1 * greed,
+        maxCalls: base.maxCalls + 1,
+      }
+    : base;
   const f = run.fight as FightState;
   const h = f.hand;
   if (h.hands[0].length === 0) return 'stop';

@@ -75,13 +75,13 @@ export function SpiritBar(props: {
             )}
           </div>
           <div className="ferocity" title="The spirit hits for its yaku points times this">
-            <svg width="11" height="12" viewBox="0 0 11 12" aria-hidden>
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
               <path
-                d="M1 1 L4 11 L5.5 5 L7 11 L10 1"
+                d="M3.5 1 Q2 6 2.5 11 M7 1 Q5.5 6 6 11 M10.5 1 Q9 6 9.5 11"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinejoin="round"
+                strokeWidth="1.5"
+                strokeLinecap="round"
               />
             </svg>
             ×{Math.round(fight.ferocity * 10) / 10}

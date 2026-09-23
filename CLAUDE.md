@@ -67,4 +67,14 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
 
 ## Current state
 
-- See `docs/work/` for session logs and `docs/balance/` for the latest simulation report.
+- **v1.0 complete (2026-09-23)** on branch `claude/hanafuda-roguelike-handoff-o39d8a`. The whole
+  game is built: guided first year, 12 months with 12 spirits and 8 bosses, the shop with charms,
+  talismans, enhancements and poems, 7 decks, 6 omens, a collection screen, settings, audio, haptics
+  and PWA. See `docs/work/2026-09-23-full-game-build.md`.
+- Balance: the smart bot wins about 46% at Clear Sky, and each omen steps it down to 9%
+  (`docs/balance/report.md`). Rerun `pnpm sim --suite` after any change to `src/content/`.
+- E2E: build first (`pnpm build`), run `npx vite preview --port 5299`, then
+  `PW_BASE_URL=http://localhost:5299 pnpm e2e`. `e2e/playthrough.spec.ts` plays a whole year
+  through the UI in about 1 minute. `e2e/tour.spec.ts` screenshots every overlay at normal speed
+  (slow).
+- Deploy: static Vite build on Vercel (`vercel.json`). Not yet hosted.

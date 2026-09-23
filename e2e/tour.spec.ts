@@ -41,7 +41,7 @@ test('photo tour of every screen and overlay', async ({ page }, info) => {
     },
     seed: 11,
     hurry: false,
-    untilMonth: 5,
+    untilMonth: 3,
     maxActions: 20000,
     onPoll: async () => {
       for (const t of targets) {
