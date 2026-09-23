@@ -1,0 +1,234 @@
+import { monthDef } from '@/content/cards';
+import { type OfudaId } from '@/content/ofuda';
+import { spiritDef } from '@/content/spirits';
+import { yakuDef, yakuShort } from '@/content/yaku';
+import type { Intent } from '@/engine/ai';
+import type { HandState } from '@/engine/hand';
+import type { FightState, RunState } from '@/engine/run';
+import { omamoriText } from '@/engine/scoring';
+import { yakuContext } from '@/engine/hand';
+import { detectYaku, yakuProgress } from '@/engine/yaku';
+import { spiritUrl } from '@/ui/art/images';
+import { CoinIcon, OfudaIcon, OmamoriIcon, PetalIcon } from '@/ui/art/Icons';
+import { seasonOf } from '@/content/cards';
+import { PLAYER_CAP_STARTS, SPIRIT_CAP_STARTS, SPIRIT_HAND_X, type Stage } from './layout';
+import { typeGroup, type Visual } from './visual';
+
+export function HpBar({ hp, max, tone }: { hp: number; max: number; tone: 'spirit' | 'player' }) {
+  const pct = Math.max(0, Math.min(1, max > 0 ? hp / max : 0));
+  return (
+    <div className={`hpbar hpbar-${tone}`}>
+      <div className="hpbar-fill" style={{ width: `${pct * 100}%` }} />
+      <div className="hpbar-ghost" style={{ width: `${pct * 100}%` }} />
+    </div>
+  );
+}
+
+export function SpiritBar(props: {
+  run: RunState;
+  fight: FightState;
+  hp: number;
+  intent: Intent | null;
+  onPortrait: () => void;
+  onBook: () => void;
+  onMenu: () => void;
+  calmed: boolean;
+  shaking: number;
+}) {
+  const { run, fight } = props;
+  const s = spiritDef(fight.spiritId);
+  const hidden = Boolean(s.passive?.hiddenIntent);
+  const m = monthDef(run.month);
+  return (
+    <div className="spirit-bar">
+      <button
+        className={`portrait ${fight.boss ? 'boss' : ''} ${props.calmed ? 'calmed' : ''}`}
+        onClick={props.onPortrait}
+        aria-label={`About ${s.name}`}
+        data-testid="spirit-portrait"
+        key={props.shaking}
+      >
+        <img src={spiritUrl(s.id, seasonOf(run.month), s.boss)} alt={s.name} />
+      </button>
+      <div className="spirit-info">
+        <div className="spirit-name">
+          <span className="display">{s.name}</span>
+          {fight.boss && <span className="boss-tag">Boss</span>}
+        </div>
+        <div className="spirit-hp">
+          <HpBar hp={props.hp} max={fight.maxHp} tone="spirit" />
+          <span className="hp-num" data-testid="spirit-hp">
+            {Math.ceil(props.hp)}
+            <small>/{fight.maxHp}</small>
+          </span>
+        </div>
+        <div className="intent-row">
+          <div className={`intent ${props.intent ? '' : 'none'}`} data-testid="intent">
+            <span className="eye" />
+            {hidden ? (
+              <span>Its face hides its plan</span>
+            ) : props.intent ? (
+              <span>
+                Chasing <b>{yakuShort(props.intent.id)}</b> {props.intent.have}/{props.intent.need}
+              </span>
+            ) : (
+              <span>Biding its time</span>
+            )}
+          </div>
+          <div className="ferocity" title="The spirit's hit is its yaku points times this">
+            hits ×{Math.round(fight.ferocity * 10) / 10}
+          </div>
+        </div>
+      </div>
+      <div className="top-buttons">
+        <div className="month-chip">
+          <span className="display">{run.month}</span>
+          <span>{m.flower}</span>
+        </div>
+        <button
+          className="icon-btn"
+          onClick={props.onBook}
+          aria-label="Yaku book"
+          data-testid="open-book"
+        >
+          <span className="book-glyph">役</span>
+        </button>
+        <button
+          className="icon-btn"
+          onClick={props.onMenu}
+          aria-label="Menu"
+          data-testid="open-menu"
+        >
+          <span className="menu-glyph" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Group counts next to the captured strips. */
+export function CapturedCounts({ visual, stage }: { visual: Visual; stage: Stage }) {
+  const counts = (seat: 0 | 1) => {
+    const c = [0, 0, 0, 0];
+    for (const id of visual.cap[seat]) c[typeGroup(id)] = (c[typeGroup(id)] ?? 0) + 1;
+    return c;
+  };
+  const tones = ['#f2c740', '#7fbf5a', '#ef5b3a', '#b99a6a'];
+  return (
+    <>
+      <div className="hand-count" style={{ left: SPIRIT_HAND_X + 18, top: stage.spiritCapY + 22 }}>
+        {visual.hand[1].length}
+      </div>
+      {([1, 0] as const).map((seat) => {
+        const c = counts(seat);
+        const y = seat === 0 ? stage.playerCapY : stage.spiritCapY;
+        const starts = seat === 0 ? PLAYER_CAP_STARTS : SPIRIT_CAP_STARTS;
+        return c.map((n, g) =>
+          n > 0 ? (
+            <div
+              key={`${seat}-${g}`}
+              className="cap-count"
+              style={{ left: (starts[g] as number) - 2, top: y + 34 }}
+            >
+              <span className="cap-dot" style={{ background: tones[g] }} />
+              {n}
+            </div>
+          ) : null,
+        );
+      })}
+    </>
+  );
+}
+
+export function Tracker({ hand, onOpen }: { hand: HandState; onOpen: () => void }) {
+  const ctx = yakuContext(hand, 0);
+  const formed = detectYaku(hand.captured[0], ctx);
+  const prog = yakuProgress(
+    { own: hand.captured[0], opponent: hand.captured[1], inGame: hand.deckIds },
+    ctx,
+  )
+    .filter((p) => !p.complete && !p.blocked && p.have > 0)
+    .sort(
+      (a, b) => b.have / b.need - a.have / a.need || yakuDef(b.id).points - yakuDef(a.id).points,
+    )
+    .slice(0, Math.max(0, 3 - Math.min(2, formed.length)));
+  const empty = formed.length === 0 && prog.length === 0;
+  return (
+    <button className="tracker" onClick={onOpen} data-testid="tracker">
+      {empty && (
+        <span className="tracker-empty">Capture cards to start a yaku · tap for the yaku book</span>
+      )}
+      {formed.map((h) => (
+        <span key={h.id} className="chip formed">
+          {yakuShort(h.id)} <b>{h.points}</b>
+        </span>
+      ))}
+      {prog.map((p) => (
+        <span key={p.id} className="chip">
+          {yakuShort(p.id)}{' '}
+          <b>
+            {p.have}/{p.need}
+          </b>
+        </span>
+      ))}
+    </button>
+  );
+}
+
+export function BottomBar(props: {
+  run: RunState;
+  hp: number;
+  onCharm: (slot: number) => void;
+  onOfuda: (slot: number) => void;
+  highlightOfuda: boolean;
+}) {
+  const { run } = props;
+  const low = props.hp / run.maxHp < 0.34;
+  return (
+    <div className="bottom-bar">
+      <div className={`hp-pill ${low ? 'low' : ''}`} data-testid="player-hp">
+        <PetalIcon size={18} />
+        <div className="hp-pill-text">
+          <span className="display">{Math.ceil(props.hp)}</span>
+          <small>/{run.maxHp}</small>
+        </div>
+        <HpBar hp={props.hp} max={run.maxHp} tone="player" />
+        <div className="mon-mini">
+          <CoinIcon size={11} /> {run.mon}
+        </div>
+      </div>
+      <div className="charm-row">
+        {Array.from({ length: run.omamoriSlots }, (_, i) => {
+          const inst = run.omamori[i];
+          return (
+            <button
+              key={i}
+              className={`slot charm ${inst ? '' : 'empty'}`}
+              onClick={() => inst && props.onCharm(i)}
+              aria-label={inst ? omamoriText(inst) : 'Empty charm slot'}
+              data-testid={`charm-${i}`}
+            >
+              {inst && <OmamoriIcon id={inst.id} size={26} />}
+            </button>
+          );
+        })}
+      </div>
+      <div className="ofuda-row">
+        {Array.from({ length: run.ofudaSlots }, (_, i) => {
+          const id = run.ofuda[i] as OfudaId | undefined;
+          return (
+            <button
+              key={i}
+              className={`slot ofuda ${id ? '' : 'empty'} ${id && props.highlightOfuda ? 'ready' : ''}`}
+              onClick={() => id && props.onOfuda(i)}
+              aria-label={id ? `Talisman ${id}` : 'Empty talisman slot'}
+              data-testid={`ofuda-${i}`}
+            >
+              {id && <OfudaIcon id={id} size={17} />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

@@ -25,6 +25,8 @@ export type YakuFamily = 'brights' | 'sake' | 'animals' | 'ribbons' | 'chaff' | 
 export interface YakuDef {
   readonly id: YakuId;
   readonly name: string;
+  /** Compact name for chips and trackers. */
+  readonly short?: string;
   readonly romaji: string;
   readonly kanji: string;
   readonly requirement: string;
@@ -145,6 +147,7 @@ export const YAKU: readonly YakuDef[] = [
   {
     id: 'inoshikacho',
     name: 'Boar, Deer, Butterflies',
+    short: 'Ino-Shika-Chō',
     romaji: 'Inoshikachō',
     kanji: '猪鹿蝶',
     requirement: 'Boar + Deer + Butterflies. +1 per extra Animal',
@@ -159,6 +162,7 @@ export const YAKU: readonly YakuDef[] = [
   {
     id: 'akaao',
     name: 'Red and Blue Poems',
+    short: 'Red + Blue',
     romaji: 'Akatan-Aotan',
     kanji: '赤短青短',
     requirement: '3 red poetry + 3 blue ribbons. +1 per extra Ribbon',
@@ -265,6 +269,11 @@ export function yakuDef(id: YakuId): YakuDef {
   const y = BY_ID.get(id);
   if (!y) throw new Error(`Unknown yaku ${id}`);
   return y;
+}
+
+export function yakuShort(id: YakuId): string {
+  const d = yakuDef(id);
+  return d.short ?? d.name;
 }
 
 export const YAKU_IDS: readonly YakuId[] = YAKU.map((y) => y.id);

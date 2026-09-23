@@ -77,5 +77,5 @@ export const BALANCE: Balance = {
   },
   bossHeal: 0.6,
   fightHeal: 0.2,
-  guided: { month1Hp: 45, month2Hp: 40, month3HpMult: 0.75, captureSting: 1 },
+  guided: { month1Hp: 60, month2Hp: 40, month3HpMult: 0.75, captureSting: 1 },
 };

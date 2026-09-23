@@ -57,7 +57,7 @@ export const DECKS: readonly DeckDef[] = [
     unlock: { kind: 'always' },
     unlockText: 'Always available.',
     start: {},
-    hue: 150,
+    hue: 0,
   },
   {
     id: 'plum',
