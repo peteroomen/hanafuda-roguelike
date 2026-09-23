@@ -68,7 +68,12 @@ export function SpiritBar(props: {
               <span>Its face hides its plan</span>
             ) : props.intent ? (
               <span>
-                Chasing <b>{yakuShort(props.intent.id)}</b> {props.intent.have}/{props.intent.need}
+                <span className="intent-name">
+                  Chasing <b>{yakuShort(props.intent.id)}</b>
+                </span>
+                <span className="intent-count">
+                  {props.intent.have}/{props.intent.need}
+                </span>
               </span>
             ) : (
               <span>Biding its time</span>

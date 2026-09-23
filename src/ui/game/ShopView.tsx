@@ -204,7 +204,13 @@ export function ShopView({ api }: { api: GameApi }) {
         >
           <span className="service-kanji display">湯</span>
           <b>Onsen</b>
-          <small>{shop.healUsed ? 'You are rested' : `Restore ${healAmount} HP`}</small>
+          <small>
+            {shop.healUsed
+              ? 'You are rested'
+              : healAmount > 0
+                ? `Restore ${healAmount} HP`
+                : 'Already at full HP'}
+          </small>
           <span className="service-price">
             <CoinIcon size={11} /> {healPrice(ctx)}
           </span>

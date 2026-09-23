@@ -155,8 +155,17 @@
   overflow: hidden;
 }
 .intent > span:last-child {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+.intent-name {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.intent-count {
+  flex: none;
 }
 .intent b {
   color: #ffb49d;
@@ -589,9 +598,12 @@
 /* Hints ------------------------------------------------------------------ */
 .hint {
   position: absolute;
-  left: 50%;
+  left: 12px;
+  right: 12px;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+  margin: 0 auto;
   top: 124px;
-  transform: translateX(-50%);
   z-index: 1100;
   display: flex;
   gap: 10px;
@@ -601,7 +613,8 @@
   background: rgba(20, 12, 8, 0.9);
   box-shadow: 0 0 0 1px rgba(246, 210, 122, 0.5);
   font-size: 12px;
-  white-space: nowrap;
+  line-height: 1.35;
+  text-align: center;
 }
 
 /* Decision -------------------------------------------------------------- */

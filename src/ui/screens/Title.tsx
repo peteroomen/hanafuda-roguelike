@@ -1,4 +1,4 @@
-import { Crest } from '@/ui/art/Icons';
+import { Crest, PetalIcon } from '@/ui/art/Icons';
 import { cardFaceUrl } from '@/ui/art/images';
 import * as sfx from '@/ui/audio/audio';
 import { setState, useStore } from '@/ui/state/store';
@@ -37,6 +37,35 @@ export function Title() {
           <div className="title-jp display">十二の花びら</div>
           <div className="title-tag">
             A Koi-Koi roguelike · twelve months, twelve spirits, one year
+          </div>
+          <div
+            className="title-year"
+            aria-label={`Furthest month reached: ${profile.bestMonth}`}
+            data-testid="title-year"
+          >
+            {Array.from({ length: 12 }, (_, i) => (
+              <span
+                key={i}
+                className="title-petal"
+                style={{
+                  transform: `translateY(${Math.abs(i - 5.5) ** 2 * 0.5}px) rotate(${180 + (i - 5.5) * 7}deg)`,
+                }}
+              >
+                <PetalIcon
+                  size={18}
+                  color={
+                    profile.runsWon > 0 ? '#f2c740' : i < profile.bestMonth ? '#f19ab2' : '#5c3a4c'
+                  }
+                />
+              </span>
+            ))}
+          </div>
+          <div className="title-year-label">
+            {profile.runsWon > 0
+              ? 'A full year of petals'
+              : profile.runsStarted > 0
+                ? `Furthest month · ${profile.bestMonth} of 12`
+                : 'Twelve months to bloom'}
           </div>
           <div className="title-buttons">
             {run && (

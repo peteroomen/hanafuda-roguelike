@@ -65,12 +65,16 @@ export interface PlayOptions {
   readonly untilMonth?: number;
 }
 
+/** A UI that stays busy this long is a bug, not a slow animation. */
+const STALL_MS = 30_000;
+
 /** Play until the year ends. Returns the final run state. */
 export async function playYear(page: Page, opts: PlayOptions): Promise<RunState> {
   const bot = makeBot(opts.bot, opts.seed);
   const max = opts.maxActions ?? 4000;
   let lastMonth = 0;
   let stuck = 0;
+  let waiting = 0;
   for (let n = 0; n < max; n++) {
     await opts.onPoll?.();
     await dismissGuide(page);
@@ -91,6 +95,20 @@ export async function playYear(page: Page, opts: PlayOptions): Promise<RunState>
     const run = tp.run;
     if (run.phase === 'victory' || run.phase === 'defeat') return run;
     if (!tp.canAct || tp.intro) {
+      waiting ||= Date.now();
+      if (Date.now() - waiting > STALL_MS) {
+        await page.screenshot({ path: 'test-results/stall.png' }).catch(() => undefined);
+        throw new Error(
+          `UI stalled for ${STALL_MS / 1000}s: ${JSON.stringify({
+            busy: tp.busy,
+            intro: tp.intro,
+            scoring: tp.scoring,
+            phase: run.phase,
+            hand: run.fight?.hand.phase,
+            month: run.month,
+          })}`,
+        );
+      }
       if (tp.scoring)
         await page
           .locator('.seq-scrim')
@@ -99,6 +117,7 @@ export async function playYear(page: Page, opts: PlayOptions): Promise<RunState>
       await page.waitForTimeout(30);
       continue;
     }
+    waiting = 0;
     if (run.phase === 'fight' && run.month !== lastMonth) {
       lastMonth = run.month;
       await opts.onMonth?.(run);
