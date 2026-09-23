@@ -6,6 +6,8 @@ import { playYear, setSettings } from './autoplay';
  * and photographs every overlay the first time it appears, for visual review.
  */
 test('photo tour of every screen and overlay', async ({ page }, info) => {
+  // Normal-speed animations: a tour takes 8–17 minutes.
+  test.setTimeout(40 * 60 * 1000);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
