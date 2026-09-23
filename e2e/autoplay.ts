@@ -57,6 +57,12 @@ export interface PlayOptions {
   readonly onStep?: (run: RunState, action: RunAction, n: number) => Promise<void>;
   /** Called when a new month's table appears. */
   readonly onMonth?: (run: RunState) => Promise<void>;
+  /** Called on every poll, e.g. to photograph overlays. */
+  readonly onPoll?: () => Promise<void>;
+  /** Tap through score sequences instead of watching them (default true). */
+  readonly hurry?: boolean;
+  /** Stop once this month is reached. */
+  readonly untilMonth?: number;
 }
 
 /** Play until the year ends. Returns the final run state. */
@@ -66,6 +72,7 @@ export async function playYear(page: Page, opts: PlayOptions): Promise<RunState>
   let lastMonth = 0;
   let stuck = 0;
   for (let n = 0; n < max; n++) {
+    await opts.onPoll?.();
     await dismissGuide(page);
     if (
       await page

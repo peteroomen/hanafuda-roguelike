@@ -169,11 +169,11 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
   };
 
   const season = seasonOf(run.month);
+  const doneScore = useCallback(() => api.resolveWait('score'), [api]);
   const fieldBottom = stage.fieldTop + stage.fieldH;
   const decide = myTurn && hand.phase === 'decide';
   const frog = myTurn && hand.phase === 'frogDecide';
   const handOver = canAct && fight.phase === 'handOver' && run.phase === 'fight';
-  const scoreHits = run.fight?.outcome?.kind === 'playerStop' ? run.fight.outcome.hits : [];
 
   return (
     <div
@@ -277,11 +277,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
       {handOver && <HandOverPanel run={run} onNext={() => dispatch({ type: 'nextHand' })} />}
 
       {view.score && (
-        <ScoreSequence
-          score={view.score}
-          hits={scoreHits}
-          onDone={api.resolveWait.bind(null, 'score')}
-        />
+        <ScoreSequence score={view.score.result} hits={view.score.hits} onDone={doneScore} />
       )}
       {view.strike && (
         <StrikeSequence

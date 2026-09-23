@@ -177,10 +177,11 @@
   flex: none;
   white-space: nowrap;
   height: 22px;
-  padding: 0 7px;
+  padding: 0 6px;
   border-radius: 11px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  gap: 2px;
+  align-items: center;
   font-family: var(--font-display);
   font-size: 12px;
   background: rgba(0, 0, 0, 0.35);
@@ -413,8 +414,8 @@
   transform: scale(0.92);
 }
 .charm-row.big .slot.charm {
-  width: 52px;
-  height: 64px;
+  width: 46px;
+  height: 56px;
 }
 
 .lift-hint {

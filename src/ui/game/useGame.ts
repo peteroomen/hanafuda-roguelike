@@ -44,7 +44,7 @@ export interface GameView {
   readonly playerHp: number;
   readonly intent: Intent | null;
   readonly banner: Banner | null;
-  readonly score: ScoreResult | null;
+  readonly score: { result: ScoreResult; hits: readonly YakuHit[] } | null;
   readonly strike: { hit: SpiritHit; hits: readonly YakuHit[] } | null;
   readonly floaters: readonly Floater[];
   readonly shake: number;
@@ -393,7 +393,7 @@ export function useGame(): GameApi {
             await sleep(260);
             break;
           case 'playerStop':
-            patch({ score: re.score });
+            patch({ score: { result: re.score, hits: re.hits } });
             await waitFor('score');
             patch((v) => ({
               score: null,
@@ -406,8 +406,7 @@ export function useGame(): GameApi {
             await sleep(700);
             break;
           case 'spiritStop': {
-            const hits = run.fight?.outcome?.kind === 'spiritStop' ? run.fight.outcome.hits : [];
-            patch({ strike: { hit: re.hit, hits } });
+            patch({ strike: { hit: re.hit, hits: re.hits } });
             await waitFor('strike');
             patch((v) => ({
               strike: null,

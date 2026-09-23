@@ -289,7 +289,7 @@
 
 /* Shop ------------------------------------------------------------------ */
 .shop {
-  gap: 10px;
+  gap: 9px;
 }
 .shop-head {
   display: flex;
@@ -336,7 +336,7 @@
 }
 .offer {
   position: relative;
-  min-height: 118px;
+  min-height: 104px;
   padding: 8px 6px;
   border-radius: 14px;
   display: flex;
@@ -375,6 +375,11 @@
   color: var(--mon);
 }
 .offer-detail {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 84px;
+  z-index: 20;
   padding: 12px 14px;
 }
 .offer-detail-name {
@@ -409,49 +414,56 @@
   opacity: 0.8;
 }
 .services {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 .service {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 52px;
-  padding: 6px 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-height: 84px;
+  padding: 8px 8px 6px;
   border-radius: 12px;
   text-align: left;
   background: rgba(0, 0, 0, 0.28);
   box-shadow: inset 0 0 0 1px rgba(244, 234, 211, 0.12);
+  font-size: 12px;
+}
+.service b {
+  font-size: 12px;
+  line-height: 1.2;
+}
+.service small {
+  font-size: 10px;
+  opacity: 0.7;
+  line-height: 1.25;
 }
 .service:disabled {
   opacity: 0.45;
 }
 .service-kanji {
-  width: 34px;
-  height: 34px;
+  width: 26px;
+  height: 26px;
   flex: none;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 7px;
   background: var(--vermilion);
-  font-size: 18px;
-}
-.service-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  font-size: 14px;
-}
-.service-text small {
-  font-size: 11px;
-  opacity: 0.7;
+  font-size: 15px;
+  margin-bottom: 3px;
 }
 .service-price {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   display: flex;
   align-items: center;
   gap: 3px;
   font-family: var(--font-display);
+  font-size: 15px;
   color: var(--mon);
 }
 .shop-section-title {

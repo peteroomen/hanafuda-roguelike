@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Season } from '@/content/cards';
+import { CARDS, type Season } from '@/content/cards';
 import { omamoriDef } from '@/content/omamori';
 import { spiritDef, type SpiritId } from '@/content/spirits';
 import { yakuDef } from '@/content/yaku';
@@ -25,7 +25,7 @@ function stepLabel(s: ScoreStep): string {
       return `${d.name}${src.level ? ` · poem Lv ${src.level}` : ''}${src.halved ? ' · halved' : ''}`;
     }
     case 'card':
-      return src.pass > 0 ? 'Scores again!' : '';
+      return src.pass > 0 ? `${CARDS[src.card]?.name ?? ''} again!` : (CARDS[src.card]?.name ?? '');
     case 'enhancement':
       return enhancementDef(src.id).name;
     case 'omamori':

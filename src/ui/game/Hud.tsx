@@ -1,4 +1,3 @@
-import { monthDef } from '@/content/cards';
 import { type OfudaId } from '@/content/ofuda';
 import { spiritDef } from '@/content/spirits';
 import { yakuDef, yakuShort } from '@/content/yaku';
@@ -12,6 +11,7 @@ import { spiritUrl } from '@/ui/art/images';
 import { CoinIcon, OfudaIcon, OmamoriIcon, PetalIcon } from '@/ui/art/Icons';
 import { seasonOf } from '@/content/cards';
 import { PLAYER_CAP_STARTS, SPIRIT_CAP_STARTS, SPIRIT_HAND_X, type Stage } from './layout';
+import { shortFlower } from './labels';
 import { typeGroup, type Visual } from './visual';
 
 export function HpBar({ hp, max, tone }: { hp: number; max: number; tone: 'spirit' | 'player' }) {
@@ -38,7 +38,6 @@ export function SpiritBar(props: {
   const { run, fight } = props;
   const s = spiritDef(fight.spiritId);
   const hidden = Boolean(s.passive?.hiddenIntent);
-  const m = monthDef(run.month);
   return (
     <div className="spirit-bar">
       <button
@@ -75,15 +74,24 @@ export function SpiritBar(props: {
               <span>Biding its time</span>
             )}
           </div>
-          <div className="ferocity" title="The spirit's hit is its yaku points times this">
-            hits ×{Math.round(fight.ferocity * 10) / 10}
+          <div className="ferocity" title="The spirit hits for its yaku points times this">
+            <svg width="11" height="12" viewBox="0 0 11 12" aria-hidden>
+              <path
+                d="M1 1 L4 11 L5.5 5 L7 11 L10 1"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinejoin="round"
+              />
+            </svg>
+            ×{Math.round(fight.ferocity * 10) / 10}
           </div>
         </div>
       </div>
       <div className="top-buttons">
         <div className="month-chip">
           <span className="display">{run.month}</span>
-          <span>{m.flower}</span>
+          <span>{shortFlower(run.month)}</span>
         </div>
         <button
           className="icon-btn"

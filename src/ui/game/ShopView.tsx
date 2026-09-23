@@ -83,7 +83,7 @@ export function ShopView({ api }: { api: GameApi }) {
     <div className="shop screen-pad" data-testid="shop">
       <div className="shop-head">
         <div>
-          <div className="shop-title display">Market at the Shrine Gate</div>
+          <div className="shop-title display">The Shrine Market</div>
           <div className="shop-sub">
             Next: month {run.month}, {m.flower} · {nextSpirit.name}
             {nextSpirit.boss ? ' (boss)' : ''}
@@ -137,7 +137,11 @@ export function ShopView({ api }: { api: GameApi }) {
       </div>
 
       {pickedOffer && (
-        <div className="offer-detail paper pop-in" data-testid="offer-detail">
+        <div
+          className="offer-detail paper pop-in"
+          data-testid="offer-detail"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="offer-detail-name display">{offerTitle(pickedOffer)}</div>
           {pickedOffer.kind === 'omamori' && (
             <div className="offer-detail-sub">
@@ -182,14 +186,14 @@ export function ShopView({ api }: { api: GameApi }) {
           <span className="service-kanji display">
             {enhancementDef(shop.shrine.enhancement).kanji}
           </span>
-          <span className="service-text">
-            <b>Shrine: {enhancementDef(shop.shrine.enhancement).name}</b>
-            <small>
-              {shop.shrine.used ? 'Blessing given' : enhancementDef(shop.shrine.enhancement).text}
-            </small>
-          </span>
+          <b>
+            {shop.shrine.used
+              ? 'Blessed'
+              : `Shrine: ${enhancementDef(shop.shrine.enhancement).name}`}
+          </b>
+          <small>{enhancementDef(shop.shrine.enhancement).text}</small>
           <span className="service-price">
-            <CoinIcon size={12} /> {shrinePrice(shop.shrine.enhancement, ctx)}
+            <CoinIcon size={11} /> {shrinePrice(shop.shrine.enhancement, ctx)}
           </span>
         </button>
         <button
@@ -199,12 +203,10 @@ export function ShopView({ api }: { api: GameApi }) {
           data-testid="btn-heal"
         >
           <span className="service-kanji display">湯</span>
-          <span className="service-text">
-            <b>Onsen</b>
-            <small>{shop.healUsed ? 'You are rested' : `Restore ${healAmount} HP`}</small>
-          </span>
+          <b>Onsen</b>
+          <small>{shop.healUsed ? 'You are rested' : `Restore ${healAmount} HP`}</small>
           <span className="service-price">
-            <CoinIcon size={12} /> {healPrice(ctx)}
+            <CoinIcon size={11} /> {healPrice(ctx)}
           </span>
         </button>
         <button
@@ -214,12 +216,10 @@ export function ShopView({ api }: { api: GameApi }) {
           data-testid="btn-reroll"
         >
           <span className="service-kanji display">替</span>
-          <span className="service-text">
-            <b>New wares</b>
-            <small>Restock charms, poem and talismans</small>
-          </span>
+          <b>New wares</b>
+          <small>Restock the stalls</small>
           <span className="service-price">
-            <CoinIcon size={12} /> {rerollPrice(shop.rerolls, ctx)}
+            <CoinIcon size={11} /> {rerollPrice(shop.rerolls, ctx)}
           </span>
         </button>
       </div>
@@ -236,7 +236,7 @@ export function ShopView({ api }: { api: GameApi }) {
                 onClick={() => inst && setCharm(i)}
                 data-testid={`shop-charm-${i}`}
               >
-                {inst && <OmamoriIcon id={inst.id} size={34} />}
+                {inst && <OmamoriIcon id={inst.id} size={30} />}
               </button>
             );
           })}

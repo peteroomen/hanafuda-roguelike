@@ -186,8 +186,8 @@ export type RunEvent =
       readonly amount: number;
       readonly source: 'capture' | 'thief';
     }
-  | { readonly t: 'playerStop'; readonly score: ScoreResult }
-  | { readonly t: 'spiritStop'; readonly hit: SpiritHit }
+  | { readonly t: 'playerStop'; readonly score: ScoreResult; readonly hits: readonly YakuHit[] }
+  | { readonly t: 'spiritStop'; readonly hit: SpiritHit; readonly hits: readonly YakuHit[] }
   | { readonly t: 'fightWon'; readonly spirit: SpiritId }
   | { readonly t: 'defeat' }
   | { readonly t: 'victory' }
@@ -680,7 +680,7 @@ function resolveHandEnd(run: RunState, events: RunEvent[]): void {
     run.stats.biggestHit = Math.max(run.stats.biggestHit, score.damage);
     if (h.koikoiCalls[0] > 0) run.stats.koikoiWins += 1;
     f.outcome = { kind: 'playerStop', hits: res.hits, score, koikoi: h.koikoiCalls[0] };
-    events.push({ t: 'playerStop', score });
+    events.push({ t: 'playerStop', score, hits: res.hits });
     grow(run, 'handWon', events);
     if (h.koikoiCalls[0] > 0) grow(run, 'stopAfterKoikoi', events);
     // Torn cards crumble after they score for you.
@@ -699,7 +699,7 @@ function resolveHandEnd(run: RunState, events: RunEvent[]): void {
     f.handsLost += 1;
     f.lead = 1;
     f.outcome = { kind: 'spiritStop', hits: res.hits, hit };
-    events.push({ t: 'spiritStop', hit });
+    events.push({ t: 'spiritStop', hit, hits: res.hits });
   } else {
     run.stats.handsExhausted += 1;
     f.outcome = { kind: 'exhausted' };
