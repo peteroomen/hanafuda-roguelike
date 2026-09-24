@@ -33,6 +33,8 @@ export interface Stage {
   readonly handScale: number;
   readonly bottomBarY: number;
   readonly fieldScale: number;
+  /** Scale of the player's captured cards. */
+  readonly capScale: number;
 }
 
 export function makeStage(h: number, fieldCount: number): Stage {
@@ -43,7 +45,9 @@ export function makeStage(h: number, fieldCount: number): Stage {
   const handCardH = CARD_H * handScale;
   const bottomBarY = H - bottomBar;
   const handY = bottomBarY - handCardH - 12;
-  const playerCapY = handY - 58;
+  // The player's captured cards are the yaku in progress: keep them big enough to read.
+  const capScale = tall ? 0.58 : 0.5;
+  const playerCapY = handY - CARD_H * capScale - 18;
   const trackerY = playerCapY - 30;
   const topBar = 78;
   const spiritCapY = topBar + 2;
@@ -85,6 +89,7 @@ export function makeStage(h: number, fieldCount: number): Stage {
     handScale,
     bottomBarY,
     fieldScale,
+    capScale,
   };
 }
 
@@ -109,22 +114,60 @@ function fieldSlotPos(st: Stage, slot: number): { x: number; y: number } {
   return { x: st.fieldX + col * st.colStep, y: st.fieldTop + row * st.rowStep };
 }
 
-export const PLAYER_CAP_STARTS = [14, 82, 170, 262];
 export const SPIRIT_CAP_STARTS = [12, 64, 128, 196];
+
+const CAP_LEFT = 14;
+const CAP_RIGHT = STAGE_W - 12;
+const CAP_GAP = 10;
+
+/**
+ * The player's captured groups (Brights, Animals, Ribbons, Chaff) sit side by side, each as wide
+ * as its cards need. Cards in a group overlap by as little as the lane allows, so each card's
+ * face stays readable; only a very full lane squeezes them.
+ */
+export function playerCapLayout(
+  st: Stage,
+  counts: readonly number[],
+): { starts: number[]; step: number } {
+  const w = CARD_W * st.capScale;
+  const overlaps = counts.reduce((a, n) => a + Math.max(0, n - 1), 0);
+  const fixed = 4 * w + 3 * CAP_GAP;
+  const room = CAP_RIGHT - CAP_LEFT - fixed;
+  const step = Math.min(w * 0.64, overlaps > 0 ? room / overlaps : w);
+  const starts: number[] = [];
+  let x = CAP_LEFT;
+  for (const n of counts) {
+    starts.push(x);
+    x += w + Math.max(0, n - 1) * step + CAP_GAP;
+  }
+  return { starts, step };
+}
+
+export function capGroups(ids: readonly CardId[]): CardId[][] {
+  const groups: CardId[][] = [[], [], [], []];
+  for (const c of ids) (groups[typeGroup(c)] as CardId[]).push(c);
+  return groups;
+}
 
 /** Horizontal groups for captured cards: Brights, Animals, Ribbons, Chaff. */
 function capPos(st: Stage, v: Visual, seat: Seat, id: CardId): { x: number; y: number } {
-  const list = v.cap[seat];
-  const groups: CardId[][] = [[], [], [], []];
-  for (const c of list) (groups[typeGroup(c)] as CardId[]).push(c);
+  const groups = capGroups(v.cap[seat]);
   const g = typeGroup(id);
   const inGroup = groups[g] as CardId[];
   const idx = inGroup.indexOf(id);
-  const starts = seat === 0 ? PLAYER_CAP_STARTS : SPIRIT_CAP_STARTS;
-  const chaffStep = seat === 0 ? (inGroup.length > 14 ? 4.5 : 7) : inGroup.length > 12 ? 4 : 6;
-  const steps = [seat === 0 ? 8 : 7, seat === 0 ? 8 : 6, seat === 0 ? 8 : 6, chaffStep];
-  const y = seat === 0 ? st.playerCapY : st.spiritCapY;
-  return { x: (starts[g] as number) + Math.max(0, idx) * (steps[g] as number), y };
+  if (seat === 0) {
+    const { starts, step } = playerCapLayout(
+      st,
+      groups.map((x) => x.length),
+    );
+    return { x: (starts[g] as number) + Math.max(0, idx) * step, y: st.playerCapY };
+  }
+  // The spirit's lane stays compact: its cards matter less than yours.
+  const steps = [7, 6, 6, inGroup.length > 12 ? 4 : 6];
+  return {
+    x: (SPIRIT_CAP_STARTS[g] as number) + Math.max(0, idx) * (steps[g] as number),
+    y: st.spiritCapY,
+  };
 }
 
 export function handPositions(n: number, st: Stage): { x: number; y: number; rot: number }[] {
@@ -219,7 +262,14 @@ export function placements(v: Visual, st: Stage, opts: LayoutOptions): Map<CardI
   for (const seat of [0, 1] as const) {
     v.cap[seat].forEach((id, i) => {
       const p = capPos(st, v, seat, id);
-      out.set(id, { ...p, rot: 0, scale: MINI, z: 50 + i, faceUp: true, interactive: false });
+      out.set(id, {
+        ...p,
+        rot: 0,
+        scale: seat === 0 ? st.capScale : MINI,
+        z: 50 + i,
+        faceUp: true,
+        interactive: false,
+      });
     });
   }
   // Transient zones.

@@ -19,7 +19,7 @@ import { BALANCE } from '@/content/balance';
 import { cardFaceUrl, spiritUrl } from '@/ui/art/images';
 import { CoinIcon, OfudaIcon, OmamoriIcon, PetalIcon, PoemIcon } from '@/ui/art/Icons';
 import * as sfx from '@/ui/audio/audio';
-import { CharmSheet } from './Sheets';
+import { CharmSheet, OfudaSheet } from './Sheets';
 import type { GameApi } from './useGame';
 import { GuideBubble } from './Overlays';
 import { markTip, useStore } from '@/ui/state/store';
@@ -45,6 +45,7 @@ export function ShopView({ api }: { api: GameApi }) {
   const [picked, setPicked] = useState<number | null>(null);
   const [shrineOpen, setShrineOpen] = useState(false);
   const [charm, setCharm] = useState<number | null>(null);
+  const [talisman, setTalisman] = useState<number | null>(null);
   const tipsSeen = useStore((s) => s.profile.tipsSeen);
   const guideOn = useStore((s) => s.settings.guide);
   if (!shop) return null;
@@ -80,7 +81,8 @@ export function ShopView({ api }: { api: GameApi }) {
     Math.round(run.maxHp * BALANCE.shop.healFraction),
   );
   return (
-    <div className="shop screen-pad" data-testid="shop">
+    // Tapping anywhere outside an offer or its details puts the details away.
+    <div className="shop screen-pad" data-testid="shop" onClick={() => setPicked(null)}>
       <div className="shop-head">
         <div>
           <div className="shop-title display">The Shrine Market</div>
@@ -114,7 +116,11 @@ export function ShopView({ api }: { api: GameApi }) {
           <button
             key={`${o.kind}-${o.id}-${i}`}
             className={`offer ${o.sold ? 'sold' : ''} ${picked === i ? 'picked' : ''} offer-${o.kind}`}
-            onClick={() => setPicked(i)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setPicked(picked === i ? null : i);
+            }}
+            aria-pressed={picked === i}
             data-testid={`offer-${i}`}
           >
             <div className="offer-art">
@@ -231,21 +237,39 @@ export function ShopView({ api }: { api: GameApi }) {
       </div>
 
       <div className="shop-charms">
-        <div className="shop-section-title">Your charms · tap to sell or reorder</div>
-        <div className="charm-row big">
-          {Array.from({ length: run.omamoriSlots }, (_, i) => {
-            const inst = run.omamori[i];
-            return (
-              <button
-                key={i}
-                className={`slot charm ${inst ? '' : 'empty'}`}
-                onClick={() => inst && setCharm(i)}
-                data-testid={`shop-charm-${i}`}
-              >
-                {inst && <OmamoriIcon id={inst.id} size={30} />}
-              </button>
-            );
-          })}
+        <div className="shop-section-title">Yours · tap a charm to sell or reorder</div>
+        <div className="owned-row">
+          <div className="charm-row big">
+            {Array.from({ length: run.omamoriSlots }, (_, i) => {
+              const inst = run.omamori[i];
+              return (
+                <button
+                  key={i}
+                  className={`slot charm ${inst ? '' : 'empty'}`}
+                  onClick={() => inst && setCharm(i)}
+                  data-testid={`shop-charm-${i}`}
+                >
+                  {inst && <OmamoriIcon id={inst.id} size={30} />}
+                </button>
+              );
+            })}
+          </div>
+          <div className="ofuda-row">
+            {Array.from({ length: run.ofudaSlots }, (_, i) => {
+              const id = run.ofuda[i];
+              return (
+                <button
+                  key={i}
+                  className={`slot ofuda ${id ? '' : 'empty'}`}
+                  onClick={() => id && setTalisman(i)}
+                  aria-label={id ? ofudaDef(id).name : 'Empty talisman slot'}
+                  data-testid={`shop-ofuda-${i}`}
+                >
+                  {id && <OfudaIcon id={id} size={17} />}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -293,6 +317,19 @@ export function ShopView({ api }: { api: GameApi }) {
             (run.omamori[charm] as NonNullable<(typeof run.omamori)[number]>).id,
           )}
           onClose={() => setCharm(null)}
+        />
+      )}
+      {talisman !== null && run.ofuda[talisman] && (
+        <OfudaSheet
+          id={run.ofuda[talisman] as NonNullable<(typeof run.ofuda)[number]>}
+          usable={false}
+          reason="Talismans are used during a fight, on your turn."
+          onUse={() => undefined}
+          onDiscard={() => {
+            dispatch({ type: 'discardOfuda', slot: talisman });
+            setTalisman(null);
+          }}
+          onClose={() => setTalisman(null)}
         />
       )}
       {showTip && <GuideBubble tip="shop" onDismiss={() => markTip('shop')} bottom={90} />}
