@@ -5,6 +5,7 @@
 import { CARDS, type CardId, type Month, type Season } from '@/content/cards';
 import type { SpiritId } from '@/content/spirits';
 import { cardBackSvg, cardFaceSvg } from './cards';
+import { type Framing, paintedPortrait } from './portraitArt';
 import { rainManSvg, spiritSvg } from './spirits';
 
 const cache = new Map<string, string>();
@@ -37,8 +38,15 @@ export function cardBackUrl(hue = 0): string {
   return url(`back:${hue}`, () => cardBackSvg(hue));
 }
 
-export function spiritUrl(id: SpiritId, season: Season, boss: boolean): string {
-  return url(`spirit:${id}:${season}`, () => spiritSvg(id, season, boss));
+export function spiritUrl(
+  id: SpiritId,
+  season: Season,
+  boss: boolean,
+  framing: Framing = 'close',
+): string {
+  const art = paintedPortrait(id, framing);
+  if (!art) return url(`spirit:${id}:${season}`, () => spiritSvg(id, season, boss));
+  return url(`spirit:${id}:${season}:${framing}`, () => spiritSvg(id, season, boss, art));
 }
 
 export function rainManUrl(): string {

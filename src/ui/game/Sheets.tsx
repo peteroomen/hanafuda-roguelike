@@ -123,7 +123,11 @@ export function SpiritSheet({
     <div className="sheet-scrim fade-in" onClick={onClose}>
       <div className="sheet paper pop-in item-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="item-top">
-          <img className="sheet-face" src={spiritUrl(s.id, seasonOf(run.month), s.boss)} alt="" />
+          <img
+            className="sheet-face"
+            src={spiritUrl(s.id, seasonOf(run.month), s.boss, 'full')}
+            alt=""
+          />
           <div>
             <div className="item-name display">
               {s.name} <span className="kanji">{s.kanji}</span>
