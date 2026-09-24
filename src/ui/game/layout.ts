@@ -289,6 +289,19 @@ export function placements(v: Visual, st: Stage, opts: LayoutOptions): Map<CardI
       continue;
     switch (zone.z) {
       case 'held': {
+        if (zone.choosing) {
+          // Waiting for a choice: park it over the draw pile, clear of every field card.
+          out.set(id, {
+            x: st.pileX + 2,
+            y: st.pileY - 14,
+            rot: -3,
+            scale: st.fieldScale * 1.06,
+            z: 950 + (moved(id) % 20),
+            faceUp: true,
+            interactive: false,
+          });
+          break;
+        }
         const y = st.fieldTop + st.fieldH / 2 - CARD_H * 0.6;
         const x = st.fieldX + (st.colStep * (st.cols - 1)) / 2;
         out.set(id, {

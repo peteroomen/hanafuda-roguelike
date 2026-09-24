@@ -46,6 +46,8 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
   const myTurn = canAct && fight.phase === 'hand' && hand.active === 0;
   const playing = myTurn && hand.phase === 'play' && !targeting;
   const choosing = myTurn && (hand.phase === 'playChoice' || hand.phase === 'flipChoice');
+  // Hints sit just above the field (over the spirit's captured lane) so they never cover a card.
+  const hintTop = Math.max(84, stage.fieldTop - 42);
 
   // Clear a stale lift when the turn moves on.
   useEffect(() => {
@@ -245,7 +247,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
       <BannerView banner={view.banner} />
       <Floaters floaters={view.floaters} stageH={stageH} />
 
-      {choosing && <Hint text="Two cards match: choose which to take" />}
+      {choosing && <Hint text="Two cards match: choose which to take" top={hintTop} />}
       {targeting?.kind === 'swap' && (
         <Hint
           text={
@@ -254,12 +256,14 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
               : 'Now pick a field card to trade it for'
           }
           onCancel={() => setTargeting(null)}
+          top={hintTop}
         />
       )}
       {targeting?.kind === 'gild' && (
         <Hint
           text="Gold Leaf: pick a card in your hand to gild"
           onCancel={() => setTargeting(null)}
+          top={hintTop}
         />
       )}
 
