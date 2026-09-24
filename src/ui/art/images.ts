@@ -5,6 +5,7 @@
 import { CARDS, type CardId, type Month, type Season } from '@/content/cards';
 import type { SpiritId } from '@/content/spirits';
 import { cardBackSvg, cardFaceSvg } from './cards';
+import { getState } from '@/ui/state/store';
 import { type Framing, paintedPortrait } from './portraitArt';
 import { rainManSvg, spiritSvg } from './spirits';
 
@@ -24,7 +25,13 @@ function url(key: string, make: () => string): string {
   return u;
 }
 
+/** The traditional deck: black-bordered hanafuda from Wikimedia Commons, as 320px webp. */
+function traditional(file: string): string {
+  return `${import.meta.env.BASE_URL}cards/traditional/${file}.webp`;
+}
+
 export function cardFaceUrl(id: CardId): string {
+  if (getState().settings.cardStyle === 'traditional') return traditional(String(id));
   return url(`face:${id}`, () => cardFaceSvg(id));
 }
 
@@ -34,6 +41,7 @@ export function disguiseUrl(month: Month): string {
   return cardFaceUrl(chaff ? chaff.id : 0);
 }
 
+/** Both styles share the drawn back: the traditional one is plain black and vanishes on the table. */
 export function cardBackUrl(hue = 0): string {
   return url(`back:${hue}`, () => cardBackSvg(hue));
 }
@@ -50,7 +58,9 @@ export function spiritUrl(
 }
 
 export function rainManUrl(): string {
-  return url('rainman', rainManSvg);
+  const art = paintedPortrait('rainMan', 'close');
+  if (art) return url('rainman:art', () => rainManSvg(art));
+  return url('rainman', () => rainManSvg());
 }
 
 /** Decode every card face up front so nothing flashes in during play. */

@@ -251,6 +251,26 @@ export function SettingsList() {
         />
       </label>
       <div className="setting">
+        <span>Cards</span>
+        <div className="seg">
+          {(
+            [
+              ['traditional', 'traditional'],
+              ['drawn', 'drawn'],
+            ] as const
+          ).map(([style, label]) => (
+            <button
+              key={style}
+              className={s.cardStyle === style ? 'on' : ''}
+              onClick={() => updateSettings({ cardStyle: style })}
+              data-testid={`card-style-${style}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="setting">
         <span>Animation speed</span>
         <div className="seg">
           {(['normal', 'fast', 'instant'] as const).map((sp) => (

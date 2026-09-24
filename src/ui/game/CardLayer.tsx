@@ -34,6 +34,8 @@ interface CardProps {
   readonly mini: boolean;
   readonly delay: number;
   readonly backUrl: string;
+  /** Computed by the layer so a card-style change redraws memoised cards. */
+  readonly faceUrl: string;
   readonly onTap: ((id: CardId) => void) | undefined;
 }
 
@@ -44,8 +46,7 @@ const Card = memo(function Card(props: CardProps) {
   const w = CARD_W * p.scale;
   const h = CARD_H * p.scale;
   const shownMonth = props.disguisedAs ?? c.month;
-  const face =
-    props.disguisedAs !== undefined ? disguiseUrl(props.disguisedAs as 1) : cardFaceUrl(id);
+  const face = props.faceUrl;
   const transform = `translate(${p.x + w / 2}px, ${p.y + h / 2}px) rotate(${p.rot}deg) translate(${-w / 2}px, ${-h / 2}px) scale(${p.scale})`;
   const cls = [
     'card',
@@ -137,6 +138,11 @@ export function CardLayer({ visual, placements, marks, delays, onTap }: CardLaye
             slamKey={visual.slams[id]}
             frozen={visual.frozen.includes(id)}
             disguisedAs={zone?.z === 'field' ? disguise : undefined}
+            faceUrl={
+              zone?.z === 'field' && disguise !== undefined
+                ? disguiseUrl(disguise as 1)
+                : cardFaceUrl(id)
+            }
             option={visual.options.includes(id)}
             match={marks.matches.has(id)}
             wanted={zone?.z === 'field' && marks.wanted.has(id)}

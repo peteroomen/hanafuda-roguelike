@@ -617,7 +617,18 @@ function oni(): string {
 
 // --- The guide -------------------------------------------------------------
 
-export function rainManSvg(): string {
+export function rainManSvg(art?: PaintedArt): string {
+  if (art) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">${el(
+      'defs',
+      {},
+      el('clipPath', { id: 'rmclip' }, circle(100, 100, 94)),
+    )}${circle(100, 100, 98, { fill: '#2f3442' })}${g(
+      { 'clip-path': 'url(#rmclip)' },
+      rect(0, 0, 200, 200, { fill: '#8d9bb4' }),
+      painted(art),
+    )}${circle(100, 100, 95, { fill: 'none', stroke: '#2b2320', 'stroke-width': 4 })}</svg>`;
+  }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">${el(
     'defs',
     {},

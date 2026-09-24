@@ -9,8 +9,10 @@ the drawn portraits in `src/ui/art/spirits.ts` one spirit at a time.
    Keep the style and composition blocks below word for word; write a new subject
    block.
 2. Save the original here as `<spiritId>.png` (the id from `src/content/spirits.ts`).
-3. Make the game copy:
-   `python3 -c "from PIL import Image; Image.open('art-source/yokai/ID.png').convert('RGBA').resize((640,640), Image.LANCZOS).save('src/ui/art/portraits/ID.webp','WEBP',quality=86,method=6)"`
+3. Make the game copy. `scripts/cutout.py` removes a flat paper background (only the paper
+   touching the edges, so paper-coloured areas inside the figure survive) and writes a 640px
+   webp: `python3 scripts/cutout.py art-source/yokai/ID.png src/ui/art/portraits/ID.webp`
+   (needs `pip install pillow numpy scipy`).
 4. Register it in `src/ui/art/portraitArt.ts` with two crops, given as fractions of
    the image width:
    - `close`: the face, for 60px portraits.
@@ -41,6 +43,10 @@ the game, and its mood.>
 
 ## Done
 
-| Spirit    | Subject notes                                                                                    |
-| --------- | ------------------------------------------------------------------------------------------------ |
-| kasaObake | Old oiled-paper umbrella, one eye, long tongue, one leg in a geta, hugging stolen ribbon strips. |
+| Spirit    | Subject notes                                                                                       |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| kasaObake | Old oiled-paper umbrella, one eye, long tongue, one leg in a geta, hugging stolen ribbon strips.    |
+| kodama    | Pale round-headed tree spirit with a pine sprig, peeking from behind a twisted pine.                |
+| tanuki    | Plump belly-drumming tanuki in a straw hat and blossom-print scarf, with a sake gourd.              |
+| tengu     | Red long-nosed tengu with white mane, tokin cap and crow wings, clutching a stolen red sun.         |
+| rainMan   | The guide: an elderly court poet with a yellow umbrella, red cloud-pattern robe and a leaping frog. |
