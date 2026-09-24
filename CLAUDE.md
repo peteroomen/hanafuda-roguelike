@@ -77,4 +77,12 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
   `PW_BASE_URL=http://localhost:5299 pnpm e2e`. `e2e/playthrough.spec.ts` plays a whole year
   through the UI in about 1 minute. `e2e/tour.spec.ts` screenshots every overlay at normal speed
   (slow).
-- Deploy: static Vite build on Vercel (`vercel.json`). Not yet hosted.
+- **Follow-ups after first play (2026-09-24):**
+  - The default animation speed is half as fast; the old pace is now "Fast".
+  - Guided month 2 teaches Ribbons, Animals and Chaff together (it used to be Ribbons only,
+    which averaged 4.1 hands).
+  - Your captured cards are larger and spaced so each card's face shows (`playerCapLayout` in
+    `layout.ts`).
+  - Shop details dismiss on a second tap or a tap outside, and the shop shows owned talismans.
+  - The pixel-art restyle was scoped and declined (`docs/work/2026-09-24-pixel-art-restyle.md`).
+- Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

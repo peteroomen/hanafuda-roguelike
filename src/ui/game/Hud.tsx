@@ -10,7 +10,7 @@ import { detectYaku, yakuProgress } from '@/engine/yaku';
 import { spiritUrl } from '@/ui/art/images';
 import { CoinIcon, OfudaIcon, OmamoriIcon, PetalIcon } from '@/ui/art/Icons';
 import { seasonOf } from '@/content/cards';
-import { PLAYER_CAP_STARTS, SPIRIT_CAP_STARTS, SPIRIT_HAND_X, type Stage } from './layout';
+import { CARD_H, playerCapLayout, SPIRIT_CAP_STARTS, SPIRIT_HAND_X, type Stage } from './layout';
 import { shortFlower } from './labels';
 import { typeGroup, type Visual } from './visual';
 
@@ -127,6 +127,7 @@ export function CapturedCounts({ visual, stage }: { visual: Visual; stage: Stage
     return c;
   };
   const tones = ['#f2c740', '#7fbf5a', '#ef5b3a', '#b99a6a'];
+  const player = playerCapLayout(stage, counts(0));
   return (
     <>
       <div className="hand-count" style={{ left: SPIRIT_HAND_X + 18, top: stage.spiritCapY + 22 }}>
@@ -134,14 +135,15 @@ export function CapturedCounts({ visual, stage }: { visual: Visual; stage: Stage
       </div>
       {([1, 0] as const).map((seat) => {
         const c = counts(seat);
-        const y = seat === 0 ? stage.playerCapY : stage.spiritCapY;
-        const starts = seat === 0 ? PLAYER_CAP_STARTS : SPIRIT_CAP_STARTS;
+        const y =
+          seat === 0 ? stage.playerCapY + CARD_H * stage.capScale + 1 : stage.spiritCapY + 34;
+        const starts = seat === 0 ? player.starts : SPIRIT_CAP_STARTS;
         return c.map((n, g) =>
           n > 0 ? (
             <div
               key={`${seat}-${g}`}
               className="cap-count"
-              style={{ left: (starts[g] as number) - 2, top: y + 34 }}
+              style={{ left: (starts[g] as number) - 2, top: y }}
             >
               <span className="cap-dot" style={{ background: tones[g] }} />
               {n}

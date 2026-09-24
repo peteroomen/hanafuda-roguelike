@@ -11,7 +11,7 @@ import { CardLayer, type CardMarks } from './CardLayer';
 import { DecisionSheet, FrogSheet, HandOverPanel, Hint } from './Decision';
 import { BottomBar, CapturedCounts, SpiritBar, Tracker } from './Hud';
 import { IntroOverlay } from './Intro';
-import { makeStage, placements } from './layout';
+import { CARD_H, makeStage, placements } from './layout';
 import { BannerView, Floaters, GuideBubble } from './Overlays';
 import { ScoreSequence, StrikeSequence } from './Sequences';
 import { CharmSheet, MenuSheet, OfudaSheet, SpiritSheet } from './Sheets';
@@ -191,7 +191,10 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
           style={{ top: stage.fieldTop - 10, height: fieldBottom - stage.fieldTop + 20 }}
         />
         <div className="cap-lane spirit" style={{ top: stage.spiritCapY - 2 }} />
-        <div className="cap-lane player" style={{ top: stage.playerCapY - 2 }} />
+        <div
+          className="cap-lane player"
+          style={{ top: stage.playerCapY - 3, height: CARD_H * stage.capScale + 6 }}
+        />
         <SpiritBar
           run={run}
           fight={fight}

@@ -318,9 +318,12 @@ export function runRules(run: RunState, spirit: SpiritDef): RuleSet {
   };
 }
 
+const COUNTING_YAKU: readonly YakuId[] = ['tan', 'tane', 'kasu'];
+
 function stageDisabled(stage: TutorialStage | null): YakuId[] {
   if (stage === 'matching') return YAKU_IDS.slice();
-  if (stage === 'oneYaku') return YAKU_IDS.filter((id) => id !== 'tan');
+  // Month 2 teaches the three counting sets together, so every hand has several ways to finish.
+  if (stage === 'oneYaku') return YAKU_IDS.filter((id) => !COUNTING_YAKU.includes(id));
   return [];
 }
 

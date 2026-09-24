@@ -2,11 +2,20 @@ import { describe, expect, it } from 'vitest';
 import { ALL_CARD_IDS, CARDS } from '@/content/cards';
 import { OMAMORI_IDS, omamoriDef } from '@/content/omamori';
 import { OFUDA_IDS } from '@/content/ofuda';
-import { SPIRITS } from '@/content/spirits';
+import { SPIRITS, spiritDef } from '@/content/spirits';
+import { YAKU_IDS } from '@/content/yaku';
 import { DECKS } from '@/content/decks';
 import { playRun } from './driver';
 import { cardCensus } from '@/engine/hand';
-import { newRun, type RunState, runStep, spiritStats, waitingOn } from '@/engine/run';
+import {
+  newRun,
+  playerYakuMods,
+  type RunState,
+  runStep,
+  spiritStats,
+  spiritYakuMods,
+  waitingOn,
+} from '@/engine/run';
 
 function censusOk(run: RunState): boolean {
   if (!run.fight) return true;
@@ -35,6 +44,19 @@ describe('new run', () => {
     expect(state.schedule.slice(0, 3)).toEqual(['kodama', 'kasaObake', 'tanuki']);
     expect(state.fight?.stage).toBe('matching');
     expect(state.fight?.hand.yakuMods[0].disabled.length).toBeGreaterThan(10);
+  });
+
+  it('guided month 2 teaches all three counting sets, for both sides', () => {
+    const spirit = spiritDef('kasaObake');
+    const { state } = newRun({ seed: 5, guided: true });
+    const live = (disabled: readonly string[]) =>
+      YAKU_IDS.filter((id) => !disabled.includes(id)).sort();
+    expect(live(playerYakuMods(state, spirit, 'oneYaku').disabled)).toEqual([
+      'kasu',
+      'tan',
+      'tane',
+    ]);
+    expect(live(spiritYakuMods(spirit, 'oneYaku').disabled)).toEqual(['kasu', 'tan', 'tane']);
   });
 
   it('every deck starts cleanly', () => {

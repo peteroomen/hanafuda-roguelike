@@ -18,7 +18,7 @@ export function IntroOverlay({
     fight.stage === 'matching'
       ? 'This month, every card you capture strikes the spirit. No yaku yet.'
       : fight.stage === 'oneYaku'
-        ? 'This month there is one yaku: Tan, any five Ribbons. Form it to strike.'
+        ? 'This month, three yaku: five Ribbons, five Animals or ten Chaff. Form one to strike.'
         : fight.stage === 'koikoi'
           ? 'Every yaku is live, and now you choose: stop, or koi-koi.'
           : null;

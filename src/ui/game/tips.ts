@@ -8,7 +8,7 @@ export const TIPS: Record<string, string> = {
   flip: 'After you play, the top card of the deck is turned over and matched the same way.',
   strike: 'Your captures wound the spirit. When the cards run out, a new hand is dealt.',
   yakuIntro:
-    'Now, yaku. Collect five Ribbons (cards with a paper strip) to form Tan. Watch the tracker under the field.',
+    'Now, yaku: sets of cards. Five Ribbons (paper strips), five Animals, or ten plain Chaff. Watch the tracker under the field.',
   firstYaku:
     'A yaku! Its cards give chips, its points give mult. Chips × mult is the damage you deal.',
   koikoiIntro:

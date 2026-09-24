@@ -2,18 +2,18 @@ import { expect, test } from '@playwright/test';
 import { playYear, setSettings } from './autoplay';
 
 /**
- * A photo tour at normal animation speed: plays the first months through the UI
+ * A photo tour with real animations (the fast setting): plays the first months through the UI
  * and photographs every overlay the first time it appears, for visual review.
  */
 test('photo tour of every screen and overlay', async ({ page }, info) => {
-  // Normal-speed animations: a tour takes 8–17 minutes.
+  // Real animations (the fast setting): a tour takes 8–17 minutes.
   test.setTimeout(40 * 60 * 1000);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
-  await setSettings(page, { speed: 'normal', guide: true, sfx: 0, music: 0 });
+  await setSettings(page, { speed: 'fast', guide: true, sfx: 0, music: 0 });
   await page.reload();
   await page.screenshot({ path: info.outputPath('00-title.png') });
   await page.getByTestId('btn-new').click();
