@@ -11,6 +11,8 @@ import { RUN_VERSION, type RunState } from '@/engine/run';
 
 export type Screen = 'title' | 'setup' | 'game' | 'collection' | 'settings';
 export type Speed = 'normal' | 'fast' | 'instant';
+/** Which card faces to draw: the traditional deck (images) or the game's own drawn art. */
+export type CardStyle = 'traditional' | 'drawn';
 
 export interface Settings {
   trainingWheels: boolean;
@@ -20,6 +22,7 @@ export interface Settings {
   haptics: boolean;
   speed: Speed;
   reduceMotion: boolean;
+  cardStyle: CardStyle;
 }
 
 export interface Profile {
@@ -55,6 +58,7 @@ export const DEFAULT_SETTINGS: Settings = {
   haptics: true,
   speed: 'normal',
   reduceMotion: false,
+  cardStyle: 'traditional',
 };
 
 export const DEFAULT_PROFILE: Profile = {

@@ -123,7 +123,11 @@ export function SpiritSheet({
     <div className="sheet-scrim fade-in" onClick={onClose}>
       <div className="sheet paper pop-in item-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="item-top">
-          <img className="sheet-face" src={spiritUrl(s.id, seasonOf(run.month), s.boss)} alt="" />
+          <img
+            className="sheet-face"
+            src={spiritUrl(s.id, seasonOf(run.month), s.boss, 'full')}
+            alt=""
+          />
           <div>
             <div className="item-name display">
               {s.name} <span className="kanji">{s.kanji}</span>
@@ -246,6 +250,26 @@ export function SettingsList() {
           onChange={(e) => updateSettings({ haptics: e.target.checked })}
         />
       </label>
+      <div className="setting">
+        <span>Cards</span>
+        <div className="seg">
+          {(
+            [
+              ['traditional', 'traditional'],
+              ['drawn', 'drawn'],
+            ] as const
+          ).map(([style, label]) => (
+            <button
+              key={style}
+              className={s.cardStyle === style ? 'on' : ''}
+              onClick={() => updateSettings({ cardStyle: style })}
+              data-testid={`card-style-${style}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="setting">
         <span>Animation speed</span>
         <div className="seg">

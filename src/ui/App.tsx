@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { preloadCards } from '@/ui/art/images';
 import { setVolumes, stopMusic } from '@/ui/audio/audio';
 import { GameScreen } from '@/ui/game/GameScreen';
 import { Collection } from '@/ui/screens/Collection';
@@ -18,6 +19,11 @@ export function App() {
     const f = speedFactorOf(settings.speed);
     document.documentElement.style.setProperty('--move-ms', `${Math.round(300 * f)}ms`);
   }, [settings]);
+
+  // Decode the chosen card faces up front so nothing flashes in during play.
+  useEffect(() => {
+    void preloadCards();
+  }, [settings.cardStyle]);
 
   useEffect(() => {
     if (screen === 'game' && !run) setState({ screen: 'title' });

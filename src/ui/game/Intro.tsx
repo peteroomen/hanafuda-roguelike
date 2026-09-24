@@ -33,7 +33,7 @@ export function IntroOverlay({
       </div>
       <img
         className={`intro-face ${s.boss ? 'boss' : ''}`}
-        src={spiritUrl(s.id, seasonOf(run.month), s.boss)}
+        src={spiritUrl(s.id, seasonOf(run.month), s.boss, 'full')}
         alt={s.name}
       />
       <div className="intro-kanji display">{s.kanji}</div>

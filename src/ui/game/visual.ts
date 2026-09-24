@@ -11,7 +11,8 @@ export type Zone =
   | { readonly z: 'hand'; readonly seat: Seat }
   | { readonly z: 'field' }
   | { readonly z: 'cap'; readonly seat: Seat }
-  | { readonly z: 'held'; readonly seat: Seat }
+  /** In the air above the field; `choosing` while its player picks which match to take. */
+  | { readonly z: 'held'; readonly seat: Seat; readonly choosing?: boolean }
   | { readonly z: 'flip' }
   | { readonly z: 'land'; readonly on: CardId }
   | { readonly z: 'reveal' }
@@ -93,7 +94,7 @@ export function visualFromHand(h: HandState, prev?: Visual): Visual {
     }
   }
   if (h.pending) {
-    zone[h.pending.card] = { z: 'held', seat: h.active };
+    zone[h.pending.card] = { z: 'held', seat: h.active, choosing: true };
     faceUp[h.pending.card] = true;
   }
   if (h.revealed !== null) {
@@ -188,7 +189,7 @@ export function applyEvent(v: Visual, e: HandEvent, final: HandState): Visual {
       return slam(withZone(v, e.card, { z: 'land', on: e.with[0] as CardId }, true), e.card);
     case 'choice':
       return {
-        ...withZone(v, e.card, { z: 'held', seat: e.seat }, true),
+        ...withZone(v, e.card, { z: 'held', seat: e.seat, choosing: true }, true),
         options: e.seat === 0 ? e.options.slice() : [],
       };
     case 'capture': {

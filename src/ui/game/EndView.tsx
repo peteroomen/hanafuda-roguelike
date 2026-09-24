@@ -24,7 +24,7 @@ export function EndView({ run, unlocks }: { run: RunState; unlocks: string[] }) 
         killer && (
           <img
             className="end-face"
-            src={spiritUrl(killer.id, seasonOf(run.month), killer.boss)}
+            src={spiritUrl(killer.id, seasonOf(run.month), killer.boss, 'full')}
             alt=""
           />
         )

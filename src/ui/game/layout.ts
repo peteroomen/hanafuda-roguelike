@@ -54,14 +54,18 @@ export function makeStage(h: number, fieldCount: number): Stage {
   const top = spiritCapY + 48;
   const bottom = trackerY - 10;
   const avail = bottom - top;
-  // Tall phones get four big columns; compact phones five normal ones.
-  const cols = tall ? 4 : 5;
-  const fieldScale = tall ? 1.18 : 1;
+  // Four columns, so the opening deal of eight sits as two neat rows of four.
+  const cols = 4;
+  const fieldScale = tall ? 1.18 : 1.08;
   const cardW = CARD_W * fieldScale;
   const cardH = CARD_H * fieldScale;
-  const colStep = cardW + (tall ? 9 : 5);
+  const colStep = cardW + (tall ? 9 : 8);
   const pileX = 12;
-  const fieldX = tall ? pileX + cardW + 12 : 76;
+  // Centre the columns in the space right of the draw pile.
+  const fieldLeft = pileX + cardW + 12;
+  const fieldRight = STAGE_W - 8;
+  const fieldX =
+    fieldLeft + Math.max(0, (fieldRight - fieldLeft - (colStep * (cols - 1) + cardW)) / 2);
   const rows = Math.max(2, Math.ceil(Math.max(fieldCount, 1) / cols));
   const natural = cardH + 8;
   const rowStep = Math.min(natural, rows > 1 ? (avail - cardH) / (rows - 1) : natural);
@@ -285,6 +289,19 @@ export function placements(v: Visual, st: Stage, opts: LayoutOptions): Map<CardI
       continue;
     switch (zone.z) {
       case 'held': {
+        if (zone.choosing) {
+          // Waiting for a choice: park it over the draw pile, clear of every field card.
+          out.set(id, {
+            x: st.pileX + 2,
+            y: st.pileY - 14,
+            rot: -3,
+            scale: st.fieldScale * 1.06,
+            z: 950 + (moved(id) % 20),
+            faceUp: true,
+            interactive: false,
+          });
+          break;
+        }
         const y = st.fieldTop + st.fieldH / 2 - CARD_H * 0.6;
         const x = st.fieldX + (st.colStep * (st.cols - 1)) / 2;
         out.set(id, {

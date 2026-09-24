@@ -617,7 +617,18 @@ function oni(): string {
 
 // --- The guide -------------------------------------------------------------
 
-export function rainManSvg(): string {
+export function rainManSvg(art?: PaintedArt): string {
+  if (art) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">${el(
+      'defs',
+      {},
+      el('clipPath', { id: 'rmclip' }, circle(100, 100, 94)),
+    )}${circle(100, 100, 98, { fill: '#2f3442' })}${g(
+      { 'clip-path': 'url(#rmclip)' },
+      rect(0, 0, 200, 200, { fill: '#8d9bb4' }),
+      painted(art),
+    )}${circle(100, 100, 95, { fill: 'none', stroke: '#2b2320', 'stroke-width': 4 })}</svg>`;
+  }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">${el(
     'defs',
     {},
@@ -674,7 +685,24 @@ const PORTRAITS: Record<SpiritId, () => string> = {
 };
 
 /** A spirit's portrait medallion. Bosses get a gold rim. */
-export function spiritSvg(id: SpiritId, season: Season, boss: boolean): string {
+/** A painted image to draw instead of the built-in figure; crop is in fractions of its width. */
+export interface PaintedArt {
+  readonly href: string;
+  readonly crop: { readonly cx: number; readonly cy: number; readonly size: number };
+}
+
+function painted(art: PaintedArt): string {
+  const w = 200 / art.crop.size;
+  return el('image', {
+    href: art.href,
+    x: n(100 - art.crop.cx * w),
+    y: n(100 - art.crop.cy * w),
+    width: n(w),
+    height: n(w),
+  });
+}
+
+export function spiritSvg(id: SpiritId, season: Season, boss: boolean, art?: PaintedArt): string {
   const [light, dark] = SEASON_BG[season];
   const clip = `sp-${id}`;
   let rays = '';
@@ -701,7 +729,7 @@ export function spiritSvg(id: SpiritId, season: Season, boss: boolean): string {
     { 'clip-path': `url(#${clip})` },
     rect(0, 0, 200, 200, { fill: `url(#${clip}-bg)` }),
     rays,
-    PORTRAITS[id](),
+    art ? painted(art) : PORTRAITS[id](),
   )}${circle(100, 100, 95, { fill: 'none', stroke: boss ? P.gold : '#2b2320', 'stroke-width': boss ? 6 : 4 })}${
     boss
       ? circle(100, 100, 88, { fill: 'none', stroke: 'rgba(227,169,42,0.5)', 'stroke-width': 1.5 })

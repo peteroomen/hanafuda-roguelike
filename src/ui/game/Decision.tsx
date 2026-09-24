@@ -146,9 +146,18 @@ export function HandOverPanel({ run, onNext }: { run: RunState; onNext: () => vo
   );
 }
 
-export function Hint({ text, onCancel }: { text: string; onCancel?: () => void }) {
+export function Hint({
+  text,
+  onCancel,
+  top,
+}: {
+  text: string;
+  onCancel?: () => void;
+  /** Stage y to sit at; hints go just above the field so they never cover a card. */
+  top?: number;
+}) {
   return (
-    <div className="hint pop-in" data-testid="hint">
+    <div className="hint pop-in" data-testid="hint" style={top === undefined ? undefined : { top }}>
       <span>{text}</span>
       {onCancel && (
         <button className="btn ghost small" onClick={onCancel}>
