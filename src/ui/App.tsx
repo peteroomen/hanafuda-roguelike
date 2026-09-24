@@ -5,7 +5,7 @@ import { Collection } from '@/ui/screens/Collection';
 import { SettingsScreen } from '@/ui/screens/SettingsScreen';
 import { Setup } from '@/ui/screens/Setup';
 import { Title } from '@/ui/screens/Title';
-import { setState, useStore } from '@/ui/state/store';
+import { setState, speedFactorOf, useStore } from '@/ui/state/store';
 
 export function App() {
   const screen = useStore((s) => s.screen);
@@ -15,7 +15,7 @@ export function App() {
   useEffect(() => {
     setVolumes(settings.sfx, settings.music);
     document.documentElement.dataset.reduceMotion = String(settings.reduceMotion);
-    const f = settings.speed === 'instant' ? 0 : settings.speed === 'fast' ? 0.5 : 1;
+    const f = speedFactorOf(settings.speed);
     document.documentElement.style.setProperty('--move-ms', `${Math.round(300 * f)}ms`);
   }, [settings]);
 

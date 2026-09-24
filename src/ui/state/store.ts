@@ -157,8 +157,15 @@ export function resetProgress(): void {
   setState({ profile: { ...DEFAULT_PROFILE }, run: null, screen: 'title' });
 }
 
+/**
+ * Animation timing multiplier for a speed setting. Timings in the code are written at 'fast';
+ * 'normal' plays everything at half speed so each move is easy to follow.
+ */
+export function speedFactorOf(speed: Speed): number {
+  return speed === 'instant' ? 0 : speed === 'fast' ? 1 : 2;
+}
+
 /** Animation timing multiplier for the current speed setting. */
 export function speedFactor(): number {
-  const s = state.settings.speed;
-  return s === 'instant' ? 0 : s === 'fast' ? 0.5 : 1;
+  return speedFactorOf(state.settings.speed);
 }

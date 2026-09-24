@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-24
 **Branch:** `claude/hanafuda-roguelike-handoff-o39d8a` (restarted from `main` after PR #1 merged)
-**Status:** Scoping only. No code yet; waiting on the open questions below.
+**Status:** Declined; see the end of this file.
 
 ## Goal
 
@@ -149,6 +149,6 @@ Everything: this session only scoped the work.
 
 ## Status
 
-- [ ] In progress
-- [ ] Complete
-- [x] Partial: scoped, waiting on the open questions
+- [x] **Declined (2026-09-24).** The user prefers the current card style and flagged that yaku
+      readability is already the bigger problem. They may source a card set that scales better
+      instead. Kept for reference.
