@@ -8,9 +8,9 @@ export const TIPS: Record<string, string> = {
   flip: 'After you play, the top card of the deck is turned over and matched the same way.',
   strike: 'Your captures wound the spirit. When the cards run out, a new hand is dealt.',
   yakuIntro:
-    'Now, yaku: sets of cards. Five Ribbons (paper strips), five Animals, or ten plain Chaff. Watch the tracker under the field.',
+    'Now, yaku: sets of cards. Tan is 5 Ribbons (the paper strips), Tane is 5 Animals, and Kasu is 10 plain Chaff. Watch the tracker under the field.',
   firstYaku:
-    'A yaku! Its cards give chips, its points give mult. Chips × mult is the damage you deal.',
+    'A yaku! Its cards give Chips, its points give Mult. Chips × Mult is the damage you deal.',
   koikoiIntro:
     'The Tanuki loves to gamble. From now on every yaku asks a question: stop now, or call koi-koi and play on?',
   decide:

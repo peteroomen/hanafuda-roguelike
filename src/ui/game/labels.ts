@@ -12,7 +12,7 @@ const SHORT: Record<number, string> = {
   9: 'Mum',
   10: 'Maple',
   11: 'Willow',
-  12: 'Kiri',
+  12: 'Paulownia',
 };
 
 export function shortFlower(month: number): string {

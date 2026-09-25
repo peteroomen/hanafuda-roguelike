@@ -39,7 +39,7 @@ export function YakuList({ poems }: { poems?: Partial<Record<YakuId, number>> })
             <div className="yaku-head">
               <span className="yaku-kanji display">{y.kanji}</span>
               <span className="yaku-name">
-                <b>{y.name}</b> <small>{y.romaji}</small>
+                <b>{y.name}</b> <small>{y.gloss}</small>
               </span>
               <span className="yaku-pts">
                 {y.points}
@@ -105,7 +105,7 @@ export function Rules() {
         top card of the deck is flipped and matched the same way.
       </p>
       <p>
-        <b>Yaku.</b> Captured cards form yaku (see the list). Brights are worth 20 chips, Animals
+        <b>Yaku.</b> Captured cards form yaku (see the list). Brights are worth 20 Chips, Animals
         10, Ribbons 5, Chaff 1.
       </p>
       <p>

@@ -107,6 +107,9 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
     month labels). Old boolean saves are migrated by `migrateSettings` in `store.ts`.
   - Shop (PR C): labelled shelves of one tile style (`Tile` and `Shelf` in `ShopView.tsx`).
     Every tile, services included, opens one details sheet whose button (`btn-buy`) buys.
-  - Next up: PR D (language), E (style pass), F (balance), G (decks and unlocks). For the later
+  - Language (PR D): a yaku's `name` is its Japanese name in English letters (Sankō, Tan); the
+    English meaning is `gloss`, shown only as a subtitle. Card types stay English. "Chips" and
+    "Mult" are capitalised. `src/ui/game/language.test.ts` enforces the yaku rule.
+  - Next up: PR E (style pass), F (balance), G (decks and unlocks). For the later
     design pass: persistent things (HP, mon, charms) should have one fixed home on every screen.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

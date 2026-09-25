@@ -296,7 +296,7 @@ export function useGame(): GameApi {
           haptics.koikoi();
           await banner(
             'koikoi',
-            'Koi-Koi!',
+            'Koi-koi!',
             1200,
             e.seat === 0
               ? 'Stakes ×2 on your next stop'

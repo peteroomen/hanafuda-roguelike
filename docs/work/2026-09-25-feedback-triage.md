@@ -4,7 +4,7 @@
 **Source:** Google Doc "koi koi feedback" (19 items, written after a play session).
 **Branch:** `claude/game-bugs-triage-plan-iewzo2` (this plan only; each workstream below gets its
 own branch and PR, per CLAUDE.md).
-**Status:** PRs A and B merged together (#7). PR C (shop) is done. PR D is next.
+**Status:** PRs A and B merged together (#7), PR C merged (#8). PR D (language) is done. PR E is next.
 
 ## Goal
 
@@ -121,6 +121,21 @@ Proposed convention (see question 3):
 - Add a `yakuName(id)` helper and replace every hard-coded yaku mention in `src/content` text.
   Add a unit test that fails if content text mentions an English yaku name.
 
+As built:
+
+- `YakuDef.name` is now the Japanese name in English letters, and the English moved to `gloss`
+  (shown under the name in the yaku book and the shop's poem details). The `romaji` and `short`
+  fields and `yakuShort()` are gone. Every screen that shows a yaku name reads `name`.
+- The charm, intro and tip texts that used English yaku names now use the Japanese ones (for
+  example "Tan (5 Ribbons), Tane (5 Animals) or Kasu (10 Chaff)").
+- `src/ui/game/language.test.ts` fails if any charm, talisman, enhancement, spirit, deck, omen,
+  yaku requirement or tip uses a multi-word English yaku name.
+- Also made consistent: "Chips" and "Mult" are capitalised everywhere, the koi-koi banner reads
+  "Koi-koi!" like the button, and month 12's short label is "Paulownia" (was "Kiri", while the
+  deck is the Paulownia Deck).
+- Kanji stay decorative. One exception is left alone: a card's enhancement badge is only a kanji
+  (金, 破…). It has a tooltip, and the style pass can decide whether it needs more.
+
 ### PR E: Light style pass (#13, #14, #16, #17, and part 1 of #15)
 
 - **Stop / koi-koi (#13).** Replace the bottom sheet with a compact panel that sits over the
@@ -190,6 +205,16 @@ the engine already has.
 
 The sim can measure each idea's win-rate change and how often it's taken, so we can compare them
 before building UI.
+
+## Queued after the plan
+
+- **Music keeps playing in a background tab** (reported 2026-09-25). Cause: `src/ui/audio/audio.ts`
+  never listens for the page being hidden, so the `AudioContext` keeps running. Fix: on
+  `visibilitychange`, suspend the context when hidden and resume it when visible, but only if it
+  was running before. Also pause the music phrase timer while hidden (`startMusic`'s
+  `setTimeout` loop). Otherwise notes queue up against the suspended clock and play in a burst
+  on return. Test: start a fight, switch tabs, switch back, and check the music stops and
+  resumes cleanly.
 
 ## Manual test steps (all PRs)
 
