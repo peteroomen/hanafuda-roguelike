@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { CARDS, type CardId, MONTHS, monthDef, seasonOf } from '@/content/cards';
 import { enhancementDef } from '@/content/enhancements';
 import { ofudaDef } from '@/content/ofuda';
-import { omamoriDef } from '@/content/omamori';
+import { type Archetype, omamoriDef } from '@/content/omamori';
 import { spiritDef } from '@/content/spirits';
 import { yakuDef } from '@/content/yaku';
 import { type RunState, shopDiscount } from '@/engine/run';
@@ -27,7 +27,8 @@ import { markTip, useStore } from '@/ui/state/store';
 function offerTitle(o: ShopOffer): string {
   if (o.kind === 'omamori') return omamoriDef(o.id).name;
   if (o.kind === 'ofuda') return ofudaDef(o.id).name;
-  return `Poem: ${yakuDef(o.id).name}`;
+  // The shelf and the details sheet both say it's a poem.
+  return yakuDef(o.id).name;
 }
 
 function offerText(o: ShopOffer, run: RunState): string {
@@ -38,11 +39,86 @@ function offerText(o: ShopOffer, run: RunState): string {
   return `${y.name} to Lv ${lv}: +${y.poem.chips} chips and +${y.poem.mult} mult each time it scores.`;
 }
 
+type Service = 'shrine' | 'heal' | 'reroll';
+/** What the details sheet is showing: an offer (by index) or a service. */
+type Picked = { kind: 'offer'; i: number } | { kind: 'service'; id: Service } | null;
+
+const ARCHETYPE_LABEL: Record<Archetype, string> = {
+  brights: 'Brights',
+  ribbons: 'Ribbons',
+  animals: 'Animals',
+  chaff: 'Chaff',
+  greed: 'Greed',
+  season: 'Season',
+  denial: 'Denial',
+  sake: 'Sake',
+  growth: 'Growth',
+  general: 'Any hand',
+};
+
+function offerSub(o: ShopOffer, run: RunState): string {
+  if (o.kind === 'omamori') return ARCHETYPE_LABEL[omamoriDef(o.id).archetype];
+  if (o.kind === 'ofuda') return 'One use';
+  const lv = run.poems[o.id] ?? 0;
+  return `Lv ${lv} → ${lv + 1}`;
+}
+
+function Tile(props: {
+  art: ReactNode;
+  name: string;
+  sub: string;
+  price: number | null;
+  /** Shown instead of the price when there is none. */
+  soldLabel?: string;
+  picked: boolean;
+  dim: boolean;
+  onTap: () => void;
+  testId: string;
+  kind: string;
+}) {
+  return (
+    <button
+      className={`tile tile-${props.kind} ${props.dim ? 'dim' : ''} ${props.picked ? 'picked' : ''}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        props.onTap();
+      }}
+      aria-pressed={props.picked}
+      data-testid={props.testId}
+    >
+      <div className="tile-art">{props.art}</div>
+      <div className="tile-name">{props.name}</div>
+      <div className="tile-sub">{props.sub}</div>
+      <div className="tile-price">
+        {props.price === null ? (
+          (props.soldLabel ?? 'Sold')
+        ) : (
+          <>
+            <CoinIcon size={12} /> {props.price}
+          </>
+        )}
+      </div>
+    </button>
+  );
+}
+
+function Shelf({ label, count, children }: { label: string; count?: string; children: ReactNode }) {
+  return (
+    <section className="shelf">
+      <div className="shelf-label">
+        <span>{label}</span>
+        {count && <span className="shelf-count">{count}</span>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export function ShopView({ api }: { api: GameApi }) {
   const run = api.view.shown;
   const shop = run.shop;
   const { dispatch } = api;
-  const [picked, setPicked] = useState<number | null>(null);
+  const [picked, setPicked] = useState<Picked>(null);
   const [shrineOpen, setShrineOpen] = useState(false);
   const [charm, setCharm] = useState<number | null>(null);
   const [talisman, setTalisman] = useState<number | null>(null);
@@ -52,14 +128,8 @@ export function ShopView({ api }: { api: GameApi }) {
   const ctx = { deckId: run.deckId, omen: run.omen, discount: shopDiscount(run) };
   const nextSpirit = spiritDef(run.schedule[run.month - 1] ?? 'kodama');
   const m = monthDef(run.month);
-  const pickedOffer = picked !== null ? shop.offers[picked] : undefined;
-  const buy = (i: number) => {
-    const o = shop.offers[i];
-    if (!o) return;
-    sfx.coinSound();
-    dispatch({ type: 'buy', offer: i });
-    setPicked(null);
-  };
+  const season = seasonOf(run.month);
+
   const canBuy = (o: ShopOffer) => {
     if (o.sold) return false;
     if (run.mon < offerPrice(o, ctx)) return false;
@@ -68,7 +138,7 @@ export function ShopView({ api }: { api: GameApi }) {
     return true;
   };
   const why = (o: ShopOffer) => {
-    if (o.sold) return 'Sold';
+    if (o.sold) return '';
     if (o.kind === 'omamori' && run.omamori.length >= run.omamoriSlots)
       return 'Charm slots full: sell one first';
     if (o.kind === 'ofuda' && run.ofuda.length >= run.ofudaSlots) return 'Talisman slots full';
@@ -80,164 +150,262 @@ export function ShopView({ api }: { api: GameApi }) {
     run.maxHp - run.hp,
     Math.round(run.maxHp * BALANCE.shop.healFraction),
   );
-  return (
-    // Tapping anywhere outside an offer or its details puts the details away.
-    <div className="shop screen-pad" data-testid="shop" onClick={() => setPicked(null)}>
-      <div className="shop-head">
-        <div>
-          <div className="shop-title display">The Shrine Market</div>
-          <div className="shop-sub">
-            Next: month {run.month}, {m.flower} · {nextSpirit.name}
-            {nextSpirit.boss ? ' (boss)' : ''}
-          </div>
-        </div>
-        <div className="purse">
-          <CoinIcon size={18} />
-          <span className="display" data-testid="mon">
-            {run.mon}
-          </span>
-        </div>
-      </div>
+  const enh = enhancementDef(shop.shrine.enhancement);
+  const prices: Record<Service, number> = {
+    shrine: shrinePrice(shop.shrine.enhancement, ctx),
+    heal: healPrice(ctx),
+    reroll: rerollPrice(shop.rerolls, ctx),
+  };
+  const serviceWhy = (id: Service): string => {
+    if (id === 'shrine' && shop.shrine.used) return 'The shrine has blessed a card this month';
+    if (id === 'heal' && shop.healUsed) return 'You have already rested this month';
+    if (id === 'heal' && run.hp >= run.maxHp) return 'You are at full HP';
+    if (run.mon < prices[id]) return 'Not enough mon';
+    return '';
+  };
+  const serviceDone = (id: Service) =>
+    (id === 'shrine' && shop.shrine.used) || (id === 'heal' && shop.healUsed);
 
-      <div className="shop-status">
-        <span className="status-pill">
-          <PetalIcon size={14} /> {run.hp}/{run.maxHp}
-        </span>
-        <span className="status-pill">
-          Charms {run.omamori.length}/{run.omamoriSlots}
-        </span>
-        <span className="status-pill">
-          Talismans {run.ofuda.length}/{run.ofudaSlots}
-        </span>
-      </div>
+  const isPicked = (p: NonNullable<Picked>) =>
+    picked !== null &&
+    picked.kind === p.kind &&
+    (p.kind === 'offer'
+      ? picked.kind === 'offer' && picked.i === p.i
+      : picked.kind === 'service' && picked.id === p.id);
+  // A second tap on the same tile puts the details away.
+  const toggle = (p: NonNullable<Picked>) => setPicked(isPicked(p) ? null : p);
 
-      <div className="offers">
-        {shop.offers.map((o, i) => (
-          <button
-            key={`${o.kind}-${o.id}-${i}`}
-            className={`offer ${o.sold ? 'sold' : ''} ${picked === i ? 'picked' : ''} offer-${o.kind}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setPicked(picked === i ? null : i);
-            }}
-            aria-pressed={picked === i}
-            data-testid={`offer-${i}`}
-          >
-            <div className="offer-art">
-              {o.kind === 'omamori' && <OmamoriIcon id={o.id} size={46} />}
-              {o.kind === 'ofuda' && <OfudaIcon id={o.id} size={30} />}
-              {o.kind === 'poem' && <PoemIcon id={o.id} size={30} />}
-            </div>
-            <div className="offer-name">{offerTitle(o)}</div>
-            <div className="offer-price">
-              {o.sold ? (
-                'Sold'
-              ) : (
-                <>
-                  <CoinIcon size={12} /> {offerPrice(o, ctx)}
-                </>
-              )}
-            </div>
-          </button>
-        ))}
-      </div>
+  const offerTile = (i: number) => {
+    const o = shop.offers[i] as ShopOffer;
+    return (
+      <Tile
+        key={`${o.kind}-${o.id}-${i}`}
+        kind={o.kind}
+        art={
+          o.kind === 'omamori' ? (
+            <OmamoriIcon id={o.id} size={31} />
+          ) : o.kind === 'ofuda' ? (
+            <OfudaIcon id={o.id} size={19} />
+          ) : (
+            <PoemIcon id={o.id} size={19} />
+          )
+        }
+        name={offerTitle(o)}
+        sub={offerSub(o, run)}
+        price={o.sold ? null : offerPrice(o, ctx)}
+        picked={isPicked({ kind: 'offer', i })}
+        dim={o.sold}
+        onTap={() => toggle({ kind: 'offer', i })}
+        testId={`offer-${i}`}
+      />
+    );
+  };
+  const indexes = (kind: ShopOffer['kind']) =>
+    shop.offers.flatMap((o, i) => (o.kind === kind ? [i] : []));
+  const charmIdx = indexes('omamori');
+  const ofudaIdx = indexes('ofuda');
+  const poemIdx = indexes('poem');
 
-      {pickedOffer && (
-        <div
-          className="offer-detail paper pop-in"
-          data-testid="offer-detail"
-          onClick={(e) => e.stopPropagation()}
+  const serviceTile = (id: Service) => {
+    const kanji = id === 'shrine' ? enh.kanji : id === 'heal' ? '湯' : '替';
+    const name = id === 'shrine' ? 'Shrine' : id === 'heal' ? 'Onsen' : 'New wares';
+    const sub =
+      id === 'shrine'
+        ? shop.shrine.used
+          ? 'Used this month'
+          : enh.name
+        : id === 'heal'
+          ? shop.healUsed
+            ? 'Used this month'
+            : healAmount > 0
+              ? `+${healAmount} HP`
+              : 'Full HP'
+          : 'Restock';
+    return (
+      <Tile
+        key={id}
+        kind="service"
+        art={<span className="seal display">{kanji}</span>}
+        name={name}
+        sub={sub}
+        price={serviceDone(id) ? null : prices[id]}
+        soldLabel="Used"
+        picked={isPicked({ kind: 'service', id })}
+        dim={serviceDone(id)}
+        onTap={() => toggle({ kind: 'service', id })}
+        testId={id === 'shrine' ? 'btn-shrine' : id === 'heal' ? 'btn-heal' : 'btn-reroll'}
+      />
+    );
+  };
+
+  const buyService = (id: Service) => {
+    setPicked(null);
+    if (id === 'shrine') {
+      setShrineOpen(true);
+      return;
+    }
+    sfx.coinSound();
+    dispatch(id === 'heal' ? { type: 'heal' } : { type: 'reroll' });
+  };
+
+  const detail = (() => {
+    if (!picked) return null;
+    if (picked.kind === 'offer') {
+      const o = shop.offers[picked.i];
+      if (!o) return null;
+      return (
+        <DetailSheet
+          kind={o.kind === 'omamori' ? 'Charm' : o.kind === 'ofuda' ? 'Talisman' : 'Poem'}
+          art={
+            o.kind === 'omamori' ? (
+              <OmamoriIcon id={o.id} size={31} />
+            ) : o.kind === 'ofuda' ? (
+              <OfudaIcon id={o.id} size={19} />
+            ) : (
+              <PoemIcon id={o.id} size={19} />
+            )
+          }
+          name={offerTitle(o)}
+          action={o.sold ? 'Sold' : `Buy · ${offerPrice(o, ctx)} mon`}
+          enabled={canBuy(o)}
+          why={why(o)}
+          onAct={() => {
+            sfx.coinSound();
+            dispatch({ type: 'buy', offer: picked.i });
+            setPicked(null);
+          }}
+          onClose={() => setPicked(null)}
         >
-          <div className="offer-detail-name display">{offerTitle(pickedOffer)}</div>
-          {pickedOffer.kind === 'omamori' && (
-            <div className="offer-detail-sub">
-              {omamoriDef(pickedOffer.id).kanji} · {omamoriDef(pickedOffer.id).rarity} charm ·{' '}
-              {omamoriDef(pickedOffer.id).archetype}
+          {o.kind === 'omamori' && (
+            <div className="detail-sub">
+              {omamoriDef(o.id).kanji} · {omamoriDef(o.id).rarity} ·{' '}
+              {ARCHETYPE_LABEL[omamoriDef(o.id).archetype]}
             </div>
           )}
-          {pickedOffer.kind === 'poem' && (
+          {o.kind === 'poem' && (
             <div className="haiku">
-              {yakuDef(pickedOffer.id).haiku.map((l) => (
+              {yakuDef(o.id).haiku.map((l) => (
                 <div key={l}>{l}</div>
               ))}
             </div>
           )}
-          <div className="offer-detail-text">{offerText(pickedOffer, run)}</div>
-          <div className="offer-detail-actions">
-            <button
-              className="btn gold"
-              disabled={!canBuy(pickedOffer)}
-              onClick={() => buy(picked as number)}
-              data-testid="btn-buy"
-            >
-              Buy · {offerPrice(pickedOffer, ctx)} mon
-            </button>
-            <button className="btn ghost small" onClick={() => setPicked(null)}>
-              Close
-            </button>
-          </div>
-          {why(pickedOffer) && !pickedOffer.sold && (
-            <div className="offer-why">{why(pickedOffer)}</div>
-          )}
-        </div>
-      )}
+          <p className="detail-text">{offerText(o, run)}</p>
+        </DetailSheet>
+      );
+    }
+    const id = picked.id;
+    const done = serviceDone(id);
+    return (
+      <DetailSheet
+        kind="Service"
+        art={
+          <span className="seal display">
+            {id === 'shrine' ? enh.kanji : id === 'heal' ? '湯' : '替'}
+          </span>
+        }
+        name={id === 'shrine' ? `Shrine: ${enh.name}` : id === 'heal' ? 'Onsen' : 'New wares'}
+        action={
+          done
+            ? 'Used this month'
+            : id === 'shrine'
+              ? `Choose a card · ${prices.shrine} mon`
+              : id === 'heal'
+                ? `Rest · ${prices.heal} mon`
+                : `Restock · ${prices.reroll} mon`
+        }
+        enabled={serviceWhy(id) === ''}
+        why={done ? '' : serviceWhy(id)}
+        onAct={() => buyService(id)}
+        onClose={() => setPicked(null)}
+      >
+        {id === 'shrine' && (
+          <p className="detail-text">
+            Bless one card in your deck. {enh.text} The deck is shared, so the spirit may capture it
+            too.
+          </p>
+        )}
+        {id === 'heal' && (
+          <>
+            <p className="detail-text">
+              Restore {Math.round(BALANCE.shop.healFraction * 100)}% of your max HP, once per
+              market.
+            </p>
+            <div className="detail-hp">
+              <span>{run.hp}</span>
+              <div className="detail-hpbar">
+                <i style={{ width: `${(run.hp / run.maxHp) * 100}%` }} />
+                <i className="gain" style={{ width: `${(healAmount / run.maxHp) * 100}%` }} />
+              </div>
+              <span>{run.maxHp}</span>
+            </div>
+          </>
+        )}
+        {id === 'reroll' && (
+          <p className="detail-text">
+            Replace every charm, talisman and poem on offer. Each restock this month costs more than
+            the last.
+          </p>
+        )}
+      </DetailSheet>
+    );
+  })();
 
-      <div className="services">
-        <button
-          className="service"
-          disabled={shop.shrine.used || run.mon < shrinePrice(shop.shrine.enhancement, ctx)}
-          onClick={() => setShrineOpen(true)}
-          data-testid="btn-shrine"
-        >
-          <span className="service-kanji display">
-            {enhancementDef(shop.shrine.enhancement).kanji}
+  return (
+    // Tapping anywhere outside a tile or its details puts the details away.
+    <div className="shop screen-pad" data-testid="shop" onClick={() => setPicked(null)}>
+      <div className="shop-head">
+        <div className="shop-title display">The Shrine Market</div>
+        <div className="shop-wallet">
+          <span className="wallet-pill">
+            <PetalIcon size={13} /> {run.hp}
+            <small>/{run.maxHp}</small>
           </span>
-          <b>
-            {shop.shrine.used
-              ? 'Blessed'
-              : `Shrine: ${enhancementDef(shop.shrine.enhancement).name}`}
-          </b>
-          <small>{enhancementDef(shop.shrine.enhancement).text}</small>
-          <span className="service-price">
-            <CoinIcon size={11} /> {shrinePrice(shop.shrine.enhancement, ctx)}
+          <span className="wallet-pill purse">
+            <CoinIcon size={16} />
+            <span className="display" data-testid="mon">
+              {run.mon}
+            </span>
           </span>
-        </button>
-        <button
-          className="service"
-          disabled={shop.healUsed || run.hp >= run.maxHp || run.mon < healPrice(ctx)}
-          onClick={() => dispatch({ type: 'heal' })}
-          data-testid="btn-heal"
-        >
-          <span className="service-kanji display">湯</span>
-          <b>Onsen</b>
-          <small>
-            {shop.healUsed
-              ? 'You are rested'
-              : healAmount > 0
-                ? `Restore ${healAmount} HP`
-                : 'Already at full HP'}
-          </small>
-          <span className="service-price">
-            <CoinIcon size={11} /> {healPrice(ctx)}
-          </span>
-        </button>
-        <button
-          className="service"
-          disabled={run.mon < rerollPrice(shop.rerolls, ctx)}
-          onClick={() => dispatch({ type: 'reroll' })}
-          data-testid="btn-reroll"
-        >
-          <span className="service-kanji display">替</span>
-          <b>New wares</b>
-          <small>Restock the stalls</small>
-          <span className="service-price">
-            <CoinIcon size={11} /> {rerollPrice(shop.rerolls, ctx)}
-          </span>
-        </button>
+        </div>
       </div>
 
-      <div className="shop-charms">
-        <div className="shop-section-title">Yours · tap a charm to sell or reorder</div>
+      {charmIdx.length > 0 && (
+        <Shelf label="Charms" count={`${run.omamori.length}/${run.omamoriSlots} slots`}>
+          <div className="tiles">{charmIdx.map(offerTile)}</div>
+        </Shelf>
+      )}
+
+      <div
+        className="shelf-split"
+        style={{ gridTemplateColumns: `${Math.max(1, ofudaIdx.length)}fr ${poemIdx.length}fr` }}
+      >
+        {ofudaIdx.length > 0 && (
+          <Shelf label="Talismans" count={`${run.ofuda.length}/${run.ofudaSlots}`}>
+            <div
+              className="tiles"
+              style={{ gridTemplateColumns: `repeat(${ofudaIdx.length}, 1fr)` }}
+            >
+              {ofudaIdx.map(offerTile)}
+            </div>
+          </Shelf>
+        )}
+        {poemIdx.length > 0 && (
+          <Shelf label="Poems">
+            <div
+              className="tiles"
+              style={{ gridTemplateColumns: `repeat(${poemIdx.length}, 1fr)` }}
+            >
+              {poemIdx.map(offerTile)}
+            </div>
+          </Shelf>
+        )}
+      </div>
+
+      <Shelf label="Services">
+        <div className="tiles">{(['shrine', 'heal', 'reroll'] as const).map(serviceTile)}</div>
+      </Shelf>
+
+      <Shelf label="Yours" count="tap to sell or move">
         <div className="owned-row">
           <div className="charm-row big">
             {Array.from({ length: run.omamoriSlots }, (_, i) => {
@@ -246,10 +414,13 @@ export function ShopView({ api }: { api: GameApi }) {
                 <button
                   key={i}
                   className={`slot charm ${inst ? '' : 'empty'}`}
-                  onClick={() => inst && setCharm(i)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (inst) setCharm(i);
+                  }}
                   data-testid={`shop-charm-${i}`}
                 >
-                  {inst && <OmamoriIcon id={inst.id} size={30} />}
+                  {inst && <OmamoriIcon id={inst.id} size={28} />}
                 </button>
               );
             })}
@@ -261,7 +432,10 @@ export function ShopView({ api }: { api: GameApi }) {
                 <button
                   key={i}
                   className={`slot ofuda ${id ? '' : 'empty'}`}
-                  onClick={() => id && setTalisman(i)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (id) setTalisman(i);
+                  }}
                   aria-label={id ? ofudaDef(id).name : 'Empty talisman slot'}
                   data-testid={`shop-ofuda-${i}`}
                 >
@@ -271,29 +445,39 @@ export function ShopView({ api }: { api: GameApi }) {
             })}
           </div>
         </div>
-      </div>
+      </Shelf>
 
       <div className="shop-foot">
         <div className="next-spirit">
-          <img src={spiritUrl(nextSpirit.id, seasonOf(run.month), nextSpirit.boss)} alt="" />
+          <img src={spiritUrl(nextSpirit.id, season, nextSpirit.boss)} alt="" />
           <div>
             <div className="display">{nextSpirit.name}</div>
-            <small>{nextSpirit.rule ? nextSpirit.rule.title : nextSpirit.epithet}</small>
+            <small>
+              {nextSpirit.boss ? 'Boss · ' : ''}
+              {nextSpirit.rule ? nextSpirit.rule.title : nextSpirit.epithet}
+            </small>
           </div>
         </div>
         <button
-          className="btn red"
+          className="btn red go-btn"
           onClick={() => dispatch({ type: 'leaveShop' })}
           data-testid="btn-leave-shop"
         >
-          To month {run.month} →
+          <span className="display">Month {run.month} →</span>
+          <small>
+            {season[0]?.toUpperCase()}
+            {season.slice(1)} · {m.flower}
+          </small>
         </button>
       </div>
+
+      {detail}
 
       {shrineOpen && (
         <ShrinePicker
           run={run}
           onPick={(card) => {
+            sfx.coinSound();
             dispatch({ type: 'enhance', card });
             setShrineOpen(false);
           }}
@@ -333,6 +517,50 @@ export function ShopView({ api }: { api: GameApi }) {
         />
       )}
       {showTip && <GuideBubble tip="shop" onDismiss={() => markTip('shop')} bottom={90} />}
+    </div>
+  );
+}
+
+/** The one details sheet every tile opens: what it is, what it does, and the button to get it. */
+function DetailSheet(props: {
+  kind: string;
+  art: ReactNode;
+  name: string;
+  action: string;
+  enabled: boolean;
+  why: string;
+  onAct: () => void;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="shop-detail paper pop-in"
+      data-testid="offer-detail"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="detail-top">
+        <div className="detail-art">{props.art}</div>
+        <div>
+          <div className="detail-kind">{props.kind}</div>
+          <div className="detail-name display">{props.name}</div>
+        </div>
+      </div>
+      {props.children}
+      <div className="detail-actions">
+        <button
+          className="btn gold"
+          disabled={!props.enabled}
+          onClick={props.onAct}
+          data-testid="btn-buy"
+        >
+          {props.action}
+        </button>
+        <button className="btn ghost small" onClick={props.onClose}>
+          Close
+        </button>
+      </div>
+      {props.why && <div className="offer-why">{props.why}</div>}
     </div>
   );
 }

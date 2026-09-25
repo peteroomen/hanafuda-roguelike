@@ -105,5 +105,8 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
     `useGame.ts`). A re-deal gathers every card into the pile, then deals two at a time.
   - Training wheels has three levels: `off`, `dots` (just the playable dot) and `full` (dot plus
     month labels). Old boolean saves are migrated by `migrateSettings` in `store.ts`.
-  - Next up: PR C (shop), D (language), E (style pass), F (balance), G (decks and unlocks).
+  - Shop (PR C): labelled shelves of one tile style (`Tile` and `Shelf` in `ShopView.tsx`).
+    Every tile, services included, opens one details sheet whose button (`btn-buy`) buys.
+  - Next up: PR D (language), E (style pass), F (balance), G (decks and unlocks). For the later
+    design pass: persistent things (HP, mon, charms) should have one fixed home on every screen.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.
