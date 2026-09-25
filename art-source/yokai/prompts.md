@@ -1,9 +1,37 @@
 # Subject prompts for the remaining spirits
 
+## Boss style
+
+Bosses use this style and composition block in place of the ones in `README.md`, so
+they feel like a step up from the regular spirits: more menacing, less silly.
+
+```
+STYLE (bosses: keep identical for every boss):
+A boss portrait for a Japanese hanafuda card game, in the style of traditional
+hanafuda cards and dramatic Edo-period woodblock prints of demons and yokai (think
+Kuniyoshi's warrior and monster prints). Flat colour fills with no gradients, bold
+black outlines of even weight, and a darker traditional palette: deep indigo, blood
+vermilion, black, burnished ochre gold, bone white, and one cold accent colour per
+creature. Hard flat shadow shapes under the brow and jaw. The creature is powerful,
+ancient and dangerous: a narrow, intense stare, a confident or cruel expression,
+tension in the pose, and no cartoon cuteness, no tongue-out grins, no blushing
+cheeks. Unsettling rather than gory: no blood, no wounds. Simple, bold shapes that
+stay readable when shrunk to 60 pixels wide.
+
+COMPOSITION (bosses):
+Square image. A slightly low angle, so the creature looms over the viewer. It is
+centred and fills about 85% of the frame, from the top of its head to its chest or
+waist, with its face in the upper-middle of the frame and nothing important near the
+corners, because the image will be cropped to a circle. One flat background motif
+behind it is allowed (a moon, waves, storm clouds or falling snow) in the same
+woodblock style. The rest of the background is plain flat off-white paper with no
+texture. Keep the creature's outline closed where it meets the paper. No text, no
+lettering, no border, no frame, no signature.
+```
+
 Put each subject block after the style and composition blocks in `README.md`. For a clean
 cutout, keep the background plain and untextured, and close the outlines wherever the
-figure meets it. Bosses get a gold frame in the game, so give them bigger, more commanding
-poses.
+figure meets it. Bosses use the boss style block below.
 
 ## Spring
 
@@ -60,23 +88,24 @@ because he sees everyone's cards. Curious and a bit of a know-it-all.
 
 ```
 SUBJECT: Kappa, "The River Imp" (a boss)
-A kappa, a river imp with a dish of water on its head. A green, frog-like, child-sized
-creature with a turtle shell on its back, a duck-like yellow beak, webbed hands and a
-ring of shaggy dark hair around a shallow dish on top of its head, brimming with
-water. It stands in a swirl of river water, gleefully tearing a red paper ribbon strip
-in half, with other torn ribbons floating away in the current. Its eyes are wide and
-triumphant. Cheeky and bossy.
+A kappa rising out of a dark river: a lean, sinewy green body with a mottled turtle
+shell, webbed clawed hands, a hard yellow beak half-open to show a black mouth, and
+cold, flat reptile eyes. A ring of wet, stringy black hair frames the shallow dish
+on its head, brimming with water that catches the light. It holds a red paper ribbon
+strip in each clawed hand and tears them apart, while the black-and-indigo river
+curls around it in stylised woodblock waves. Cold, territorial, predatory.
 ```
 
 ### namazu (boss)
 
 ```
 SUBJECT: Ōnamazu, "The Earthquake Catfish" (a boss)
-Ōnamazu, a giant catfish that lives under the islands and shakes the earth when it
-thrashes. A huge dark indigo-grey catfish curling through the frame, with long
-drooping whiskers, a wide grumpy mouth, and small gold eyes. Its body is thrashing,
-and around it a few tiles and hanafuda cards are tumbling into the air. Short curved
-motion lines around its body show the ground shaking. Enormous, sulky and powerful.
+Ōnamazu, the colossal catfish that lives under the islands and shakes the earth. A
+vast dark indigo-black catfish coiling out of cracked ground, its body scarred and
+ancient, with long whip-like whiskers lashing outwards, a huge downturned mouth and
+small burning gold eyes full of old anger. Jagged cracks split the earth around it
+and a few hanafuda cards and roof tiles are thrown into the air. A dull red sky band
+sits behind it. Enormous, ancient and wrathful.
 ```
 
 ## Autumn
@@ -120,23 +149,24 @@ quiet, polite stranger with no face.
 
 ```
 SUBJECT: Kitsune, "The Nine-Tailed Illusion" (a boss)
-A kitsune, an ancient fox whose foxfire makes things seem what they are not. A white
-fox with red markings around its eyes and on its ears, sitting upright and elegant,
-with nine big tails fanned out behind it like a peacock's display. Small floating
-blue-white flames of foxfire drift around it, and one flame is turning a hanafuda
-card into a different card. Narrow, knowing eyes and a faint smile. Beautiful,
-mysterious and a little dangerous.
+An ancient nine-tailed fox spirit. A tall white fox with blood-red markings around
+its narrowed gold eyes and along its muzzle, sitting upright and utterly still, with
+nine long tails fanned out behind it like a halo. Cold blue-white foxfire burns in
+small flames around it; one flame hovers over a hanafuda card, and the card's
+picture is visibly changing into a different month. A thin, knowing smile that does
+not reach its eyes. Beautiful, cold and deceitful.
 ```
 
 ### nue (boss)
 
 ```
 SUBJECT: Nue, "The Chimera of the Palace Roof" (a boss)
-A nue, a chimera perched on a palace roof ridge at night: a red-faced monkey's head
-with a clever, calculating stare; a round badger body; striped tiger legs gripping
-the roof tiles; and a green serpent for a tail, curling up with its own small head.
-A thin crescent moon sits behind it. It holds up one clawed finger as if taking notes
-on your tricks. Watchful and smart.
+A nue crouched on the ridge of a palace roof at night: the red face of an old monkey
+with deep-set, calculating eyes and bared fangs; a hunched, heavy badger body; striped
+tiger legs with claws dug into the black roof tiles; and a green serpent for a tail,
+rearing up with its own head and flicking tongue. A pale crescent moon and thin black
+clouds sit behind it. It stares straight at the viewer as if memorising every move
+you make. Watchful, intelligent and menacing.
 ```
 
 ## Winter
@@ -180,22 +210,22 @@ surface, a little too hungry underneath.
 
 ```
 SUBJECT: Yuki-onna, "The Snow Woman" (a boss)
-Yuki-onna, a snow woman who walks in on the last night of the year. A tall, pale
-woman with very long straight black hair, in a pure white kimono with a pale blue
-snowflake pattern, and pale blue lips. She holds one hand out towards the viewer,
-and frost crystals spread from her fingertips over a hanafuda card, freezing it in
-ice. Snowflakes drift around her. Serene, beautiful and cold, with a small calm
-smile.
+Yuki-onna on the last night of the year. A tall, deathly pale woman with very long
+straight black hair that drifts as if in a cold wind, wearing a pure white kimono with
+a faint pale blue snowflake pattern. Her lips are blue, her eyes dark and empty, and
+her face is calm and without pity. One pale hand reaches out towards the viewer, and
+ice spreads from her fingertips over a hanafuda card, encasing it in frost. Heavy
+snow falls around her against a dark indigo night. Serene, beautiful and deadly.
 ```
 
 ### oni (final boss)
 
 ```
 SUBJECT: Oni, "The Ogre at the Gate" (the final boss)
-An oni, a red ogre with an iron club who collects debts on the last night of the
-year. A big, muscular red ogre with two short horns, wild black hair, bulging gold
-eyes and a wide fanged grin. He wears a tiger-skin loincloth and has a heavy studded
-iron club (kanabō) resting on one shoulder. With his other hand he holds out a long
-paper ledger, demanding payment. Huge and intimidating, but still in the playful,
-bold style of the other characters, not horror.
+A towering red oni at the gate on the last night of the year. A massive, muscular red
+ogre with two thick curved horns, a wild black mane, burning gold eyes under a heavy
+furrowed brow, and long fangs in a snarling mouth. He wears a tiger-skin loincloth,
+and a heavy studded iron club (kanabō) rests on one shoulder. With his other hand he
+holds out a long paper ledger of debts, demanding payment. Storm clouds and a blood
+red sky loom behind him. Overwhelming, merciless and final.
 ```
