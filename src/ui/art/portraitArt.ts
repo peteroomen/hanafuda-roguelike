@@ -5,6 +5,12 @@
  */
 import type { SpiritId } from '@/content/spirits';
 import kasaObake from './portraits/kasaObake.webp';
+import kappa from './portraits/kappa.webp';
+import kitsune from './portraits/kitsune.webp';
+import namazu from './portraits/namazu.webp';
+import nue from './portraits/nue.webp';
+import oni from './portraits/oni.webp';
+import yukiOnna from './portraits/yukiOnna.webp';
 import bakeneko from './portraits/bakeneko.webp';
 import chochinObake from './portraits/chochinObake.webp';
 import hitotsumeKozo from './portraits/hitotsumeKozo.webp';
@@ -41,6 +47,36 @@ export type Framing = 'close' | 'full';
 export type PortraitId = SpiritId | 'rainMan';
 
 export const PORTRAIT_ART: Partial<Record<PortraitId, PortraitArt>> = {
+  oni: {
+    src: oni,
+    close: { cx: 0.5, cy: 0.3, size: 0.5 },
+    full: { cx: 0.5, cy: 0.5, size: 1.02 },
+  },
+  yukiOnna: {
+    src: yukiOnna,
+    close: { cx: 0.55, cy: 0.3, size: 0.5 },
+    full: { cx: 0.5, cy: 0.5, size: 1.02 },
+  },
+  nue: {
+    src: nue,
+    close: { cx: 0.42, cy: 0.35, size: 0.5 },
+    full: { cx: 0.5, cy: 0.5, size: 1.02 },
+  },
+  kappa: {
+    src: kappa,
+    close: { cx: 0.5, cy: 0.3, size: 0.55 },
+    full: { cx: 0.5, cy: 0.5, size: 1.02 },
+  },
+  namazu: {
+    src: namazu,
+    close: { cx: 0.5, cy: 0.42, size: 0.62 },
+    full: { cx: 0.5, cy: 0.5, size: 1.02 },
+  },
+  kitsune: {
+    src: kitsune,
+    close: { cx: 0.5, cy: 0.25, size: 0.5 },
+    full: { cx: 0.5, cy: 0.5, size: 1.02 },
+  },
   rokurokubi: {
     src: rokurokubi,
     close: { cx: 0.7, cy: 0.36, size: 0.52 },

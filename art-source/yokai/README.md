@@ -60,3 +60,15 @@ the game, and its mood.>
 | kamaitachi     | Weasel with sickle claws leaping through winter wind.                                               |
 | rokurokubi     | Woman in an indigo kimono whose long neck loops round, a card in her teeth.                         |
 | yamauba        | Wild-haired crone in a straw cape offering tea, a ladle behind her back.                            |
+| kappa          | Boss style. A sinewy kappa rising from woodblock waves, tearing red ribbons.                        |
+| namazu         | Boss style. A scarred black catfish bursting from cracked earth, cards flying.                      |
+| kitsune        | Boss style. A white nine-tailed fox in foxfire, changing one card into another.                     |
+| nue            | Boss style. A red-faced chimera on a palace roof under a crescent moon.                             |
+| yukiOnna       | Boss style. A pale snow woman freezing a card in ice under a red moon.                              |
+| oni            | Boss style. A red oni at the gate with an iron club and a ledger of debts.                          |
+
+The boss paintings fill the whole frame with scenery, so they skip `cutout.py` (with no
+paper edge, it would cut into the picture). Resize them directly instead:
+`python3 -c "from PIL import Image; Image.open('art-source/yokai/ID.png').convert('RGBA').resize((512,512), Image.LANCZOS).save('src/ui/art/portraits/ID.webp','WEBP',quality=86,method=6)"`
+
+Tanuki and Tengu are bosses drawn in the regular style. Chōchin-obake stays deliberately silly.
