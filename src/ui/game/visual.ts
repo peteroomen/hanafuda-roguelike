@@ -287,3 +287,17 @@ export function typeGroup(id: CardId): number {
   const t = CARDS[id]?.type;
   return t === 'bright' ? 0 : t === 'animal' ? 1 : t === 'ribbon' ? 2 : 3;
 }
+
+/** Deal order, two cards at a time: your hand, the field, the spirit's hand, and round again. */
+export function dealOrder(
+  mine: readonly CardId[],
+  field: readonly CardId[],
+  theirs: readonly CardId[],
+): CardId[] {
+  const out: CardId[] = [];
+  const n = Math.max(mine.length, field.length, theirs.length);
+  for (let i = 0; i < n; i += 2) {
+    for (const list of [mine, field, theirs]) out.push(...list.slice(i, i + 2));
+  }
+  return out;
+}

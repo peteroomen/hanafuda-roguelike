@@ -119,6 +119,8 @@
 .card.tappable {
   pointer-events: auto;
   cursor: pointer;
+  /* Hand cards can be dragged: don't let the browser scroll or zoom instead. */
+  touch-action: none;
 }
 .card-body {
   position: absolute;
@@ -168,6 +170,20 @@
 }
 .card-flip .back {
   transform: rotateY(180deg);
+}
+/* Cards inside the draw pile: just the thin edge. Only the bottom card casts a shadow. */
+.card.stacked .card-flip {
+  box-shadow: 0 1px 0 #0c0705;
+}
+.card.dragging {
+  transition: none;
+  cursor: grabbing;
+}
+.card.dragging .card-flip {
+  box-shadow:
+    0 1.5px 0 #0c0705,
+    0 2.5px 0 #0c0705,
+    0 12px 18px rgba(0, 0, 0, 0.5);
 }
 .card.mini .card-flip {
   box-shadow:

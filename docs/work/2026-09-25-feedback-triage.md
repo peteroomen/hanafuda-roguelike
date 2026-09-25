@@ -4,7 +4,7 @@
 **Source:** Google Doc "koi koi feedback" (19 items, written after a play session).
 **Branch:** `claude/game-bugs-triage-plan-iewzo2` (this plan only; each workstream below gets its
 own branch and PR, per CLAUDE.md).
-**Status:** Awaiting answers to the open questions at the end.
+**Status:** Answers in. PR A and PR B are done and ship together as one PR. PR C is next.
 
 ## Goal
 
@@ -196,6 +196,15 @@ before building UI.
 - The big dedicated design pass (#15 part 2). It gets its own plan after PR E lands.
 - Building any of the new-mechanic items (#10) until we've discussed them.
 
-## Open questions
+## Answers (2026-09-25)
 
-See the session report. The answers get copied here before work starts.
+1. **Balance patch:** merge it first. Done as PR #6 (`monthEase`, `spiritSlip`).
+2. **Balance direction:** fine, but model it in the sim when we get to PR F.
+3. **Language convention:** agreed as written in PR D.
+4. **Stop / koi-koi:** the compact panel with press-and-hold peek, kept near the thumb.
+5. **Zen Loop:** try it; not committed to it.
+6. **Locked charms:** about 6 for now, but audit all charms at PR G (some existing ones may get
+   locked too). Also add a Balatro-style record: a glossary of runs, stats and unlocks.
+7. **Score deck:** model it at PR G, and audit all the decks then.
+8. **Hand order:** January to December, then Bright > Animal > Ribbon > Chaff. Correct.
+9. **PR A and PR B ship as one PR.**

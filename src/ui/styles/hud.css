@@ -318,10 +318,12 @@
 .tracker .chip.formed b {
   color: #7a1d10;
 }
+/* Nothing formed or in progress yet: a quiet mark that the strip opens the yaku book. */
 .tracker-empty {
-  font-size: 11px;
-  opacity: 0.55;
-  padding-left: 4px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  opacity: 0.35;
+  padding-left: 6px;
 }
 
 /* Bottom bar -------------------------------------------------------------- */

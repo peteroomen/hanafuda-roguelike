@@ -2,7 +2,7 @@
  * Where everything sits on the portrait stage (logical width 390, height ≥ 640).
  * Cards are positioned absolutely from these numbers and animate between them.
  */
-import type { CardId } from '@/content/cards';
+import { CARDS, type CardId, TYPE_ORDER } from '@/content/cards';
 import type { Seat } from '@/engine/types';
 import { typeGroup, type Visual } from './visual';
 
@@ -37,6 +37,11 @@ export interface Stage {
   readonly capScale: number;
 }
 
+/** The opening deal fills a 4×2 grid; later cards add columns to the right. */
+const BASE_COLS = 4;
+/** Captured-card groups are separated by this gap (both lanes). */
+const CAP_GAP = 10;
+
 export function makeStage(h: number, fieldCount: number): Stage {
   const H = Math.max(MIN_STAGE_H, h);
   const bottomBar = 62;
@@ -45,34 +50,41 @@ export function makeStage(h: number, fieldCount: number): Stage {
   const handCardH = CARD_H * handScale;
   const bottomBarY = H - bottomBar;
   const handY = bottomBarY - handCardH - 12;
-  // The player's captured cards are the yaku in progress: keep them big enough to read.
-  const capScale = tall ? 0.58 : 0.5;
-  const playerCapY = handY - CARD_H * capScale - 18;
+  // Both captured lanes use the same card size: they are the yaku in progress, yours and the
+  // spirit's, and both need to be readable.
+  const capScale = tall ? 0.62 : 0.52;
+  const capH = CARD_H * capScale;
+  const playerCapY = handY - capH - 18;
   const trackerY = playerCapY - 30;
   const topBar = 78;
   const spiritCapY = topBar + 2;
-  const top = spiritCapY + 48;
-  const bottom = trackerY - 10;
+  // The spirit's lane, then its group counts underneath.
+  const top = spiritCapY + capH + 20;
+  const bottom = trackerY - 6;
   const avail = bottom - top;
-  // Four columns, so the opening deal of eight sits as two neat rows of four.
-  const cols = 4;
-  const fieldScale = tall ? 1.18 : 1.08;
-  const cardW = CARD_W * fieldScale;
-  const cardH = CARD_H * fieldScale;
-  const colStep = cardW + (tall ? 9 : 8);
+  // Always two rows. Past eight cards the field grows extra columns, which squeeze together and
+  // overlap (each card's month pip is on its left edge, so it stays readable).
+  const rows = 2;
+  const cols = Math.max(BASE_COLS, BASE_COLS + Math.ceil(Math.max(0, fieldCount - 8) / 2));
+  const cardW0 = CARD_W * (tall ? 1.18 : 1.08);
+  const cardH0 = CARD_H * (tall ? 1.18 : 1.08);
+  // Shrink the field only if two rows can't fit (they can at 360×640; this is a safety net).
+  const fit = Math.min(1, (avail - 6) / (cardH0 * 2));
+  const fieldScale = (tall ? 1.18 : 1.08) * fit;
+  const cardW = cardW0 * fit;
+  const cardH = cardH0 * fit;
   const pileX = 12;
-  // Centre the columns in the space right of the draw pile.
   const fieldLeft = pileX + cardW + 12;
   const fieldRight = STAGE_W - 8;
+  const natural = cardW + (tall ? 9 : 8);
+  const colStep = Math.min(natural, (fieldRight - fieldLeft - cardW) / (cols - 1));
+  // Centre the columns in the space right of the draw pile.
   const fieldX =
     fieldLeft + Math.max(0, (fieldRight - fieldLeft - (colStep * (cols - 1) + cardW)) / 2);
-  const rows = Math.max(2, Math.ceil(Math.max(fieldCount, 1) / cols));
-  const natural = cardH + 8;
-  const rowStep = Math.min(natural, rows > 1 ? (avail - cardH) / (rows - 1) : natural);
+  const rowStep = Math.min(cardH + 8, avail - cardH);
   const fieldH = rowStep * (rows - 1) + cardH;
   const fieldTop = top + Math.max(0, Math.min((avail - fieldH) * 0.4, 36));
-  const pileRows = Math.min(rows, 2);
-  const pileY = fieldTop + (rowStep * (pileRows - 1)) / 2;
+  const pileY = fieldTop + rowStep / 2;
   return {
     w: STAGE_W,
     h: H,
@@ -105,6 +117,10 @@ export interface Placement {
   readonly z: number;
   readonly faceUp: boolean;
   readonly interactive: boolean;
+  /** Sits on another card (inside the draw pile): no drop shadow, or the shadows stack up. */
+  readonly stacked?: boolean;
+  /** Follows the finger: no transition. */
+  readonly dragging?: boolean;
 }
 
 const MINI = 0.36;
@@ -112,31 +128,41 @@ const MINI = 0.36;
 /** Where the spirit keeps its hand, and where its captured lane stops. */
 export const SPIRIT_HAND_X = 336;
 
+/**
+ * Slots 0–7 are the opening 4×2 grid, row by row. Later slots fill extra columns top then bottom,
+ * so a card never jumps to a new row when the field grows.
+ */
+export function fieldSlotCell(slot: number): { col: number; row: number } {
+  if (slot < BASE_COLS * 2) return { col: slot % BASE_COLS, row: Math.floor(slot / BASE_COLS) };
+  const k = slot - BASE_COLS * 2;
+  return { col: BASE_COLS + Math.floor(k / 2), row: k % 2 };
+}
+
 function fieldSlotPos(st: Stage, slot: number): { x: number; y: number } {
-  const col = slot % st.cols;
-  const row = Math.floor(slot / st.cols);
+  const { col, row } = fieldSlotCell(slot);
   return { x: st.fieldX + col * st.colStep, y: st.fieldTop + row * st.rowStep };
 }
 
-export const SPIRIT_CAP_STARTS = [12, 64, 128, 196];
-
 const CAP_LEFT = 14;
 const CAP_RIGHT = STAGE_W - 12;
-const CAP_GAP = 10;
+/** The spirit's lane stops short of its hand stack. */
+const SPIRIT_CAP_RIGHT = SPIRIT_HAND_X - 10;
 
 /**
- * The player's captured groups (Brights, Animals, Ribbons, Chaff) sit side by side, each as wide
- * as its cards need. Cards in a group overlap by as little as the lane allows, so each card's
- * face stays readable; only a very full lane squeezes them.
+ * Captured groups (Brights, Animals, Ribbons, Chaff) sit side by side, each as wide as its cards
+ * need. Cards in a group overlap by as little as the lane allows, so each card's face stays
+ * readable; only a very full lane squeezes them. Both seats use the same layout and card size.
  */
-export function playerCapLayout(
+export function capLayout(
   st: Stage,
+  seat: Seat,
   counts: readonly number[],
 ): { starts: number[]; step: number } {
   const w = CARD_W * st.capScale;
+  const right = seat === 0 ? CAP_RIGHT : SPIRIT_CAP_RIGHT;
   const overlaps = counts.reduce((a, n) => a + Math.max(0, n - 1), 0);
   const fixed = 4 * w + 3 * CAP_GAP;
-  const room = CAP_RIGHT - CAP_LEFT - fixed;
+  const room = right - CAP_LEFT - fixed;
   const step = Math.min(w * 0.64, overlaps > 0 ? room / overlaps : w);
   const starts: number[] = [];
   let x = CAP_LEFT;
@@ -145,6 +171,11 @@ export function playerCapLayout(
     x += w + Math.max(0, n - 1) * step + CAP_GAP;
   }
   return { starts, step };
+}
+
+/** Top of a seat's captured lane. */
+export function capY(st: Stage, seat: Seat): number {
+  return seat === 0 ? st.playerCapY : st.spiritCapY;
 }
 
 export function capGroups(ids: readonly CardId[]): CardId[][] {
@@ -157,21 +188,22 @@ export function capGroups(ids: readonly CardId[]): CardId[][] {
 function capPos(st: Stage, v: Visual, seat: Seat, id: CardId): { x: number; y: number } {
   const groups = capGroups(v.cap[seat]);
   const g = typeGroup(id);
-  const inGroup = groups[g] as CardId[];
-  const idx = inGroup.indexOf(id);
-  if (seat === 0) {
-    const { starts, step } = playerCapLayout(
-      st,
-      groups.map((x) => x.length),
-    );
-    return { x: (starts[g] as number) + Math.max(0, idx) * step, y: st.playerCapY };
-  }
-  // The spirit's lane stays compact: its cards matter less than yours.
-  const steps = [7, 6, 6, inGroup.length > 12 ? 4 : 6];
-  return {
-    x: (SPIRIT_CAP_STARTS[g] as number) + Math.max(0, idx) * (steps[g] as number),
-    y: st.spiritCapY,
+  const idx = (groups[g] as CardId[]).indexOf(id);
+  const { starts, step } = capLayout(
+    st,
+    seat,
+    groups.map((x) => x.length),
+  );
+  return { x: (starts[g] as number) + Math.max(0, idx) * step, y: capY(st, seat) };
+}
+
+/** The player's hand, as shown: by month (January first), then Bright, Animal, Ribbon, Chaff. */
+export function sortHand(ids: readonly CardId[]): CardId[] {
+  const key = (id: CardId) => {
+    const c = CARDS[id];
+    return c ? c.month * 10 + TYPE_ORDER[c.type] : id;
   };
+  return ids.slice().sort((a, b) => key(a) - key(b) || a - b);
 }
 
 export function handPositions(n: number, st: Stage): { x: number; y: number; rot: number }[] {
@@ -192,6 +224,8 @@ export function handPositions(n: number, st: Stage): { x: number; y: number; rot
 export interface LayoutOptions {
   readonly lifted: CardId | null;
   readonly selectable: boolean;
+  /** A hand card being dragged: its top-left corner in stage coordinates. */
+  readonly drag?: { readonly id: CardId; readonly x: number; readonly y: number } | null;
 }
 
 export function placements(v: Visual, st: Stage, opts: LayoutOptions): Map<CardId, Placement> {
@@ -221,6 +255,7 @@ export function placements(v: Visual, st: Stage, opts: LayoutOptions): Map<CardI
       z: 10 + i,
       faceUp: false,
       interactive: false,
+      stacked: i > 0,
     });
   });
   // Spirit's hand: a small stack at the right of its lane (spread out if revealed).
@@ -228,7 +263,9 @@ export function placements(v: Visual, st: Stage, opts: LayoutOptions): Map<CardI
     const revealed = v.revealHand;
     out.set(id, {
       x: revealed ? 150 + i * 29 : SPIRIT_HAND_X + i * 2.2,
-      y: revealed ? st.spiritCapY + 44 : st.spiritCapY + 2 - i * 0.6,
+      y: revealed
+        ? st.spiritCapY + CARD_H * st.capScale + 4
+        : st.spiritCapY + (CARD_H * (st.capScale - MINI)) / 2 - i * 0.6,
       rot: revealed ? 0 : i % 2 ? 2 : -2,
       scale: revealed ? 0.46 : MINI,
       z: 200 + i,
@@ -236,11 +273,24 @@ export function placements(v: Visual, st: Stage, opts: LayoutOptions): Map<CardI
       interactive: false,
     });
   });
-  // Player's hand: a fan.
+  // Player's hand: a fan, sorted by month.
   const hp = handPositions(v.hand[0].length, st);
-  v.hand[0].forEach((id, i) => {
+  sortHand(v.hand[0]).forEach((id, i) => {
     const p = hp[i] as { x: number; y: number; rot: number };
     const lift = opts.lifted === id;
+    if (opts.drag?.id === id) {
+      out.set(id, {
+        x: opts.drag.x,
+        y: opts.drag.y,
+        rot: 0,
+        scale: st.handScale * 1.06,
+        z: 1000,
+        faceUp: true,
+        interactive: opts.selectable,
+        dragging: true,
+      });
+      return;
+    }
     out.set(id, {
       x: p.x,
       y: lift ? p.y - 26 : p.y,

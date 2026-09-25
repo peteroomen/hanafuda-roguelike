@@ -84,7 +84,7 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
   - The default animation speed is half as fast; the old pace is now "Fast".
   - Guided month 2 teaches Ribbons, Animals and Chaff together (it used to be Ribbons only,
     which averaged 4.1 hands).
-  - Your captured cards are larger and spaced so each card's face shows (`playerCapLayout` in
+  - Your captured cards are larger and spaced so each card's face shows (`capLayout` in
     `layout.ts`).
   - Shop details dismiss on a second tap or a tap outside, and the shop shows owned talismans.
   - The pixel-art restyle was scoped and declined (`docs/work/2026-09-24-pixel-art-restyle.md`).
@@ -92,4 +92,16 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
   back to full strength by month 7 (`monthEase`). They also slip, playing their second-best move
   30% of the time early and 5% late (`spiritSlip`, seeded so replays match). The smart bot now
   wins 53% at Clear Sky; omens step down to 14%.
+- **Play-test feedback (2026-09-25):** triaged into seven PRs in
+  `docs/work/2026-09-25-feedback-triage.md`, with the user's answers. Done: table fixes and drag
+  to play (PRs A and B, shipped together):
+  - Hand cards act on release, so they can be tapped (lift, then play) or dragged onto a match
+    or the field. `e2e/drag.spec.ts` covers it. `tapCard` in `e2e/autoplay.ts` sends a press and
+    a release.
+  - The field is always 2 rows. Past 8 cards it adds overlapping columns (`fieldSlotCell`).
+  - Both captured lanes use the same card size (`capLayout`). The hand is shown sorted
+    (`sortHand`; engine order is unchanged). Only the bottom pile card casts a shadow.
+  - A played card moves straight to its slot, match or choice spot (`animatePlay` in
+    `useGame.ts`). A re-deal gathers every card into the pile, then deals two at a time.
+  - Next up: PR C (shop), D (language), E (style pass), F (balance), G (decks and unlocks).
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

@@ -31,8 +31,11 @@ export async function setSettings(page: Page, settings: Record<string, unknown>)
 const T = { timeout: 4000 };
 const DEBUG = Boolean(process.env.TP_DEBUG);
 
+/** Hand cards act on release (so they can be dragged), so a tap is a press and a release. */
 async function tapCard(page: Page, id: number): Promise<void> {
-  await page.locator(`[data-testid="card-${id}"]`).dispatchEvent('pointerdown', undefined, T);
+  const card = page.locator(`[data-testid="card-${id}"]`);
+  await card.dispatchEvent('pointerdown', { pointerId: 1 }, T);
+  await card.dispatchEvent('pointerup', { pointerId: 1 }, T);
 }
 
 async function tap(page: Page, testId: string): Promise<void> {

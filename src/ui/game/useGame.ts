@@ -15,7 +15,14 @@ import type { Seat, YakuHit } from '@/engine/types';
 import * as sfx from '@/ui/audio/audio';
 import { haptics } from '@/ui/audio/haptics';
 import { getState, setState, speedFactor } from '@/ui/state/store';
-import { applyEvent, emptyVisual, reconcile, type Visual, visualFromHand } from './visual';
+import {
+  applyEvent,
+  dealOrder,
+  emptyVisual,
+  reconcile,
+  type Visual,
+  visualFromHand,
+} from './visual';
 
 export type BannerKind = 'yaku' | 'koikoi' | 'stop' | 'wilt' | 'hand' | 'info' | 'danger' | 'calm';
 
@@ -62,6 +69,11 @@ export function sleep(ms: number): Promise<void> {
   const f = speedFactor();
   if (f === 0 || ms <= 0) return new Promise((r) => requestAnimationFrame(() => r()));
   return new Promise((r) => setTimeout(r, ms * f));
+}
+
+/** Two frames: the browser has painted what was just set. */
+function nextFrame(): Promise<void> {
+  return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 }
 
 export interface GameApi {
@@ -179,7 +191,6 @@ export function useGame(): GameApi {
       const setVisual = (fn: (v: Visual) => Visual) => patch((v) => ({ visual: fn(v.visual) }));
       switch (e.t) {
         case 'deal': {
-          // All cards start in the pile, then fly out in a staggered deal.
           const target = visualFromHand(final);
           const start: Visual = {
             ...target,
@@ -189,12 +200,23 @@ export function useGame(): GameApi {
             cap: [[], []],
             slots: [],
             pile: final.deckIds.slice(),
+            options: [],
+            peeked: [],
           };
+          // A new hand in the same fight: first gather last hand's cards into the pile, and let
+          // that finish, so no card changes course mid-flight.
+          const onTable = Object.values(viewRef.current.visual.zone).some((z) => z.z !== 'pile');
           patch({ visual: start, delays: null });
-          await sleep(60);
-          const delays = new Map<CardId, number>();
-          const order = [...final.hands[0], ...final.field, ...final.hands[1]];
+          if (onTable) {
+            sfx.flipSound();
+            await sleep(460);
+          } else {
+            await nextFrame();
+          }
+          // Then deal two at a time, the way it's done at a table: you, the field, the spirit.
+          const order = dealOrder(final.hands[0], final.field, final.hands[1]);
           const step = speedFactor() === 0 ? 0 : 38 * speedFactor();
+          const delays = new Map<CardId, number>();
           order.forEach((id, i) => delays.set(id, i * step));
           patch({ visual: target, delays });
           sfx.flipSound();
@@ -341,14 +363,49 @@ export function useGame(): GameApi {
     [patch, banner, showTip],
   );
 
+  /** A card played from a hand, and where it lands, as one move. */
+  const animatePlay = useCallback(
+    async (play: HandEvent, land: HandEvent, run: RunState) => {
+      const final = run.fight?.hand;
+      if (!final || play.t !== 'play') return;
+      patch((v) => ({ visual: applyEvent(applyEvent(v.visual, play, final), land, final) }));
+      if (play.seat === 0) haptics.play();
+      if (land.t === 'choice') {
+        sfx.flipSound();
+        await sleep(260);
+        return;
+      }
+      sfx.slap(land.t === 'match' ? 1.1 : 0.8);
+      if (land.t === 'match' && play.seat === 0) haptics.capture();
+      await sleep(play.seat === 0 ? 320 : 420);
+    },
+    [patch],
+  );
+
   const animate = useCallback(
     async (events: readonly RunEvent[], run: RunState) => {
-      for (const re of events) {
+      for (let i = 0; i < events.length; i++) {
+        const re = events[i] as RunEvent;
         if (!mounted.current) return;
         switch (re.t) {
-          case 'hand':
-            await animateHandEvent(re.e, run);
+          case 'hand': {
+            // A played card goes straight to where it lands (a free slot, the card it matches, or
+            // the spot where you choose between two matches), not via the middle of the field.
+            const next = events[i + 1];
+            const e = re.e;
+            if (
+              e.t === 'play' &&
+              next?.t === 'hand' &&
+              (next.e.t === 'place' || next.e.t === 'match' || next.e.t === 'choice') &&
+              next.e.card === e.card
+            ) {
+              await animatePlay(e, next.e, run);
+              i += 1;
+              break;
+            }
+            await animateHandEvent(e, run);
             break;
+          }
           case 'fightStart': {
             patch({
               intro: true,
@@ -465,7 +522,7 @@ export function useGame(): GameApi {
         }
       }
     },
-    [animateHandEvent, patch, waitFor, banner, floater, showTip],
+    [animateHandEvent, animatePlay, patch, waitFor, banner, floater, showTip],
   );
 
   const scheduleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
