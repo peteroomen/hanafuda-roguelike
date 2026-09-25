@@ -208,21 +208,20 @@ function bestOf(ev: Evaluator, options: readonly CardId[]): CardId {
   return best;
 }
 
-export function choosePlay(s: HandState, ev: Evaluator): CardId {
-  let best = s.hands[ev.seat][0] as CardId;
-  let bestScore = -Infinity;
-  for (const card of s.hands[ev.seat]) {
-    const sc = scorePlay(s, ev, card);
-    if (sc > bestScore + 1e-9) {
-      bestScore = sc;
-      best = card;
-    }
-  }
-  return best;
+/** Best play, or with `slip` the second-best (a plausible mistake, never a random one). */
+export function choosePlay(s: HandState, ev: Evaluator, slip = false): CardId {
+  const ranked = s.hands[ev.seat]
+    .map((card, i) => ({ card, sc: scorePlay(s, ev, card), i }))
+    .sort((a, b) => b.sc - a.sc || a.i - b.i);
+  const pick = slip && ranked.length > 1 ? ranked[1] : ranked[0];
+  return (pick ?? ranked[0])?.card as CardId;
 }
 
-export function chooseMatch(s: HandState, ev: Evaluator): CardId {
-  return bestOf(ev, s.pending?.options ?? []);
+export function chooseMatch(s: HandState, ev: Evaluator, slip = false): CardId {
+  const options = s.pending?.options ?? [];
+  const best = bestOf(ev, options);
+  if (!slip || options.length < 2) return best;
+  return options.find((o) => o !== best) ?? best;
 }
 
 /** 0..1: how close the opponent looks to scoring. */
@@ -325,6 +324,8 @@ export function refreshIntent(s: HandState, seat: Seat, intent: Intent | null): 
 export interface SpiritTurnContext {
   readonly intent: YakuId | null;
   readonly decide?: DecideContext;
+  /** Make a plausible mistake this move (play or choose the second-best option). */
+  readonly slip?: boolean;
 }
 
 /** The AI's action for whatever the hand is waiting on. */
@@ -337,12 +338,12 @@ export function aiAction(
   switch (s.phase) {
     case 'play': {
       const ev = makeEvaluator(s, seat, persona, ctx.intent);
-      return { type: 'play', card: choosePlay(s, ev) };
+      return { type: 'play', card: choosePlay(s, ev, ctx.slip) };
     }
     case 'playChoice':
     case 'flipChoice': {
       const ev = makeEvaluator(s, seat, persona, ctx.intent);
-      return { type: 'choose', card: chooseMatch(s, ev) };
+      return { type: 'choose', card: chooseMatch(s, ev, ctx.slip) };
     }
     case 'flip':
       return { type: 'flip' };

@@ -88,4 +88,8 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
     `layout.ts`).
   - Shop details dismiss on a second tap or a tap outside, and the shop shows owned talismans.
   - The pixel-art restyle was scoped and declined (`docs/work/2026-09-24-pixel-art-restyle.md`).
+- **Early-year easing (2026-09-25):** spirits have 75% HP and ferocity in months 1–4, easing
+  back to full strength by month 7 (`monthEase`). They also slip, playing their second-best move
+  30% of the time early and 5% late (`spiritSlip`, seeded so replays match). The smart bot now
+  wins 53% at Clear Sky; omens step down to 14%.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.
