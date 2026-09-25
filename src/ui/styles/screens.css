@@ -823,3 +823,10 @@
   width: 34px;
   height: 56px;
 }
+.about a {
+  color: var(--ink);
+  text-decoration: underline;
+}
+.credits {
+  font-size: 12px;
+}

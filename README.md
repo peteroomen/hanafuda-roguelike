@@ -17,7 +17,8 @@ new year in.
 
 ## What's in it
 
-- The full 48-card hanafuda deck with original SVG art, and all 14 standard Koi-Koi yaku.
+- The full 48-card hanafuda deck (traditional faces, or the game's own drawn style) and all 14
+  standard Koi-Koi yaku.
 - 12 regular spirits and 8 bosses, each with its own persona, passive and rule-bending twist
   (Tengu steals a bright, Kitsune disguises cards, Yuki-onna freezes the field…).
 - 39 omamori across 9 archetypes, 9 ofuda, 7 enhancements and a poem for every yaku.
@@ -58,3 +59,12 @@ architecture.
 The build is a static site. On Vercel, import the repo and keep the detected Vite preset (build
 `pnpm build`, output `dist`). `vercel.json` stops the service worker and manifest from being
 cached, so updates reach players.
+
+## Credits
+
+The traditional card faces are adapted from the traditional-colour hanafuda set on
+[Wikimedia Commons](<https://commons.wikimedia.org/wiki/Category:SVG_Hanafuda_with_traditional_colors_(black_border)>),
+a recolouring of the hanafuda SVGs by Louiemantia, under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). They are resized and
+converted to WebP, and those files stay under the same licence (see
+`public/cards/traditional/LICENSE.md`).

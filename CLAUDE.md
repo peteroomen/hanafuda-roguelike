@@ -45,7 +45,10 @@ src/
   never hard-coded in engine logic.
 - Mobile first: portrait, one thumb, 44px minimum touch targets, and everything important
   visible at 360×640 without scrolling. Check at 390×844 and 360×640.
-- All art is original SVG drawn in code (`src/ui/art/`). Do not copy modern printed decks.
+- Art: the drawn card style is original SVG in `src/ui/art/`. The traditional card faces are
+  CC BY-SA 4.0 from Wikimedia Commons: keep the Settings → Credits text and
+  `public/cards/traditional/LICENSE.md` if they change. Spirit portraits are generated
+  paintings (`art-source/yokai/`). Do not copy modern printed decks.
 - No `console.log` in committed code (`console.warn`/`console.error` for real problems; the
   simulator CLI may print).
 - Conventional commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
