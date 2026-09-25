@@ -5,7 +5,8 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CardId } from '@/content/cards';
-import { spiritDef } from '@/content/spirits';
+import { type SpiritId, spiritDef } from '@/content/spirits';
+import { type Mood, SPEECH_MS, type VoiceMoment, voiceOf } from '@/content/voices';
 import { yakuDef, type YakuId } from '@/content/yaku';
 import type { Intent } from '@/engine/ai';
 import type { HandEvent } from '@/engine/hand';
@@ -61,6 +62,8 @@ export interface GameView {
   readonly yakuFlash: { seat: Seat; ids: readonly YakuId[] } | null;
   readonly tip: string | null;
   readonly calmed: boolean;
+  /** A line the spirit is saying right now, in its mood's speech bubble. */
+  readonly speech: { readonly id: number; readonly text: string; readonly mood: Mood } | null;
 }
 
 let uid = 1;
@@ -81,6 +84,8 @@ export interface GameApi {
   dispatch(action: RunAction): void;
   resolveWait(kind: WaitKind): void;
   dismissTip(): void;
+  /** The spirit says a line for this moment, if it has one. */
+  say(moment: VoiceMoment): void;
   canAct: boolean;
 }
 
@@ -119,6 +124,7 @@ export function useGame(): GameApi {
     yakuFlash: null,
     tip: null,
     calmed: false,
+    speech: null,
   }));
   const viewRef = useRef(view);
   viewRef.current = view;
@@ -161,6 +167,37 @@ export function useGame(): GameApi {
       const f: Floater = { id: uid++, text, kind, at };
       patch((v) => ({ floaters: [...v.floaters, f] }));
       setTimeout(() => patch((v) => ({ floaters: v.floaters.filter((x) => x.id !== f.id) })), 1400);
+    },
+    [patch],
+  );
+
+  const lastLine = useRef<string | null>(null);
+  const ruleSaid = useRef<string | null>(null);
+  const say = useCallback(
+    (moment: VoiceMoment, spirit?: SpiritId) => {
+      if (speedFactor() === 0) return;
+      const run = runRef.current;
+      const id = spirit ?? run.fight?.spiritId;
+      if (!id) return;
+      // Boss rules can fire every turn; say something about it once per hand.
+      if (moment === 'rule') {
+        const key = `${run.month}:${run.fight?.handNo ?? 0}`;
+        if (ruleSaid.current === key) return;
+        ruleSaid.current = key;
+      }
+      const voice = voiceOf(id);
+      const lines = voice.lines[moment];
+      if (!lines?.length) return;
+      // Don't repeat the line it just said.
+      const fresh = lines.length > 1 ? lines.filter((l) => l !== lastLine.current) : lines;
+      const text = fresh[Math.floor(Math.random() * fresh.length)] as string;
+      lastLine.current = text;
+      const speech = { id: uid++, text, mood: voice.mood };
+      patch({ speech });
+      setTimeout(
+        () => patch((v) => (v.speech?.id === speech.id ? { speech: null } : {})),
+        SPEECH_MS,
+      );
     },
     [patch],
   );
@@ -303,6 +340,7 @@ export function useGame(): GameApi {
               : `${spiritDef(f.spiritId).name} presses on`,
             e.seat,
           );
+          say(e.seat === 0 ? 'playerKoikoi' : 'koikoi');
           if (e.seat === 0) showTip('koikoiDone');
           break;
         case 'stop':
@@ -322,11 +360,13 @@ export function useGame(): GameApi {
         case 'steal':
           setVisual((v) => applyEvent(v, e, final));
           sfx.flipSound();
+          say('rule');
           await banner('danger', 'Snatched!', 900, 'The Tengu hides your Bright in the deck');
           break;
         case 'freeze':
           setVisual((v) => applyEvent(v, e, final));
           sfx.tock(2600, 0.3);
+          say('rule');
           await sleep(420);
           break;
         case 'thaw':
@@ -338,13 +378,16 @@ export function useGame(): GameApi {
           break;
         case 'reveal':
           setVisual((v) => applyEvent(v, e, final));
-          if (run.fight?.boss && spiritDef(f.spiritId).rule?.id === 'kitsune')
+          if (run.fight?.boss && spiritDef(f.spiritId).rule?.id === 'kitsune') {
+            say('rule');
             await banner('danger', 'Foxfire!', 700, 'It was an illusion');
+          }
           break;
         case 'quake':
           patch((v) => ({ shake: v.shake + 1 }));
           sfx.taiko(1.2);
           setVisual((v) => applyEvent(v, e, final));
+          say('rule');
           await banner('danger', 'Earthquake!', 900, 'The field is dealt again');
           break;
         case 'downpour':
@@ -360,7 +403,7 @@ export function useGame(): GameApi {
           break;
       }
     },
-    [patch, banner, showTip],
+    [patch, banner, showTip, say],
   );
 
   /** A card played from a hand, and where it lands, as one move. */
@@ -413,6 +456,7 @@ export function useGame(): GameApi {
               spiritHp: run.fight?.maxHp ?? 0,
               intent: null,
               visual: emptyVisual(),
+              speech: null,
             });
             sfx.startMusic(seasonOfMonth(run.month));
             await waitFor('intro');
@@ -460,6 +504,8 @@ export function useGame(): GameApi {
             sfx.strikeSound(true);
             haptics.strike();
             floater(`−${re.score.damage}`, 'dmg', 'spirit');
+            // It only complains if it's still standing; otherwise it says goodbye below.
+            if (re.score.damage < viewRef.current.spiritHp) say('hurt');
             await sleep(700);
             break;
           case 'spiritStop': {
@@ -474,12 +520,14 @@ export function useGame(): GameApi {
             sfx.hurtSound();
             haptics.hurt();
             floater(`−${re.hit.damage}`, 'hurt', 'player');
+            say('hit');
             await sleep(800);
             showTip('spiritScored');
             break;
           }
           case 'fightWon':
             patch({ calmed: true });
+            say('calmed', re.spirit);
             sfx.victorySound();
             await banner(
               'calm',
@@ -522,7 +570,7 @@ export function useGame(): GameApi {
         }
       }
     },
-    [animateHandEvent, animatePlay, patch, waitFor, banner, floater, showTip],
+    [animateHandEvent, animatePlay, patch, waitFor, banner, floater, showTip, say],
   );
 
   const scheduleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -648,13 +696,16 @@ export function useGame(): GameApi {
       intro: view.intro,
       scoring: Boolean(view.score || view.strike),
       run: view.shown,
+      say,
     };
-  }, [canAct, view.busy, view.intro, view.score, view.strike, view.shown]);
+  }, [canAct, view.busy, view.intro, view.score, view.strike, view.shown, say]);
   const dismissTip = useCallback(() => patch({ tip: null }), [patch]);
 
+  const sayNow = useCallback((moment: VoiceMoment) => say(moment), [say]);
+
   return useMemo(
-    () => ({ view, dispatch, resolveWait, dismissTip, canAct }),
-    [view, dispatch, resolveWait, dismissTip, canAct],
+    () => ({ view, dispatch, resolveWait, dismissTip, canAct, say: sayNow }),
+    [view, dispatch, resolveWait, dismissTip, canAct, sayNow],
   );
 }
 

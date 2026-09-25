@@ -105,7 +105,11 @@ export interface HandState {
 }
 
 export type HandAction =
-  | { readonly type: 'play'; readonly card: CardId }
+  /**
+   * Play a card from hand. `target` says which field card to take if two match, so a player who
+   * aimed at one (tapped or dragged onto it) isn't asked again. Ignored unless it's one of them.
+   */
+  | { readonly type: 'play'; readonly card: CardId; readonly target?: CardId }
   | { readonly type: 'choose'; readonly card: CardId }
   | { readonly type: 'flip' }
   | { readonly type: 'keepFlip' }
@@ -479,6 +483,7 @@ function resolveArrival(
   id: CardId,
   source: 'play' | 'flip',
   events: HandEvent[],
+  target?: CardId,
 ): boolean {
   const matches = fieldMatches(s, id);
   if (source === 'play' && s.boss.disguise?.victim === seat) {
@@ -491,6 +496,11 @@ function resolveArrival(
     s.field.push(id);
     events.push({ t: 'place', seat, card: id });
     maybeDisguise(s, id, events);
+    return false;
+  }
+  if (matches.length === 2 && target !== undefined && matches.includes(target)) {
+    events.push({ t: 'match', seat, card: id, with: [target] });
+    capture(s, seat, [id, target], events);
     return false;
   }
   if (matches.length === 2) {
@@ -612,7 +622,7 @@ export function step(state: HandState, action: HandAction): StepResult {
       const hand = s.hands[seat];
       hand.splice(hand.indexOf(action.card), 1);
       events.push({ t: 'play', seat, card: action.card });
-      if (!resolveArrival(s, seat, action.card, 'play', events)) toFlip(s, events);
+      if (!resolveArrival(s, seat, action.card, 'play', events, action.target)) toFlip(s, events);
       break;
     }
     case 'choose': {

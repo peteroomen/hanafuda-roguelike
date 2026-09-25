@@ -65,6 +65,29 @@ describe('capture rules (played card)', () => {
     expect(after.phase).toBe('flip');
   });
 
+  it('two matches with a target: takes that one without asking', () => {
+    const s = handWith({
+      hands: [[janChaffA], [febChaffA]],
+      field: [crane, janRibbon],
+      pile: [decChaff[0]],
+    });
+    const { state: after, events } = step(s, { type: 'play', card: janChaffA, target: janRibbon });
+    expect(after.phase).toBe('flip');
+    expect(sorted(after.captured[0])).toEqual(sorted([janChaffA, janRibbon]));
+    expect(after.field).toContain(crane);
+    expect(events.map((ev) => ev.t)).not.toContain('choice');
+  });
+
+  it('a target that is not a match is ignored', () => {
+    const s = handWith({
+      hands: [[janChaffA], [febChaffA]],
+      field: [crane, janRibbon, febChaffB],
+      pile: [decChaff[0]],
+    });
+    const mid = step(s, { type: 'play', card: janChaffA, target: febChaffB }).state;
+    expect(mid.phase).toBe('playChoice');
+  });
+
   it('three matches: all four are taken', () => {
     const s = handWith({
       hands: [[janChaffA], [febChaffA]],

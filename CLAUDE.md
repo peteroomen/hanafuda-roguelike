@@ -112,6 +112,11 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
     "Mult" are capitalised. `src/ui/game/language.test.ts` enforces the yaku rule.
   - Sound pauses while the tab is hidden (`onVisibilityChange` in `audio.ts`, covered by
     `e2e/audio.spec.ts`).
-  - Next up: PR E (style pass), F (balance), G (decks and unlocks). For the later
+  - Style (PR E): the woodblock look. Flat fills, a 2px ink edge and a hard printed shadow
+    (`--line`, `--edge`, `--print`, `--sumi` in `global.css`); no blurred shadows or glows.
+    Gradients only for the bokashi skies (`--season-sky`) and card effects. Stop/koi-koi is a
+    compact bottom panel with a hold-to-peek button. Spirits speak in mood-shaped speech
+    bubbles (`Fukidashi.tsx`, lines in `src/content/voices.ts`, `say()` in `useGame.ts`).
+  - Next up: PR F (balance), G (decks and unlocks). For the later
     design pass: persistent things (HP, mon, charms) should have one fixed home on every screen.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

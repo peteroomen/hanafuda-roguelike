@@ -340,12 +340,21 @@ export function placements(v: Visual, st: Stage, opts: LayoutOptions): Map<CardI
     switch (zone.z) {
       case 'held': {
         if (zone.choosing) {
-          // Waiting for a choice: park it over the draw pile, clear of every field card.
+          // Waiting for a choice between two matches: it waits near where it came from, clear of
+          // the field, then flies straight to the one chosen. A drawn card waits by the pile; a
+          // played one just above your hand, or beside the spirit's hand.
+          const s = st.fieldScale * (zone.from === 'hand' && zone.seat === 1 ? 0.8 : 1.06);
+          const w = CARD_W * s;
+          const pos =
+            zone.from !== 'hand'
+              ? { x: st.pileX + 2, y: st.pileY - 14 }
+              : zone.seat === 0
+                ? { x: (STAGE_W - w) / 2, y: st.handY - CARD_H * s * 0.55 }
+                : { x: SPIRIT_HAND_X - w - 8, y: st.spiritCapY + 2 };
           out.set(id, {
-            x: st.pileX + 2,
-            y: st.pileY - 14,
+            ...pos,
             rot: -3,
-            scale: st.fieldScale * 1.06,
+            scale: s,
             z: 950 + (moved(id) % 20),
             faceUp: true,
             interactive: false,

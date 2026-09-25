@@ -4,12 +4,15 @@ import { deckDef } from '@/content/decks';
 import { ofudaDef } from '@/content/ofuda';
 import { apparentMatches, canUseTalisman } from '@/engine/hand';
 import { type FightState, type RunState, waitingOn } from '@/engine/run';
-import { setState, useStore } from '@/ui/state/store';
+import { setState, speedFactor, useStore } from '@/ui/state/store';
+import { IDLE_TAUNT_MS } from '@/content/voices';
+import { yakuDef, type YakuId } from '@/content/yaku';
 import * as sfx from '@/ui/audio/audio';
 import { haptics } from '@/ui/audio/haptics';
 import { CardLayer, type CardMarks } from './CardLayer';
 import { DecisionSheet, FrogSheet, HandOverPanel, Hint } from './Decision';
-import { BottomBar, CapturedCounts, SpiritBar, Tracker } from './Hud';
+import { Fukidashi } from './Fukidashi';
+import { BottomBar, CapturedCounts, type OnYaku, SpiritBar, Tracker } from './Hud';
 import { IntroOverlay } from './Intro';
 import { CARD_H, CARD_W, makeStage, type Placement, placements, STAGE_W } from './layout';
 import { BannerView, Floaters, GuideBubble } from './Overlays';
@@ -56,7 +59,6 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
     | null
   >(null);
   const [targeting, setTargeting] = useState<Targeting>(null);
-  const intendedTarget = useRef<CardId | null>(null);
   const [drag, setDrag] = useState<{ id: CardId; x: number; y: number } | null>(null);
   const press = useRef<Press | null>(null);
   /** Removes the window listeners of the press in progress. */
@@ -83,20 +85,14 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
   }, [playing]);
   useEffect(() => () => endPress.current?.(), []);
 
-  // If the player aimed at a specific field card and a choice came up, take it.
+  // An impatient spirit pipes up if your turn sits too long. Once per turn.
+  const turnKey = `${fight.handNo}:${hand.turn}`;
+  const say = api.say;
   useEffect(() => {
-    if (
-      choosing &&
-      intendedTarget.current !== null &&
-      hand.pending?.options.includes(intendedTarget.current)
-    ) {
-      const target = intendedTarget.current;
-      intendedTarget.current = null;
-      dispatch({ type: 'hand', action: { type: 'choose', card: target } });
-    } else if (!choosing) {
-      intendedTarget.current = null;
-    }
-  }, [choosing, hand.pending, dispatch]);
+    if (!playing || speedFactor() === 0) return;
+    const t = setTimeout(() => say('idle'), IDLE_TAUNT_MS);
+    return () => clearTimeout(t);
+  }, [playing, turnKey, say]);
 
   const matches = useMemo(() => {
     if (lifted === null) return new Set<CardId>();
@@ -122,12 +118,17 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
     [view.visual, stage, lifted, myTurn, drag],
   );
 
-  /** Play a hand card, aiming at `target` if the engine then asks which match to take. */
+  /**
+   * Play a hand card. When you aimed at a match (tapped or dropped onto it), the engine takes that
+   * one straight away, so the card flies right to it instead of stopping to ask.
+   */
   const playCard = useCallback(
     (card: CardId, target: CardId | null) => {
-      intendedTarget.current = target;
       setLifted(null);
-      dispatch({ type: 'hand', action: { type: 'play', card } });
+      dispatch({
+        type: 'hand',
+        action: target === null ? { type: 'play', card } : { type: 'play', card, target },
+      });
     },
     [dispatch],
   );
@@ -152,6 +153,26 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
     const k = rect.width / STAGE_W;
     return { x: (clientX - rect.left) / k, y: (clientY - rect.top) / k };
   }, []);
+
+  // A yaku's meaning, shown when you tap its Japanese name (yours on the tracker, or the spirit's
+  // intent). Another tap on it, a tap elsewhere, or a few seconds, and it goes away.
+  const [gloss, setGloss] = useState<{ id: YakuId; x: number; y: number; below: boolean } | null>(
+    null,
+  );
+  const showGloss: OnYaku = useCallback(
+    (id, el) => {
+      const r = el.getBoundingClientRect();
+      const below = r.top < window.innerHeight / 2;
+      const at = toStage(r.left + r.width / 2, below ? r.bottom : r.top);
+      setGloss((g) => (g?.id === id ? null : { id, x: at.x, y: at.y, below }));
+    },
+    [toStage],
+  );
+  useEffect(() => {
+    if (!gloss) return;
+    const t = setTimeout(() => setGloss(null), 5000);
+    return () => clearTimeout(t);
+  }, [gloss]);
 
   // Everything the window listeners need, always current.
   const live = useRef({ placed, hand, stage, tapHandCard, playCard });
@@ -322,7 +343,10 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
       ref={fightRef}
       className={`fight ${view.shake ? 'shaking' : ''}`}
       style={{ height: stageH }}
-      onPointerDown={() => sfx.unlockAudio()}
+      onPointerDown={(e) => {
+        sfx.unlockAudio();
+        if (!(e.target as HTMLElement).closest('[data-gloss]')) setGloss(null);
+      }}
     >
       <div
         className="fight-inner"
@@ -351,6 +375,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
           onMenu={() => setSheet({ kind: 'menu' })}
           calmed={view.calmed}
           shaking={view.shake}
+          onYaku={showGloss}
         />
         <div
           className="pile-count"
@@ -360,7 +385,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
         </div>
         <CapturedCounts visual={view.visual} stage={stage} />
         <div style={{ position: 'absolute', left: 10, right: 10, top: stage.trackerY }}>
-          <Tracker hand={hand} onOpen={() => setSheet({ kind: 'book' })} />
+          <Tracker hand={hand} onOpen={() => setSheet({ kind: 'book' })} onYaku={showGloss} />
         </div>
         <CardLayer
           visual={view.visual}
@@ -387,6 +412,33 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
         )}
         {view.hurt > 0 && <div className="hurt-flash" key={`hurt-${view.hurt}`} />}
       </div>
+
+      {view.speech && (
+        <div
+          className="speech"
+          key={view.speech.id}
+          style={{ top: stage.topBar - 4 }}
+          data-testid="speech"
+        >
+          <Fukidashi mood={view.speech.mood} text={view.speech.text} tail="up" />
+        </div>
+      )}
+
+      {gloss && (
+        <div
+          className={`gloss-tip ${gloss.below ? 'below' : 'above'}`}
+          style={{ left: Math.min(STAGE_W - 104, Math.max(104, gloss.x)), top: gloss.y }}
+          data-testid="gloss"
+        >
+          <div className="gloss-name">
+            <b>{yakuDef(gloss.id).name}</b> · {yakuDef(gloss.id).gloss}
+          </div>
+          <div className="gloss-req">
+            {yakuDef(gloss.id).requirement} · {yakuDef(gloss.id).points} pt
+            {yakuDef(gloss.id).points === 1 ? '' : 's'}
+          </div>
+        </div>
+      )}
 
       <BannerView banner={view.banner} />
       <Floaters floaters={view.floaters} stageH={stageH} />

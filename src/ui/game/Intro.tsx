@@ -2,6 +2,8 @@ import { monthDef, seasonOf } from '@/content/cards';
 import { spiritDef } from '@/content/spirits';
 import type { FightState, RunState } from '@/engine/run';
 import { spiritUrl } from '@/ui/art/images';
+import { voiceOf } from '@/content/voices';
+import { Fukidashi } from './Fukidashi';
 
 export function IntroOverlay({
   run,
@@ -31,11 +33,14 @@ export function IntroOverlay({
         </span>
         <span className="intro-season">{seasonOf(run.month)}</span>
       </div>
-      <img
-        className={`intro-face ${s.boss ? 'boss' : ''}`}
-        src={spiritUrl(s.id, seasonOf(run.month), s.boss, 'full')}
-        alt={s.name}
-      />
+      <div className="intro-hero">
+        <img
+          className={`intro-face ${s.boss ? 'boss' : ''}`}
+          src={spiritUrl(s.id, seasonOf(run.month), s.boss, 'full')}
+          alt={s.name}
+        />
+        <Fukidashi mood={voiceOf(s.id).mood} text={s.taunt} className="intro-bubble" />
+      </div>
       <div className="intro-kanji display">{s.kanji}</div>
       <div className="intro-name display">{s.name}</div>
       <div className="intro-epithet">{s.epithet}</div>
@@ -56,7 +61,6 @@ export function IntroOverlay({
       )}
       {s.passive && <div className="intro-passive">{s.passive.text}</div>}
       {stageText && <div className="intro-stage">{stageText}</div>}
-      <div className="intro-taunt">“{s.taunt}”</div>
       <button className="btn red intro-begin" onClick={onBegin} data-testid="btn-begin">
         Begin
       </button>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { spiritDef } from '@/content/spirits';
 import { yakuDef } from '@/content/yaku';
 import { currentYaku } from '@/engine/hand';
@@ -15,10 +16,10 @@ export function DecisionSheet({
   onStop: () => void;
   onKoikoi: () => void;
 }) {
+  const [peek, setPeek] = useState(false);
   const f = run.fight as FightState;
   const h = f.hand;
-  const hits = currentYaku(h, 0);
-  const points = totalPoints(hits);
+  const points = totalPoints(currentYaku(h, 0));
   const preview = previewPlayerStop(run);
   const dmg = preview?.damage ?? 0;
   const kills = dmg >= f.hp;
@@ -40,51 +41,50 @@ export function DecisionSheet({
   const nextStake = stakeMultiplier(h.rules, h.koikoi[0] + h.rules.koiKoiCallWeight);
   const cardsLeft = h.hands[0].length;
   return (
-    <div className="decision-scrim fade-in" data-testid="decision">
-      <div className="decision paper pop-in">
-        <div className="decision-yaku">
-          {hits.map((y) => (
-            <span key={y.id} className="yaku-pill">
-              <span className="kanji">{yakuDef(y.id).kanji}</span>
-              {yakuDef(y.id).name} <b>{y.points}</b>
-            </span>
-          ))}
+    // No scrim: the field, both captured lanes and the tracker stay in view. The panel covers only
+    // your hand and the bottom bar. Holding the peek button slides it down (leaving its top row)
+    // so you can see your hand; letting go brings it back.
+    <div className={`decide-panel ${peek ? 'peeking' : ''}`} data-testid="decision">
+      <div className="decide-top">
+        {/* The yaku themselves are on the tracker, just above the panel. */}
+        <div className="decide-q">
+          <b>{points}</b> point{points === 1 ? '' : 's'}. Stop, or koi-koi?
         </div>
-        <div className="decision-cols">
-          <div className="decision-col">
-            <div className="decision-head">Stop</div>
-            <div className="decision-big display">{dmg.toLocaleString('en-US')}</div>
-            <div className="decision-note">
-              {kills ? (
-                <b className="good">Finishes the {spirit.name}</b>
-              ) : (
-                <>
-                  damage · leaves <b>{Math.max(0, f.hp - dmg).toLocaleString('en-US')}</b> HP
-                </>
-              )}
-            </div>
-          </div>
-          <div className="decision-col koikoi">
-            <div className="decision-head">Koi-koi</div>
-            <div className="decision-big display">×{nextStake}</div>
-            <div className="decision-note">
-              your next stop · but if the spirit scores first: <b className="bad">~{risk.damage}</b>{' '}
-              to you
-            </div>
-          </div>
-        </div>
-        <div className="decision-meta">
-          {points} point{points === 1 ? '' : 's'} · {cardsLeft} card{cardsLeft === 1 ? '' : 's'}{' '}
-          left in your hand
-        </div>
-        <div className="decision-buttons">
-          <button className="btn gold" onClick={onStop} data-testid="btn-stop">
-            Stop
-          </button>
-          <button className="btn red" onClick={onKoikoi} data-testid="btn-koikoi">
-            Koi-koi!
-          </button>
-        </div>
+        <button
+          className="peek-btn"
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture(e.pointerId);
+            setPeek(true);
+          }}
+          onPointerUp={() => setPeek(false)}
+          onPointerCancel={() => setPeek(false)}
+          onLostPointerCapture={() => setPeek(false)}
+          onContextMenu={(e) => e.preventDefault()}
+          data-testid="btn-peek"
+        >
+          <span className="peek-eye" aria-hidden />
+          {peek ? 'Let go' : 'Hold: hand'}
+        </button>
+      </div>
+      <div className="decision-buttons">
+        <button className="decide-btn stop" onClick={onStop} data-testid="btn-stop">
+          <span className="decide-label">Stop</span>
+          <span className="decide-big display">{dmg.toLocaleString('en-US')}</span>
+          <span className="decide-note">
+            {kills ? (
+              <>finishes the {spirit.name}</>
+            ) : (
+              <>damage · leaves {Math.max(0, f.hp - dmg).toLocaleString('en-US')} HP</>
+            )}
+          </span>
+        </button>
+        <button className="decide-btn koikoi" onClick={onKoikoi} data-testid="btn-koikoi">
+          <span className="decide-label">Koi-koi!</span>
+          <span className="decide-big display">×{nextStake}</span>
+          <span className="decide-note">
+            {cardsLeft} card{cardsLeft === 1 ? '' : 's'} left · risk ~{risk.damage} HP
+          </span>
+        </button>
       </div>
     </div>
   );
