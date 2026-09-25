@@ -386,7 +386,11 @@ export function spiritStats(
     if (run.month === 2) hp = BALANCE.guided.month2Hp;
     if (run.month === 3) hp *= BALANCE.guided.month3HpMult;
   }
-  return { hp: Math.round(hp / 5) * 5, ferocity: Math.round(ferocity * 100) / 100 };
+  const ease = BALANCE.monthEase[i] ?? 1;
+  return {
+    hp: Math.round((hp * ease) / 5) * 5,
+    ferocity: Math.round(ferocity * ease * 100) / 100,
+  };
 }
 
 function dealHand(run: RunState, fight: FightState, events: RunEvent[]): void {
@@ -796,9 +800,15 @@ function spiritAct(run: RunState, events: RunEvent[]): void {
     const points = totalPoints(currentYaku(h, 1));
     decide = { stopDamage: previewSpiritHit(run, points).damage, targetHp: run.hp };
   }
+  // A seeded roll per spirit move, so slips replay exactly from a save.
+  const moveNo = h.captured[0].length + h.captured[1].length + h.hands[1].length * 100;
+  const roll = new Rng(
+    deriveSeed(run.seed, `slip:${run.month}:${f.handNo}:${h.phase}:${moveNo}`),
+  ).next();
   const action = aiAction(h, 1, spirit.persona, {
     intent: f.intent?.id ?? null,
     ...(decide ? { decide } : {}),
+    slip: roll < (BALANCE.spiritSlip[run.month - 1] ?? 0),
   });
   applyHandAction(run, action, events);
 }

@@ -80,7 +80,7 @@ export function runSuite(runs: number): string {
   md.push('## Targets and verdict');
   md.push('');
   md.push(
-    '- **Winnable:** a strong player (the smart bot) should clear the year about 45% of the time at Clear Sky. A player who never calls koi-koi should win less; a player who taps at random should never win.',
+    '- **Winnable:** a strong player (the smart bot) should clear the year a little over half the time at Clear Sky, so that human players, who play less precisely, land nearer 30–45%. Spirits are eased in months 1–6 (`monthEase`) and sometimes play their second-best move (`spiritSlip`). A player who never calls koi-koi should win less; a player who taps at random should never win.',
   );
   md.push(
     '- **Varied:** every archetype and every seasonal deck should be viable, within about 15 points of the best.',
