@@ -71,7 +71,7 @@ describe('new run', () => {
   it('spirit HP grows through the year and bosses are tougher', () => {
     const at = (month: number, id: string) =>
       spiritStats(
-        { month: month as 1, omen: 0, guided: false },
+        { month: month as 1, omen: 0, guided: false, deckId: 'pine' },
         SPIRITS.find((s) => s.id === id) as (typeof SPIRITS)[number],
       );
     expect(at(12, 'kamaitachi').hp).toBeGreaterThan(at(1, 'kodama').hp * 5);

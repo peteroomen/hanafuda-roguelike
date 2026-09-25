@@ -22,6 +22,8 @@ function met(c: UnlockCondition, p: Profile, run: RunState | null): boolean {
       return (run?.stats.maxKoikoiInHand ?? 0) >= c.calls || p.koikoiCalls >= 999;
     case 'winRun':
       return p.runsWon > 0;
+    case 'stopDamage':
+      return p.biggestHit >= c.damage;
   }
 }
 

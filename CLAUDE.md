@@ -129,6 +129,9 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
   - Queued in the triage doc: HP visible while deciding stop or koi-koi (for the design pass).
   - The build type-checks `e2e/` too: a broken scratch spec fails `pnpm build`, so don't hide
     its output when building for e2e.
-  - Next up: PR G (decks and unlocks). For the later
-    design pass: persistent things (HP, mon, charms) should have one fixed home on every screen.
+  - Next up: PR G (decks, charm unlocks, record book): plan in
+    `docs/work/2026-09-25-decks-and-unlocks.md`, awaiting confirmation. The Firework Deck
+    (×2 yaku Mult, +50% spirit HP, deck modifiers `yakuMult` and `spiritHp`) is prototyped.
+  - What comes after (the design pass, including HP visible while deciding, and the mechanics
+    to model) lives in `docs/roadmap.md`.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

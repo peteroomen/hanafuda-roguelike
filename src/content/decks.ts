@@ -7,7 +7,8 @@ import type { OmamoriId } from './omamori';
 import type { EnhancementId } from '@/engine/types';
 import type { YakuFamily } from './yaku';
 
-export type DeckId = 'pine' | 'plum' | 'moon' | 'willow' | 'maple' | 'paulownia' | 'gambler';
+export type DeckId =
+  'pine' | 'plum' | 'moon' | 'willow' | 'maple' | 'paulownia' | 'gambler' | 'firework';
 
 export type UnlockCondition =
   | { readonly kind: 'always' }
@@ -15,7 +16,9 @@ export type UnlockCondition =
   | { readonly kind: 'defeatBoss' }
   | { readonly kind: 'scoreFamily'; readonly family: YakuFamily }
   | { readonly kind: 'koikoiInHand'; readonly calls: number }
-  | { readonly kind: 'winRun' };
+  | { readonly kind: 'winRun' }
+  /** Deal this much damage in a single stop. */
+  | { readonly kind: 'stopDamage'; readonly damage: number };
 
 export interface DeckDef {
   readonly id: DeckId;
@@ -43,6 +46,10 @@ export interface DeckDef {
     readonly stakeFactor?: number;
     /** Overrides the spirit's koi-koi punishment multiplier. */
     readonly punish?: number;
+    /** Multiplies the Mult every yaku gives when it scores. */
+    readonly yakuMult?: number;
+    /** Multiplies every spirit's HP. */
+    readonly spiritHp?: number;
   };
   /** Accent hue for the deck's card back. */
   readonly hue: number;
@@ -127,6 +134,17 @@ export const DECKS: readonly DeckDef[] = [
     start: { poemLevels: 3 },
     modifiers: { poemPrice: 2 },
     hue: 270,
+  },
+  {
+    id: 'firework',
+    name: 'Firework Deck',
+    kanji: '花火',
+    text: 'Every yaku gives ×2 Mult, but spirits have 50% more HP. Start with Carp Streamer.',
+    unlock: { kind: 'stopDamage', damage: 1000 },
+    unlockText: 'Deal 1,000 damage in one stop.',
+    start: { omamori: ['carpStreamer'] },
+    modifiers: { yakuMult: 2, spiritHp: 1.5 },
+    hue: 20,
   },
 ];
 

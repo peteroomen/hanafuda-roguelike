@@ -369,13 +369,17 @@ function bossHooks(spirit: SpiritDef): HandBossRules {
 }
 
 export function spiritStats(
-  run: Pick<RunState, 'month' | 'omen' | 'guided'>,
+  run: Pick<RunState, 'month' | 'omen' | 'guided' | 'deckId'>,
   spirit: SpiritDef,
 ): { hp: number; ferocity: number } {
   const oe = omenEffects(run.omen);
   const i = run.month - 1;
   let hp =
-    (BALANCE.monthHp[i] ?? 1000) * spirit.hp * (spirit.boss ? BALANCE.bossHp : 1) * oe.hpMult;
+    (BALANCE.monthHp[i] ?? 1000) *
+    spirit.hp *
+    (spirit.boss ? BALANCE.bossHp : 1) *
+    oe.hpMult *
+    (deckDef(run.deckId).modifiers?.spiritHp ?? 1);
   const ferocity =
     (BALANCE.monthFerocity[i] ?? 3) *
     spirit.ferocity *
@@ -508,6 +512,9 @@ export function playerStopInput(run: RunState, hits: readonly YakuHit[]): StopIn
     lightningIsBright: h.yakuMods[0].lightningIsBright,
     ...(deckDef(run.deckId).modifiers?.stakeFactor
       ? { stakeFactor: deckDef(run.deckId).modifiers?.stakeFactor as number }
+      : {}),
+    ...(deckDef(run.deckId).modifiers?.yakuMult
+      ? { yakuMult: deckDef(run.deckId).modifiers?.yakuMult as number }
       : {}),
   };
 }
