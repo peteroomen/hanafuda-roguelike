@@ -10,7 +10,7 @@ import { detectYaku, yakuProgress } from '@/engine/yaku';
 import { spiritUrl } from '@/ui/art/images';
 import { CoinIcon, OfudaIcon, OmamoriIcon, PetalIcon } from '@/ui/art/Icons';
 import { seasonOf } from '@/content/cards';
-import { CARD_H, playerCapLayout, SPIRIT_CAP_STARTS, SPIRIT_HAND_X, type Stage } from './layout';
+import { CARD_H, capLayout, capY, SPIRIT_HAND_X, type Stage } from './layout';
 import { shortFlower } from './labels';
 import { typeGroup, type Visual } from './visual';
 
@@ -127,17 +127,19 @@ export function CapturedCounts({ visual, stage }: { visual: Visual; stage: Stage
     return c;
   };
   const tones = ['#f2c740', '#7fbf5a', '#ef5b3a', '#b99a6a'];
-  const player = playerCapLayout(stage, counts(0));
+  const capH = CARD_H * stage.capScale;
   return (
     <>
-      <div className="hand-count" style={{ left: SPIRIT_HAND_X + 18, top: stage.spiritCapY + 22 }}>
+      <div
+        className="hand-count"
+        style={{ left: SPIRIT_HAND_X + 18, top: stage.spiritCapY + capH / 2 + 6 }}
+      >
         {visual.hand[1].length}
       </div>
       {([1, 0] as const).map((seat) => {
         const c = counts(seat);
-        const y =
-          seat === 0 ? stage.playerCapY + CARD_H * stage.capScale + 1 : stage.spiritCapY + 34;
-        const starts = seat === 0 ? player.starts : SPIRIT_CAP_STARTS;
+        const y = capY(stage, seat) + capH + 1;
+        const { starts } = capLayout(stage, seat, c);
         return c.map((n, g) =>
           n > 0 ? (
             <div
@@ -171,7 +173,9 @@ export function Tracker({ hand, onOpen }: { hand: HandState; onOpen: () => void 
   return (
     <button className="tracker" onClick={onOpen} data-testid="tracker">
       {empty && (
-        <span className="tracker-empty">Capture cards to start a yaku · tap for the yaku book</span>
+        <span className="tracker-empty" aria-label="Yaku book">
+          役
+        </span>
       )}
       {formed.map((h) => (
         <span key={h.id} className="chip formed">

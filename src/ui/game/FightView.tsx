@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type CardId, seasonOf } from '@/content/cards';
 import { deckDef } from '@/content/decks';
 import { ofudaDef } from '@/content/ofuda';
@@ -11,12 +11,31 @@ import { CardLayer, type CardMarks } from './CardLayer';
 import { DecisionSheet, FrogSheet, HandOverPanel, Hint } from './Decision';
 import { BottomBar, CapturedCounts, SpiritBar, Tracker } from './Hud';
 import { IntroOverlay } from './Intro';
-import { CARD_H, makeStage, placements } from './layout';
+import { CARD_H, CARD_W, makeStage, type Placement, placements, STAGE_W } from './layout';
 import { BannerView, Floaters, GuideBubble } from './Overlays';
 import { ScoreSequence, StrikeSequence } from './Sequences';
 import { CharmSheet, MenuSheet, OfudaSheet, SpiritSheet } from './Sheets';
 import type { GameApi } from './useGame';
 import { YakuBook } from './YakuBook';
+
+/** A finger (or mouse) held down on a hand card: a tap, or a drag once it moves far enough. */
+interface Press {
+  readonly id: CardId;
+  readonly pointerId: number;
+  readonly startX: number;
+  readonly startY: number;
+  /** Where on the card the finger is, so the card doesn't jump to be centred on it. */
+  readonly offX: number;
+  readonly offY: number;
+  moved: boolean;
+}
+
+/** Past this many stage pixels, a press is a drag. */
+const DRAG_START = 8;
+
+function contains(p: Placement, x: number, y: number): boolean {
+  return x >= p.x && x <= p.x + CARD_W * p.scale && y >= p.y && y <= p.y + CARD_H * p.scale;
+}
 
 type Targeting =
   { kind: 'swap'; slot: number; handCard: CardId | null } | { kind: 'gild'; slot: number } | null;
@@ -38,6 +57,11 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
   >(null);
   const [targeting, setTargeting] = useState<Targeting>(null);
   const intendedTarget = useRef<CardId | null>(null);
+  const [drag, setDrag] = useState<{ id: CardId; x: number; y: number } | null>(null);
+  const press = useRef<Press | null>(null);
+  /** Removes the window listeners of the press in progress. */
+  const endPress = useRef<(() => void) | null>(null);
+  const fightRef = useRef<HTMLDivElement>(null);
 
   const stage = useMemo(
     () => makeStage(stageH, view.visual.slots.length),
@@ -49,10 +73,15 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
   // Hints sit just above the field (over the spirit's captured lane) so they never cover a card.
   const hintTop = Math.max(84, stage.fieldTop - 42);
 
-  // Clear a stale lift when the turn moves on.
+  // Clear a stale lift or drag when the turn moves on.
   useEffect(() => {
-    if (!playing) setLifted(null);
+    if (!playing) {
+      setLifted(null);
+      setDrag(null);
+      endPress.current?.();
+    }
   }, [playing]);
+  useEffect(() => () => endPress.current?.(), []);
 
   // If the player aimed at a specific field card and a choice came up, take it.
   useEffect(() => {
@@ -75,7 +104,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
   }, [lifted, hand]);
 
   const playable = useMemo(() => {
-    if (!settings.trainingWheels || !playing) return new Set<CardId>();
+    if (settings.trainingWheels === 'off' || !playing) return new Set<CardId>();
     return new Set(hand.hands[0].filter((c) => apparentMatches(hand, c, 0).length > 0));
   }, [settings.trainingWheels, playing, hand]);
 
@@ -84,17 +113,128 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
     wanted: new Set(view.intent && !isHidden(fight) ? view.intent.wanted : []),
     playable,
     enhancements: run.enhancements,
-    trainingWheels: settings.trainingWheels,
+    monthLabels: settings.trainingWheels === 'full',
     deckHue: deckDef(run.deckId).hue,
   };
 
   const placed = useMemo(
-    () => placements(view.visual, stage, { lifted, selectable: myTurn }),
-    [view.visual, stage, lifted, myTurn],
+    () => placements(view.visual, stage, { lifted, selectable: myTurn, drag }),
+    [view.visual, stage, lifted, myTurn, drag],
   );
 
-  const onTap = useCallback(
+  /** Play a hand card, aiming at `target` if the engine then asks which match to take. */
+  const playCard = useCallback(
+    (card: CardId, target: CardId | null) => {
+      intendedTarget.current = target;
+      setLifted(null);
+      dispatch({ type: 'hand', action: { type: 'play', card } });
+    },
+    [dispatch],
+  );
+
+  /** A tap on a hand card: the first lifts it, the second plays it. */
+  const tapHandCard = useCallback(
     (id: CardId) => {
+      if (lifted === id) {
+        playCard(id, null);
+      } else {
+        haptics.tap();
+        sfx.uiTap();
+        setLifted(id);
+      }
+    },
+    [lifted, playCard],
+  );
+
+  const toStage = useCallback((clientX: number, clientY: number) => {
+    const rect = fightRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0) return { x: clientX, y: clientY };
+    const k = rect.width / STAGE_W;
+    return { x: (clientX - rect.left) / k, y: (clientY - rect.top) / k };
+  }, []);
+
+  // Everything the window listeners need, always current.
+  const live = useRef({ placed, hand, stage, tapHandCard, playCard });
+  live.current = { placed, hand, stage, tapHandCard, playCard };
+
+  /** Release a dragged card: onto a match, onto the field, or back to the hand. */
+  const drop = useCallback((id: CardId, x: number, y: number) => {
+    const { placed: pl, hand: h, stage: st, playCard: play } = live.current;
+    setDrag(null);
+    const options = apparentMatches(h, id, 0);
+    const onto = options.find((m) => {
+      const p = pl.get(m);
+      return p !== undefined && contains(p, x, y);
+    });
+    if (onto !== undefined) {
+      play(id, onto);
+      return;
+    }
+    const overField = y >= st.fieldTop - 24 && y <= st.fieldTop + st.fieldH + 24;
+    if (overField) {
+      play(id, null);
+      return;
+    }
+    // Dropped somewhere else: it springs back, still lifted so the matches stay lit.
+  }, []);
+
+  const startPress = useCallback(
+    (id: CardId, e: PointerEvent) => {
+      endPress.current?.();
+      const p = live.current.placed.get(id);
+      const at = toStage(e.clientX, e.clientY);
+      press.current = {
+        id,
+        pointerId: e.pointerId,
+        startX: at.x,
+        startY: at.y,
+        offX: p ? at.x - p.x : 0,
+        offY: p ? at.y - p.y : 0,
+        moved: false,
+      };
+      const onMove = (ev: globalThis.PointerEvent) => {
+        const pr = press.current;
+        if (!pr || ev.pointerId !== pr.pointerId) return;
+        const q = toStage(ev.clientX, ev.clientY);
+        if (!pr.moved) {
+          if (Math.hypot(q.x - pr.startX, q.y - pr.startY) < DRAG_START) return;
+          pr.moved = true;
+          haptics.tap();
+          setLifted(pr.id);
+        }
+        setDrag({ id: pr.id, x: q.x - pr.offX, y: q.y - pr.offY });
+      };
+      const onUp = (ev: globalThis.PointerEvent) => {
+        const pr = press.current;
+        if (!pr || ev.pointerId !== pr.pointerId) return;
+        endPress.current?.();
+        if (ev.type === 'pointercancel') {
+          setDrag(null);
+          return;
+        }
+        if (pr.moved) {
+          const q = toStage(ev.clientX, ev.clientY);
+          drop(pr.id, q.x, q.y);
+        } else {
+          live.current.tapHandCard(pr.id);
+        }
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+      endPress.current = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        press.current = null;
+        endPress.current = null;
+      };
+    },
+    [toStage, drop],
+  );
+
+  const onPress = useCallback(
+    (id: CardId, e: PointerEvent) => {
       sfx.unlockAudio();
       const zone = view.visual.zone[id];
       if (!zone) return;
@@ -124,24 +264,24 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
       }
       if (!playing) return;
       if (zone.z === 'hand' && zone.seat === 0) {
-        if (lifted === id) {
-          setLifted(null);
-          dispatch({ type: 'hand', action: { type: 'play', card: id } });
-        } else {
-          haptics.tap();
-          sfx.uiTap();
-          setLifted(id);
-        }
+        // Decided on release: a tap lifts or plays it, a drag carries it to the field.
+        startPress(id, e);
         return;
       }
-      if (zone.z === 'field' && lifted !== null && matches.has(id)) {
-        intendedTarget.current = id;
-        const card = lifted;
-        setLifted(null);
-        dispatch({ type: 'hand', action: { type: 'play', card } });
-      }
+      if (zone.z === 'field' && lifted !== null && matches.has(id)) playCard(lifted, id);
     },
-    [view.visual.zone, targeting, choosing, playing, lifted, matches, hand, dispatch],
+    [
+      view.visual.zone,
+      targeting,
+      choosing,
+      playing,
+      lifted,
+      matches,
+      hand,
+      dispatch,
+      startPress,
+      playCard,
+    ],
   );
 
   const activateOfuda = (slot: number) => {
@@ -179,6 +319,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
 
   return (
     <div
+      ref={fightRef}
       className={`fight ${view.shake ? 'shaking' : ''}`}
       style={{ height: stageH }}
       onPointerDown={() => sfx.unlockAudio()}
@@ -192,7 +333,10 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
           className="table-mat"
           style={{ top: stage.fieldTop - 10, height: fieldBottom - stage.fieldTop + 20 }}
         />
-        <div className="cap-lane spirit" style={{ top: stage.spiritCapY - 2 }} />
+        <div
+          className="cap-lane spirit"
+          style={{ top: stage.spiritCapY - 3, height: CARD_H * stage.capScale + 6 }}
+        />
         <div
           className="cap-lane player"
           style={{ top: stage.playerCapY - 3, height: CARD_H * stage.capScale + 6 }}
@@ -223,7 +367,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
           placements={placed}
           marks={marks}
           {...(view.delays ? { delays: view.delays } : {})}
-          onTap={onTap}
+          onPress={onPress}
         />
         <div style={{ position: 'absolute', left: 0, right: 0, top: stage.bottomBarY }}>
           <BottomBar
@@ -234,11 +378,11 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
             highlightOfuda={playing}
           />
         </div>
-        {lifted !== null && playing && (
+        {lifted !== null && playing && drag === null && (
           <div className="lift-hint" style={{ top: stage.handY - 56 }}>
             {matches.size > 0
-              ? 'Tap again to play, or tap a glowing card'
-              : 'No match: tap again to lay it on the field'}
+              ? 'Tap or drag onto a glowing card'
+              : 'No match: tap again or drag it to the field'}
           </div>
         )}
         {view.hurt > 0 && <div className="hurt-flash" key={`hurt-${view.hurt}`} />}

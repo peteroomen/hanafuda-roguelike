@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, type PointerEvent } from 'react';
 import { CARDS, type CardId } from '@/content/cards';
 import { shortFlower } from './labels';
 import type { EnhancementId } from '@/engine/types';
@@ -15,7 +15,8 @@ export interface CardMarks {
   /** Hand cards that can capture something right now. */
   readonly playable: ReadonlySet<CardId>;
   readonly enhancements: Readonly<Record<string, EnhancementId>>;
-  readonly trainingWheels: boolean;
+  /** Month number and flower name on every card (full training wheels). */
+  readonly monthLabels: boolean;
   readonly deckHue: number;
 }
 
@@ -30,13 +31,13 @@ interface CardProps {
   readonly wanted: boolean;
   readonly playable: boolean;
   readonly enhancement: EnhancementId | undefined;
-  readonly trainingWheels: boolean;
+  readonly monthLabels: boolean;
   readonly mini: boolean;
   readonly delay: number;
   readonly backUrl: string;
   /** Computed by the layer so a card-style change redraws memoised cards. */
   readonly faceUrl: string;
-  readonly onTap: ((id: CardId) => void) | undefined;
+  readonly onPress: ((id: CardId, e: PointerEvent) => void) | undefined;
 }
 
 const Card = memo(function Card(props: CardProps) {
@@ -56,7 +57,9 @@ const Card = memo(function Card(props: CardProps) {
     props.frozen ? 'frozen' : '',
     props.disguisedAs !== undefined ? 'disguised' : '',
     props.mini ? 'mini' : '',
-    props.onTap && p.interactive ? 'tappable' : '',
+    props.onPress && p.interactive ? 'tappable' : '',
+    p.stacked ? 'stacked' : '',
+    p.dragging ? 'dragging' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -70,7 +73,9 @@ const Card = memo(function Card(props: CardProps) {
         zIndex: p.z,
         transitionDelay: props.delay ? `${props.delay}ms` : undefined,
       }}
-      onPointerDown={props.onTap && p.interactive ? () => props.onTap?.(id) : undefined}
+      onPointerDown={
+        props.onPress && p.interactive ? (e: PointerEvent) => props.onPress?.(id, e) : undefined
+      }
     >
       <div
         className="card-body"
@@ -83,7 +88,7 @@ const Card = memo(function Card(props: CardProps) {
         </div>
         {p.faceUp && !props.mini && (
           <>
-            {props.trainingWheels && (
+            {props.monthLabels && (
               <div className="tw">
                 <span className="tw-n">{shownMonth}</span>
                 <span className="tw-name">{shortFlower(shownMonth)}</span>
@@ -115,10 +120,11 @@ export interface CardLayerProps {
   readonly placements: ReadonlyMap<CardId, Placement>;
   readonly marks: CardMarks;
   readonly delays?: ReadonlyMap<CardId, number>;
-  readonly onTap?: (id: CardId) => void;
+  /** Pointer down on an interactive card. */
+  readonly onPress?: (id: CardId, e: PointerEvent) => void;
 }
 
-export function CardLayer({ visual, placements, marks, delays, onTap }: CardLayerProps) {
+export function CardLayer({ visual, placements, marks, delays, onPress }: CardLayerProps) {
   const back = cardBackUrl(marks.deckHue);
   const cards: CardId[] = [];
   for (const id of placements.keys()) cards.push(id);
@@ -148,11 +154,11 @@ export function CardLayer({ visual, placements, marks, delays, onTap }: CardLaye
             wanted={zone?.z === 'field' && marks.wanted.has(id)}
             playable={zone?.z === 'hand' && marks.playable.has(id)}
             enhancement={marks.enhancements[String(id)]}
-            trainingWheels={marks.trainingWheels}
+            monthLabels={marks.monthLabels}
             mini={mini}
             delay={delays?.get(id) ?? 0}
             backUrl={back}
-            onTap={onTap}
+            onPress={onPress}
           />
         );
       })}

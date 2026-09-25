@@ -13,9 +13,14 @@ export type Screen = 'title' | 'setup' | 'game' | 'collection' | 'settings';
 export type Speed = 'normal' | 'fast' | 'instant';
 /** Which card faces to draw: the traditional deck (images) or the game's own drawn art. */
 export type CardStyle = 'traditional' | 'drawn';
+/**
+ * Help drawn on the cards: none; a dot on the hand cards that can capture something; or the dot
+ * plus the month number and flower name on every card.
+ */
+export type TrainingWheels = 'off' | 'dots' | 'full';
 
 export interface Settings {
-  trainingWheels: boolean;
+  trainingWheels: TrainingWheels;
   guide: boolean;
   sfx: number;
   music: number;
@@ -51,7 +56,7 @@ export interface AppState {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  trainingWheels: true,
+  trainingWheels: 'full',
   guide: true,
   sfx: 0.8,
   music: 0.5,
@@ -107,9 +112,18 @@ function loadRun(): RunState | null {
   return run;
 }
 
+/** Settings saved by older versions: training wheels used to be on or off. */
+export function migrateSettings(s: Settings): Settings {
+  const tw = s.trainingWheels as unknown;
+  if (tw === true) return { ...s, trainingWheels: 'full' };
+  if (tw === false) return { ...s, trainingWheels: 'off' };
+  if (tw !== 'off' && tw !== 'dots' && tw !== 'full') return { ...s, trainingWheels: 'full' };
+  return s;
+}
+
 let state: AppState = {
   screen: 'title',
-  settings: load(KEYS.settings, DEFAULT_SETTINGS),
+  settings: migrateSettings(load(KEYS.settings, DEFAULT_SETTINGS)),
   profile: load(KEYS.profile, DEFAULT_PROFILE),
   run: loadRun(),
 };

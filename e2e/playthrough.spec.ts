@@ -20,7 +20,13 @@ async function freshStart(page: Page, settings: Record<string, unknown>) {
 
 test('a whole year played through the UI by the smart bot', async ({ page }, info) => {
   const errors = watchErrors(page);
-  await freshStart(page, { speed: 'instant', guide: true, trainingWheels: true, sfx: 0, music: 0 });
+  await freshStart(page, {
+    speed: 'instant',
+    guide: true,
+    trainingWheels: 'full',
+    sfx: 0,
+    music: 0,
+  });
   await page.getByTestId('btn-new').click();
   await page.getByTestId('btn-begin-year').click();
   let shots = 0;
@@ -47,7 +53,7 @@ test('a whole year played through the UI by the smart bot', async ({ page }, inf
 
 test('the guided first months at normal speed', async ({ page }, info) => {
   const errors = watchErrors(page);
-  await freshStart(page, { speed: 'fast', guide: true, trainingWheels: true, sfx: 0, music: 0 });
+  await freshStart(page, { speed: 'fast', guide: true, trainingWheels: 'full', sfx: 0, music: 0 });
   await page.getByTestId('btn-new').click();
   await expect(page.getByTestId('toggle-guided')).toBeChecked();
   await page.getByTestId('btn-begin-year').click();
