@@ -71,4 +71,4 @@ The boss paintings fill the whole frame with scenery, so they skip `cutout.py` (
 paper edge, it would cut into the picture). Resize them directly instead:
 `python3 -c "from PIL import Image; Image.open('art-source/yokai/ID.png').convert('RGBA').resize((512,512), Image.LANCZOS).save('src/ui/art/portraits/ID.webp','WEBP',quality=86,method=6)"`
 
-Tanuki and Tengu are bosses drawn in the regular style. Chōchin-obake stays deliberately silly.
+Tengu is a boss drawn in the regular style. Chōchin-obake stays deliberately silly.

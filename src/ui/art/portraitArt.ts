@@ -134,7 +134,7 @@ export const PORTRAIT_ART: Partial<Record<PortraitId, PortraitArt>> = {
   },
   tanuki: {
     src: tanuki,
-    close: { cx: 0.51, cy: 0.33, size: 0.58 },
+    close: { cx: 0.56, cy: 0.26, size: 0.5 },
     full: { cx: 0.5, cy: 0.5, size: 1.02 },
   },
   tengu: {
