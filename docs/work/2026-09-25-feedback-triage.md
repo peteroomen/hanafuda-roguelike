@@ -288,6 +288,8 @@ before building UI.
   browser's long-press text selection and its haptic tick. Fix: `user-select: none` and
   `-webkit-touch-callout: none` on the whole decision panel (not just the button), and call
   `preventDefault` on the button's `pointerdown` / `touchstart`. Small; can ride any UI PR.
+  - **Done** with the UI sounds: `user-select: none` and `-webkit-touch-callout: none` on the
+    panel, and `preventDefault` on the peek's `pointerdown`.
 - **You can't see your HP while deciding stop or koi-koi** (reported after PR E). The panel covers
   the bottom bar, where HP lives, and HP is exactly what the risk depends on. Queued for the big
   design pass, together with "persistent things (HP, mon, charms) get one fixed home that's never
@@ -297,6 +299,12 @@ before building UI.
   files): a paper rustle for sheets and the shop, a soft wooden tock for buttons, a bamboo clack
   for confirms, a brushed-paper swish for tabs, and a water-drop for the peek. The card slap, koto
   and taiko already fit and stay. Small, self-contained PR.
+  - **Done:** `woodTock` on every button (one `pointerdown` listener in `App.tsx`; buttons with
+    their own sound opt out with `data-quiet`), `paperRustle` when a sheet or panel opens
+    (`usePaperOnOpen`), `paperSlide` when you lift a card, `waterDrop` for the peek, and mon as
+    bronze coins dropped into a wooden tray. The old synth coin blips and noise-tap are gone.
+    `e2e/sound.spec.ts` checks with an analyser on the output that button and sheet sounds play,
+    and that a button is quieter than a card slap.
 
 ## Manual test steps (all PRs)
 

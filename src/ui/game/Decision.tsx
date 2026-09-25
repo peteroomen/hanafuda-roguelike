@@ -1,4 +1,6 @@
+import { usePaperOnOpen } from '@/ui/audio/usePaper';
 import { useState } from 'react';
+import * as sfx from '@/ui/audio/audio';
 import { spiritDef } from '@/content/spirits';
 import { yakuDef } from '@/content/yaku';
 import { currentYaku } from '@/engine/hand';
@@ -16,6 +18,7 @@ export function DecisionSheet({
   onStop: () => void;
   onKoikoi: () => void;
 }) {
+  usePaperOnOpen();
   const [peek, setPeek] = useState(false);
   const f = run.fight as FightState;
   const h = f.hand;
@@ -53,9 +56,13 @@ export function DecisionSheet({
         <button
           className="peek-btn"
           onPointerDown={(e) => {
+            // No long-press text selection (and its buzz) while holding.
+            e.preventDefault();
             e.currentTarget.setPointerCapture(e.pointerId);
+            sfx.waterDrop();
             setPeek(true);
           }}
+          data-quiet
           onPointerUp={() => setPeek(false)}
           onPointerCancel={() => setPeek(false)}
           onLostPointerCapture={() => setPeek(false)}
@@ -99,6 +106,7 @@ export function FrogSheet({
   onKeep: () => void;
   onLeap: () => void;
 }) {
+  usePaperOnOpen();
   const card = run.fight?.hand.revealed;
   return (
     <div className="decision-scrim fade-in" data-testid="frog">
@@ -121,6 +129,7 @@ export function FrogSheet({
 }
 
 export function HandOverPanel({ run, onNext }: { run: RunState; onNext: () => void }) {
+  usePaperOnOpen();
   const f = run.fight as FightState;
   const o = f.outcome;
   const s = spiritDef(f.spiritId);

@@ -261,8 +261,107 @@ export function tick(step: number, kind: 'chips' | 'mult' = 'chips'): void {
   pluck(scaleNote((kind === 'chips' ? 3 : 5) + Math.min(step, 10)), 0, 0.3);
 }
 
+// ---------------------------------------------------------------------------
+// UI sounds: paper, wood and water, to match the woodblock look.
+
+/** A few damped, slightly inharmonic sine partials: the ring of a struck object. */
+function modes(c: Ctx, t: number, partials: readonly (readonly [number, number, number])[]): void {
+  if (!sfxBus) return;
+  for (const [freq, gain, decay] of partials) {
+    const o = c.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    const g = env(c, t, 0.001, gain, decay);
+    o.connect(g).connect(sfxBus);
+    o.start(t);
+    o.stop(t + decay + 0.05);
+  }
+}
+
+/** A small wooden block, knocked: every button press. */
+export function woodTock(gain = 0.22): void {
+  const c = ready();
+  if (!c || !sfxBus) return;
+  const t = c.currentTime + 0.004;
+  const j = 0.95 + Math.random() * 0.1;
+  modes(c, t, [
+    [720 * j, 0.55 * gain, 0.05],
+    [1310 * j, 0.25 * gain, 0.035],
+    [2150 * j, 0.1 * gain, 0.02],
+  ]);
+  // The knock itself: a tiny, bright click of noise.
+  const n = noise(c, t, 0.02);
+  const f = c.createBiquadFilter();
+  f.type = 'bandpass';
+  f.frequency.value = 3000;
+  f.Q.value = 2;
+  n.connect(f)
+    .connect(env(c, t, 0.0005, 0.25 * gain, 0.012))
+    .connect(sfxBus);
+}
+
+/** Washi paper, handled: a sheet opening or a panel sliding in. */
+export function paperRustle(gain = 0.3): void {
+  const c = ready();
+  if (!c || !sfxBus) return;
+  const t0 = c.currentTime + 0.005;
+  // Three quick crinkles, each a short burst of high-passed noise.
+  for (const [d, g, f] of [
+    [0, 1, 4200],
+    [0.045, 0.7, 5600],
+    [0.1, 0.5, 3600],
+  ] as const) {
+    const t = t0 + d + Math.random() * 0.012;
+    const n = noise(c, t, 0.07);
+    const hp = c.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = f;
+    const bp = c.createBiquadFilter();
+    bp.type = 'peaking';
+    bp.frequency.value = f * 1.4;
+    bp.gain.value = 6;
+    n.connect(hp)
+      .connect(bp)
+      .connect(env(c, t, 0.004, g * gain, 0.05))
+      .connect(sfxBus);
+  }
+}
+
+/** A card slid off the hand: a soft paper swish. */
+export function paperSlide(gain = 0.22): void {
+  const c = ready();
+  if (!c || !sfxBus) return;
+  const t = c.currentTime + 0.005;
+  const n = noise(c, t, 0.14);
+  const f = c.createBiquadFilter();
+  f.type = 'bandpass';
+  f.Q.value = 0.8;
+  f.frequency.setValueAtTime(1800, t);
+  f.frequency.exponentialRampToValueAtTime(4200, t + 0.1);
+  n.connect(f)
+    .connect(env(c, t, 0.03, gain, 0.09))
+    .connect(sfxBus);
+}
+
+/** A drop into still water: the peek. */
+export function waterDrop(gain = 0.3): void {
+  const c = ready();
+  if (!c || !sfxBus) return;
+  const t = c.currentTime + 0.005;
+  const o = c.createOscillator();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(520, t);
+  o.frequency.exponentialRampToValueAtTime(1350, t + 0.045);
+  const g = env(c, t, 0.002, gain, 0.09);
+  o.connect(g).connect(sfxBus);
+  if (reverbSend) g.connect(reverbSend);
+  o.start(t);
+  o.stop(t + 0.15);
+}
+
+/** Lifting a card from your hand. */
 export function uiTap(): void {
-  tock(1400, 0.18);
+  paperSlide(0.18);
 }
 
 // ---------------------------------------------------------------------------
@@ -332,22 +431,27 @@ export function hurtSound(): void {
   pluck(scaleNote(-1) * 1.06, 0.07, 0.3);
 }
 
+/** Old bronze mon, dropped into a wooden tray: two damped clinks over a soft wooden thud. */
 export function coinSound(): void {
   const c = ready();
   if (!c || !sfxBus) return;
-  for (const [d, f] of [
-    [0, 1760],
-    [0.07, 2350],
+  const t0 = c.currentTime + 0.01;
+  for (const [d, k] of [
+    [0, 1],
+    [0.065, 1.07],
   ] as const) {
-    const t = c.currentTime + 0.01 + d;
-    const o = c.createOscillator();
-    o.type = 'triangle';
-    o.frequency.value = f;
-    const g = env(c, t, 0.002, 0.25, 0.25);
-    o.connect(g).connect(sfxBus);
-    o.start(t);
-    o.stop(t + 0.3);
+    const t = t0 + d;
+    modes(c, t, [
+      [2210 * k, 0.16, 0.09],
+      [3470 * k, 0.09, 0.06],
+      [5120 * k, 0.04, 0.035],
+    ]);
   }
+  // The tray.
+  modes(c, t0, [
+    [340, 0.22, 0.06],
+    [610, 0.08, 0.04],
+  ]);
 }
 
 export function victorySound(): void {

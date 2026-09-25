@@ -11,7 +11,6 @@ export function Title() {
   const profile = useStore((s) => s.profile);
   const go = (screen: 'setup' | 'game' | 'collection' | 'settings') => {
     sfx.unlockAudio();
-    sfx.uiTap();
     setState({ screen });
   };
   return (

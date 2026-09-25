@@ -1,3 +1,4 @@
+import { usePaperOnOpen } from '@/ui/audio/usePaper';
 import { seasonOf } from '@/content/cards';
 import { ofudaDef, type OfudaId } from '@/content/ofuda';
 import { omamoriDef } from '@/content/omamori';
@@ -20,6 +21,7 @@ export function CharmSheet(props: {
   sellPrice?: number;
   onClose: () => void;
 }) {
+  usePaperOnOpen();
   const d = omamoriDef(props.inst.id);
   return (
     <div className="sheet-scrim fade-in" onClick={props.onClose} data-testid="charm-sheet">
@@ -75,6 +77,7 @@ export function OfudaSheet(props: {
   onDiscard: () => void;
   onClose: () => void;
 }) {
+  usePaperOnOpen();
   const d = ofudaDef(props.id);
   return (
     <div className="sheet-scrim fade-in" onClick={props.onClose} data-testid="ofuda-sheet">
@@ -118,6 +121,7 @@ export function SpiritSheet({
   fight: FightState;
   onClose: () => void;
 }) {
+  usePaperOnOpen();
   const s = spiritDef(fight.spiritId);
   return (
     <div className="sheet-scrim fade-in" onClick={onClose}>
@@ -168,6 +172,7 @@ export function MenuSheet(props: {
   onAbandon: () => void;
   onTitle: () => void;
 }) {
+  usePaperOnOpen();
   const settings = useStore((s) => s.settings);
   return (
     <div className="sheet-scrim fade-in" onClick={props.onResume} data-testid="menu">
