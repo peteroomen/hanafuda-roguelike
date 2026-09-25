@@ -206,6 +206,16 @@ the engine already has.
 The sim can measure each idea's win-rate change and how often it's taken, so we can compare them
 before building UI.
 
+## Queued after the plan
+
+- **Music keeps playing in a background tab** (reported 2026-09-25). Cause: `src/ui/audio/audio.ts`
+  never listens for the page being hidden, so the `AudioContext` keeps running. Fix: on
+  `visibilitychange`, suspend the context when hidden and resume it when visible, but only if it
+  was running before. Also pause the music phrase timer while hidden (`startMusic`'s
+  `setTimeout` loop). Otherwise notes queue up against the suspended clock and play in a burst
+  on return. Test: start a fight, switch tabs, switch back, and check the music stops and
+  resumes cleanly.
+
 ## Manual test steps (all PRs)
 
 1. `pnpm lint`, `pnpm typecheck` and `pnpm test`.
