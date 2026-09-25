@@ -1,3 +1,4 @@
+import { usePaperOnOpen } from '@/ui/audio/usePaper';
 import { type ReactNode, useState } from 'react';
 import { CARDS, type CardId, MONTHS, monthDef, seasonOf } from '@/content/cards';
 import { enhancementDef } from '@/content/enhancements';
@@ -534,6 +535,7 @@ function DetailSheet(props: {
   onClose: () => void;
   children: ReactNode;
 }) {
+  usePaperOnOpen();
   return (
     <div
       className="shop-detail paper pop-in"
@@ -575,6 +577,7 @@ function ShrinePicker({
   onPick: (card: CardId) => void;
   onClose: () => void;
 }) {
+  usePaperOnOpen();
   const enh = run.shop?.shrine.enhancement;
   return (
     <div className="sheet-scrim fade-in" onClick={onClose} data-testid="shrine">

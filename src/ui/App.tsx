@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { preloadCards } from '@/ui/art/images';
-import { setVolumes, stopMusic } from '@/ui/audio/audio';
+import { setVolumes, stopMusic, unlockAudio, woodTock } from '@/ui/audio/audio';
 import { GameScreen } from '@/ui/game/GameScreen';
 import { Collection } from '@/ui/screens/Collection';
 import { SettingsScreen } from '@/ui/screens/SettingsScreen';
@@ -19,6 +19,19 @@ export function App() {
     const f = speedFactorOf(settings.speed);
     document.documentElement.style.setProperty('--move-ms', `${Math.round(300 * f)}ms`);
   }, [settings]);
+
+  // Every button knocks like a small wooden block. One listener, so they all sound the same.
+  // Buttons with their own sound opt out with data-quiet.
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const b = (e.target as HTMLElement | null)?.closest('button');
+      if (!b || b.disabled || b.hasAttribute('data-quiet')) return;
+      unlockAudio();
+      woodTock();
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, []);
 
   // Decode the chosen card faces up front so nothing flashes in during play.
   useEffect(() => {

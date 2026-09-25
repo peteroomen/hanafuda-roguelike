@@ -1,3 +1,4 @@
+import { usePaperOnOpen } from '@/ui/audio/usePaper';
 import { useState } from 'react';
 import { CARDS, type CardId, MONTHS, cardWithTag } from '@/content/cards';
 import { DEFAULT_RULES } from '@/content/rules';
@@ -133,6 +134,7 @@ export function YakuBook({
   onClose: () => void;
   poems?: Partial<Record<YakuId, number>>;
 }) {
+  usePaperOnOpen();
   const [tab, setTab] = useState<'yaku' | 'cards' | 'rules'>('yaku');
   return (
     <div className="sheet-scrim fade-in" onClick={onClose} data-testid="yaku-book">

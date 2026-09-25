@@ -122,8 +122,13 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
   - Balance (PR F): spirits have 28% less HP than v1.0 and hit about twice as hard early (1.15×
     by December); heals are 15% after a fight and 55% after a boss. The intro centres the
     portrait, with the speech bubble up and to the right.
-  - Queued in the triage doc: the peek button's long-press text selection, HP visible while
-    deciding, and paper/wood/nature UI sounds.
+  - UI sounds are paper, wood and water (`woodTock`, `paperRustle`, `paperSlide`, `waterDrop`,
+    a bronze-and-wood `coinSound` in `audio.ts`). Every button knocks via one listener in
+    `App.tsx` (`data-quiet` opts out); sheets rustle via `usePaperOnOpen`. `e2e/sound.spec.ts`
+    measures the output. The peek no longer triggers text selection.
+  - Queued in the triage doc: HP visible while deciding stop or koi-koi (for the design pass).
+  - The build type-checks `e2e/` too: a broken scratch spec fails `pnpm build`, so don't hide
+    its output when building for e2e.
   - Next up: PR G (decks and unlocks). For the later
     design pass: persistent things (HP, mon, charms) should have one fixed home on every screen.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.
