@@ -110,6 +110,8 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
   - Language (PR D): a yaku's `name` is its Japanese name in English letters (Sankō, Tan); the
     English meaning is `gloss`, shown only as a subtitle. Card types stay English. "Chips" and
     "Mult" are capitalised. `src/ui/game/language.test.ts` enforces the yaku rule.
+  - Sound pauses while the tab is hidden (`onVisibilityChange` in `audio.ts`, covered by
+    `e2e/audio.spec.ts`).
   - Next up: PR E (style pass), F (balance), G (decks and unlocks). For the later
     design pass: persistent things (HP, mon, charms) should have one fixed home on every screen.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

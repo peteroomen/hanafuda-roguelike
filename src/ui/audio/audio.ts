@@ -26,6 +26,27 @@ export function setVolumes(sfx: number, music: number): void {
   if (musicBus) musicBus.gain.value = music * 0.55;
 }
 
+/** True while we have paused the sound because the page is hidden. */
+let pausedForHidden = false;
+
+/**
+ * Silence everything while the game is in a background tab or the app is minimised, and pick up
+ * again on return. Every sound (music notes included) checks `ready()`, which is false while the
+ * context is suspended, so nothing queues up and plays in a burst on return.
+ */
+function onVisibilityChange(): void {
+  if (!ctx) return;
+  if (document.hidden) {
+    if (ctx.state === 'running') {
+      pausedForHidden = true;
+      void ctx.suspend();
+    }
+  } else if (pausedForHidden) {
+    pausedForHidden = false;
+    void ctx.resume();
+  }
+}
+
 /** Create (or resume) the audio context. Must be called from a user gesture. */
 export function unlockAudio(): void {
   try {
@@ -52,6 +73,7 @@ export function unlockAudio(): void {
       reverbSend.connect(reverb).connect(master);
       noiseBuffer = makeNoise(ctx);
       setVolumes(volumes.sfx, volumes.music);
+      document.addEventListener('visibilitychange', onVisibilityChange);
     }
     if (ctx.state === 'suspended') void ctx.resume();
   } catch {

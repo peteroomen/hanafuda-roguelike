@@ -215,6 +215,9 @@ before building UI.
   `setTimeout` loop). Otherwise notes queue up against the suspended clock and play in a burst
   on return. Test: start a fight, switch tabs, switch back, and check the music stops and
   resumes cleanly.
+  - **Done:** only the suspend and resume were needed. Every sound, music notes included, goes
+    through `ready()`, which skips it while the context isn't running, so nothing queues up.
+    `e2e/audio.spec.ts` fakes a hidden tab and checks the context suspends and resumes.
 
 ## Manual test steps (all PRs)
 
