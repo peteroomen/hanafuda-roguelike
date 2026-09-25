@@ -103,5 +103,7 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
     (`sortHand`; engine order is unchanged). Only the bottom pile card casts a shadow.
   - A played card moves straight to its slot, match or choice spot (`animatePlay` in
     `useGame.ts`). A re-deal gathers every card into the pile, then deals two at a time.
+  - Training wheels has three levels: `off`, `dots` (just the playable dot) and `full` (dot plus
+    month labels). Old boolean saves are migrated by `migrateSettings` in `store.ts`.
   - Next up: PR C (shop), D (language), E (style pass), F (balance), G (decks and unlocks).
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

@@ -198,17 +198,30 @@ export function SettingsList() {
   const s = useStore((st) => st.settings);
   return (
     <div className="settings-list">
-      <label className="setting">
+      <div className="setting">
         <span>
           Training wheels
-          <small>Month number and flower name on every card</small>
+          <small>
+            {s.trainingWheels === 'off'
+              ? 'No help on the cards'
+              : s.trainingWheels === 'dots'
+                ? 'A dot on hand cards that can capture'
+                : 'The dot, plus month and flower on every card'}
+          </small>
         </span>
-        <input
-          type="checkbox"
-          checked={s.trainingWheels}
-          onChange={(e) => updateSettings({ trainingWheels: e.target.checked })}
-        />
-      </label>
+        <div className="seg">
+          {(['off', 'dots', 'full'] as const).map((tw) => (
+            <button
+              key={tw}
+              className={s.trainingWheels === tw ? 'on' : ''}
+              onClick={() => updateSettings({ trainingWheels: tw })}
+              data-testid={`training-${tw}`}
+            >
+              {tw}
+            </button>
+          ))}
+        </div>
+      </div>
       <label className="setting">
         <span>
           The Rain Man’s advice

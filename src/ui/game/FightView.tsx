@@ -104,7 +104,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
   }, [lifted, hand]);
 
   const playable = useMemo(() => {
-    if (!settings.trainingWheels || !playing) return new Set<CardId>();
+    if (settings.trainingWheels === 'off' || !playing) return new Set<CardId>();
     return new Set(hand.hands[0].filter((c) => apparentMatches(hand, c, 0).length > 0));
   }, [settings.trainingWheels, playing, hand]);
 
@@ -113,7 +113,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
     wanted: new Set(view.intent && !isHidden(fight) ? view.intent.wanted : []),
     playable,
     enhancements: run.enhancements,
-    trainingWheels: settings.trainingWheels,
+    monthLabels: settings.trainingWheels === 'full',
     deckHue: deckDef(run.deckId).hue,
   };
 

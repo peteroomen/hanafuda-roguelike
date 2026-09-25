@@ -15,7 +15,8 @@ export interface CardMarks {
   /** Hand cards that can capture something right now. */
   readonly playable: ReadonlySet<CardId>;
   readonly enhancements: Readonly<Record<string, EnhancementId>>;
-  readonly trainingWheels: boolean;
+  /** Month number and flower name on every card (full training wheels). */
+  readonly monthLabels: boolean;
   readonly deckHue: number;
 }
 
@@ -30,7 +31,7 @@ interface CardProps {
   readonly wanted: boolean;
   readonly playable: boolean;
   readonly enhancement: EnhancementId | undefined;
-  readonly trainingWheels: boolean;
+  readonly monthLabels: boolean;
   readonly mini: boolean;
   readonly delay: number;
   readonly backUrl: string;
@@ -87,7 +88,7 @@ const Card = memo(function Card(props: CardProps) {
         </div>
         {p.faceUp && !props.mini && (
           <>
-            {props.trainingWheels && (
+            {props.monthLabels && (
               <div className="tw">
                 <span className="tw-n">{shownMonth}</span>
                 <span className="tw-name">{shortFlower(shownMonth)}</span>
@@ -153,7 +154,7 @@ export function CardLayer({ visual, placements, marks, delays, onPress }: CardLa
             wanted={zone?.z === 'field' && marks.wanted.has(id)}
             playable={zone?.z === 'hand' && marks.playable.has(id)}
             enhancement={marks.enhancements[String(id)]}
-            trainingWheels={marks.trainingWheels}
+            monthLabels={marks.monthLabels}
             mini={mini}
             delay={delays?.get(id) ?? 0}
             backUrl={back}
