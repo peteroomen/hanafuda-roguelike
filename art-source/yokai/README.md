@@ -10,7 +10,7 @@ the drawn portraits in `src/ui/art/spirits.ts` one spirit at a time.
    block.
 2. Save the original here as `<spiritId>.png` (the id from `src/content/spirits.ts`).
 3. Make the game copy. `scripts/cutout.py` removes a flat paper background (only the paper
-   touching the edges, so paper-coloured areas inside the figure survive) and writes a 640px
+   touching the edges, so paper-coloured areas inside the figure survive) and writes a 512px
    webp: `python3 scripts/cutout.py art-source/yokai/ID.png src/ui/art/portraits/ID.webp`
    (needs `pip install pillow numpy scipy`).
 4. Register it in `src/ui/art/portraitArt.ts` with two crops, given as fractions of
@@ -43,10 +43,20 @@ the game, and its mood.>
 
 ## Done
 
-| Spirit    | Subject notes                                                                                       |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| kasaObake | Old oiled-paper umbrella, one eye, long tongue, one leg in a geta, hugging stolen ribbon strips.    |
-| kodama    | Pale round-headed tree spirit with a pine sprig, peeking from behind a twisted pine.                |
-| tanuki    | Plump belly-drumming tanuki in a straw hat and blossom-print scarf, with a sake gourd.              |
-| tengu     | Red long-nosed tengu with white mane, tokin cap and crow wings, clutching a stolen red sun.         |
-| rainMan   | The guide: an elderly court poet with a yellow umbrella, red cloud-pattern robe and a leaping frog. |
+| Spirit         | Subject notes                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| kasaObake      | Old oiled-paper umbrella, one eye, long tongue, one leg in a geta, hugging stolen ribbon strips.    |
+| kodama         | Pale round-headed tree spirit with a pine sprig, peeking from behind a twisted pine.                |
+| tanuki         | Plump belly-drumming tanuki in a straw hat and blossom-print scarf, with a sake gourd.              |
+| tengu          | Red long-nosed tengu with white mane, tokin cap and crow wings, clutching a stolen red sun.         |
+| rainMan        | The guide: an elderly court poet with a yellow umbrella, red cloud-pattern robe and a leaping frog. |
+| zashikiWarashi | Bob-haired child in a plum-blossom kimono, holding up a string of mon coins, a top behind her back. |
+| chochinObake   | Torn paper lantern with one eye, a grinning split mouth and a long tongue reaching for a sun disc.  |
+| kawauso        | Otter in a straw hat on a river rock, a coin purse in one paw and three cards fanned in the other.  |
+| hitotsumeKozo  | Bald one-eyed monk boy peering at a hanafuda card.                                                  |
+| bakeneko       | Calico cat in an indigo jacket, with blue ghost-fire and a stolen sea bream.                        |
+| ittanMomen     | A looping strip of cloth with slit eyes, its tail frayed into red and indigo ribbons.               |
+| nopperabo      | Faceless traveller in a straw hat and green kimono, holding a card.                                 |
+| kamaitachi     | Weasel with sickle claws leaping through winter wind.                                               |
+| rokurokubi     | Woman in an indigo kimono whose long neck loops round, a card in her teeth.                         |
+| yamauba        | Wild-haired crone in a straw cape offering tea, a ladle behind her back.                            |

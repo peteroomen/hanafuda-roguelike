@@ -1,5 +1,5 @@
 """
-Cut a painted portrait out of its flat paper background and write the game's 640px webp.
+Cut a painted portrait out of its flat paper background and write the game's 512px webp.
 
 Only paper connected to the image border is removed, so paper-coloured areas inside the
 figure (a belly, a face, fur) survive as long as an outline encloses them.
@@ -33,7 +33,7 @@ def cutout(src: str, dst: str) -> None:
     alpha = ndimage.gaussian_filter(alpha, 0.8)
     out = a.copy()
     out[..., 3] = np.minimum(a[..., 3], alpha).astype(np.int32)
-    img = Image.fromarray(out.astype(np.uint8), 'RGBA').resize((640, 640), Image.LANCZOS)
+    img = Image.fromarray(out.astype(np.uint8), 'RGBA').resize((512, 512), Image.LANCZOS)
     img.save(dst, 'WEBP', quality=86, method=6)
     print(f'{dst}: paper {paper.astype(int).tolist()}, removed {bg.mean():.0%}')
 
