@@ -11,6 +11,16 @@ export interface Balance {
   readonly monthFerocity: readonly number[];
   readonly bossHp: number;
   readonly bossFerocity: number;
+  /**
+   * Early-year easing for human players: multiplies spirit HP and ferocity by month
+   * (index 0 = month 1). 1 = full strength.
+   */
+  readonly monthEase: readonly number[];
+  /**
+   * Chance, by month, that a spirit slips and plays its second-best move instead of its best.
+   * Spirits play well, not perfectly; they are sloppier early in the year.
+   */
+  readonly spiritSlip: readonly number[];
   /** A spirit's ferocity grows by this fraction for every hand after the first in a fight. */
   readonly handFerocityGrowth: number;
   /** The player's koi-koi multiplies the spirit's hit by this (standard: 2). */
@@ -57,6 +67,8 @@ export const BALANCE: Balance = {
   monthFerocity: [1, 1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.85, 1.95, 2.1, 2.25],
   bossHp: 1.35,
   bossFerocity: 1.25,
+  monthEase: [0.75, 0.75, 0.75, 0.75, 0.82, 0.9, 1, 1, 1, 1, 1, 1],
+  spiritSlip: [0.3, 0.3, 0.25, 0.22, 0.18, 0.15, 0.12, 0.1, 0.08, 0.06, 0.05, 0.05],
   handFerocityGrowth: 0.2,
   koikoiPunish: 2,
   reward: {
