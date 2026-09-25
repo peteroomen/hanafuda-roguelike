@@ -4,7 +4,7 @@
 **Source:** Google Doc "koi koi feedback" (19 items, written after a play session).
 **Branch:** `claude/game-bugs-triage-plan-iewzo2` (this plan only; each workstream below gets its
 own branch and PR, per CLAUDE.md).
-**Status:** Answers in. PR A and PR B are done and ship together as one PR. PR C is next.
+**Status:** PRs A and B merged together (#7). PR C (shop) is done. PR D is next.
 
 ## Goal
 
@@ -94,6 +94,17 @@ Tests: unit tests for the hand sort, for `makeStage` (always 2 rows, no overlap 
   wares). An empty section is hidden.
 - Check at 360×640 that the whole shop fits without scrolling or with one short scroll. Today it
   already scrolls a little.
+
+As built, after the mockup (https://claude.ai/artifact/ANGwK4jktvPwVhjwDC5hnh) was approved:
+
+- HP and mon sit in the header. The status-pill row is gone, and slot counts are on the shelf
+  labels.
+- Shelves: Charms; Talismans and Poems sharing a row; Services; Yours.
+- Every tile (offers and services alike) shows art, name, a short line and the price. Tapping a
+  tile opens one shared details sheet with the action on its button. Onsen and New wares no
+  longer spend mon on the first tap. The e2e bot taps the tile, then `btn-buy`.
+- The footer button reads "Month N →" over "Season · Flower". The header's "Next: …" line is gone.
+- Fits at 360×640 and 390×844 with no scrolling.
 
 ### PR D: Language pass (#12)
 
@@ -194,6 +205,9 @@ before building UI.
 ## Out of scope
 
 - The big dedicated design pass (#15 part 2). It gets its own plan after PR E lands.
+  - Note from the user for that pass: anything persistent (player HP, mon, charms and talismans)
+    should have one consistent home on every screen, never moved or covered. Today HP is
+    bottom-left in a fight and in the header in the shop.
 - Building any of the new-mechanic items (#10) until we've discussed them.
 
 ## Answers (2026-09-25)
@@ -208,3 +222,5 @@ before building UI.
 7. **Score deck:** model it at PR G, and audit all the decks then.
 8. **Hand order:** January to December, then Bright > Animal > Ribbon > Chaff. Correct.
 9. **PR A and PR B ship as one PR.**
+10. **Shop (PR C):** services get the confirm step, and tiles keep the three lines (name, short
+    line, price).

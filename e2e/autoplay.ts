@@ -203,14 +203,18 @@ async function perform(page: Page, run: RunState, a: RunAction): Promise<boolean
       await tap(page, 'btn-sell');
       return true;
     case 'enhance':
+      // Every shop tile opens its details first; the sheet's button does the buying.
       await tap(page, 'btn-shrine');
+      await tap(page, 'btn-buy');
       await tap(page, `shrine-card-${a.card}`);
       return true;
     case 'heal':
       await tap(page, 'btn-heal');
+      await tap(page, 'btn-buy');
       return true;
     case 'reroll':
       await tap(page, 'btn-reroll');
+      await tap(page, 'btn-buy');
       return true;
     case 'leaveShop':
       await tap(page, 'btn-leave-shop');
