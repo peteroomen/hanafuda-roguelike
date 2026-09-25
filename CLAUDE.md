@@ -74,8 +74,10 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
   game is built: guided first year, 12 months with 12 spirits and 8 bosses, the shop with charms,
   talismans, enhancements and poems, 7 decks, 6 omens, a collection screen, settings, audio, haptics
   and PWA. See `docs/work/2026-09-23-full-game-build.md`.
-- Balance: the smart bot wins about 46% at Clear Sky, and each omen steps it down to 9%
-  (`docs/balance/report.md`). Rerun `pnpm sim --suite` after any change to `src/content/`.
+- Balance: the smart bot wins about 44% at Clear Sky and the casual bot (a learning player)
+  about 35%; omens step the smart bot down to 7% (`docs/balance/report.md`). Spirit hits are
+  about 10–15% of your HP early and 25–30% by December. Rerun `pnpm sim --suite` after any change
+  to `src/content/` (about 6 minutes at 400 runs).
 - E2E: build first (`pnpm build`), run `npx vite preview --port 5299`, then
   `PW_BASE_URL=http://localhost:5299 pnpm e2e`. `e2e/playthrough.spec.ts` plays a whole year
   through the UI in about 1 minute. `e2e/tour.spec.ts` screenshots every overlay at normal speed
@@ -117,6 +119,11 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
     Gradients only for the bokashi skies (`--season-sky`) and card effects. Stop/koi-koi is a
     compact bottom panel with a hold-to-peek button. Spirits speak in mood-shaped speech
     bubbles (`Fukidashi.tsx`, lines in `src/content/voices.ts`, `say()` in `useGame.ts`).
-  - Next up: PR F (balance), G (decks and unlocks). For the later
+  - Balance (PR F): spirits have 28% less HP than v1.0 and hit about twice as hard early (1.15×
+    by December); heals are 15% after a fight and 55% after a boss. The intro centres the
+    portrait, with the speech bubble up and to the right.
+  - Queued in the triage doc: the peek button's long-press text selection, HP visible while
+    deciding, and paper/wood/nature UI sounds.
+  - Next up: PR G (decks and unlocks). For the later
     design pass: persistent things (HP, mon, charms) should have one fixed home on every screen.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

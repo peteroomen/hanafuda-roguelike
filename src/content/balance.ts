@@ -63,8 +63,10 @@ export interface Balance {
 export const BALANCE: Balance = {
   playerHp: 80,
   startMon: 4,
-  monthHp: [100, 150, 210, 280, 370, 480, 620, 800, 1000, 1250, 1550, 1900],
-  monthFerocity: [1, 1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.85, 1.95, 2.1, 2.25],
+  // Tuned 2026-09-25 (see docs/balance/): spirits have 28% less HP than v1.0 and hit about twice
+  // as hard early in the year (1.15× by December), so fights are short and every hit matters.
+  monthHp: [72, 108, 151, 202, 266, 346, 446, 576, 720, 900, 1116, 1368],
+  monthFerocity: [1.9, 1.9, 2.12, 2.2, 2.28, 2.34, 2.39, 2.42, 2.51, 2.51, 2.56, 2.59],
   bossHp: 1.35,
   bossFerocity: 1.25,
   monthEase: [0.75, 0.75, 0.75, 0.75, 0.82, 0.9, 1, 1, 1, 1, 1, 1],
@@ -87,7 +89,7 @@ export const BALANCE: Balance = {
     rarityWeights: { common: 60, uncommon: 32, rare: 8 },
     extraOfudaChance: 0.35,
   },
-  bossHeal: 0.6,
-  fightHeal: 0.2,
+  bossHeal: 0.55,
+  fightHeal: 0.15,
   guided: { month1Hp: 60, month2Hp: 40, month3HpMult: 0.75, captureSting: 1 },
 };

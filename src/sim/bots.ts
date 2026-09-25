@@ -5,6 +5,10 @@
  * - greedy:  captures greedily, always stops at once, buys whatever it can afford.
  * - smart:   the AI evaluator with lookahead, fight-aware koi-koi decisions, an
  *            archetype it commits to in the shop, and sensible talisman use.
+ * - casual:  a stand-in for a person still learning: it takes what looks good without looking
+ *            ahead or blocking the spirit, plays a loose card now and then, calls koi-koi on a
+ *            whim, and shops like the smart bot but never sells or restocks. Balance targets
+ *            for fight length are set against this bot, not the smart one.
  */
 import { CARDS, type CardId } from '@/content/cards';
 import { ENHANCEMENTS } from '@/content/enhancements';
@@ -47,7 +51,7 @@ export interface DecidePolicy {
 }
 
 export interface BotConfig {
-  readonly kind: 'random' | 'greedy' | 'smart';
+  readonly kind: 'random' | 'greedy' | 'smart' | 'casual';
   readonly archetype?: Archetype | 'auto';
   readonly decide?: DecidePolicy;
   /** Keep this much mon for interest when shopping (smart only). */
@@ -72,6 +76,20 @@ export const PLAYER_PERSONA: AiPersona = {
   lookahead: true,
 };
 
+/** How the casual bot reads the table: what's good for it, without much thought for the spirit. */
+export const CASUAL_PERSONA: AiPersona = {
+  prefs: {},
+  denial: 0.15,
+  stopAt: 99,
+  minCards: 0,
+  caution: 0.4,
+  focus: 0.3,
+  lookahead: false,
+};
+
+/** How often the casual bot plays a loose card instead of its best one. */
+const CASUAL_SLIP = 0.2;
+
 const FAMILY_FOR: Partial<Record<Archetype, YakuFamily[]>> = {
   brights: ['brights'],
   ribbons: ['ribbons'],
@@ -88,6 +106,7 @@ export interface Bot {
 }
 
 function personaFor(config: BotConfig, archetype: Archetype | null): AiPersona {
+  if (config.kind === 'casual') return CASUAL_PERSONA;
   if (config.kind !== 'smart' || !archetype) return PLAYER_PERSONA;
   const fams = FAMILY_FOR[archetype] ?? [];
   const prefs: Partial<Record<YakuFamily, number>> = {};
@@ -111,6 +130,8 @@ export function makeBot(config: BotConfig, seed: number): Bot {
     const persona = personaFor(config, archetype);
     switch (h.phase) {
       case 'play':
+        if (config.kind === 'casual' && rng.next() < CASUAL_SLIP)
+          return { type: 'play', card: rng.pick(h.hands[0]) };
         return { type: 'play', card: choosePlay(h, makeEvaluator(h, 0, persona, null)) };
       case 'playChoice':
       case 'flipChoice': {
@@ -135,6 +156,7 @@ export function makeBot(config: BotConfig, seed: number): Bot {
         return valueOf(kept) >= avg ? { type: 'keepFlip' } : { type: 'redoFlip' };
       }
       case 'decide':
+        if (config.kind === 'casual') return { type: casualDecide(run, rng) };
         return {
           type: config.kind === 'greedy' ? 'stop' : decide(run, config.decide ?? DEFAULT_DECIDE),
         };
@@ -164,6 +186,7 @@ export function makeBot(config: BotConfig, seed: number): Bot {
       return { type: 'heal' };
     if (!archetype && config.archetype === 'auto') archetype = pickArchetype(run, rng);
     const reserve = config.kind === 'smart' ? (config.savings ?? 0) : 0;
+    // The casual player buys what fits its plan, and the shrine, but never sells or restocks.
     let bestIdx = -1;
     let bestScore = 0;
     shop.offers.forEach((o, i) => {
@@ -202,7 +225,7 @@ export function makeBot(config: BotConfig, seed: number): Bot {
       );
       if (weakest && better >= 0) return { type: 'sell', slot: weakest.i };
     }
-    if (!shop.shrine.used && config.kind === 'smart') {
+    if (!shop.shrine.used && (config.kind === 'smart' || config.kind === 'casual')) {
       const price = shrinePrice(shop.shrine.enhancement, ctx);
       const target = enhanceTarget(run, shop.shrine.enhancement, archetype);
       if (target !== null && affordable(price + reserve)) return { type: 'enhance', card: target };
@@ -217,7 +240,7 @@ export function makeBot(config: BotConfig, seed: number): Bot {
   };
 
   const ofudaAction = (run: RunState): RunAction | null => {
-    if (config.kind !== 'smart') return null;
+    if (config.kind !== 'smart' && config.kind !== 'casual') return null;
     const f = run.fight as FightState;
     const h = f.hand;
     if (h.phase !== 'play' || h.active !== 0) return null;
@@ -292,6 +315,19 @@ export function makeBot(config: BotConfig, seed: number): Bot {
 function rank(c: CardId): number {
   const t = CARDS[c]?.type;
   return t === 'bright' ? 4 : t === 'animal' ? 3 : t === 'ribbon' ? 2 : 1;
+}
+
+/**
+ * The casual player's koi-koi call: it doesn't weigh the spirit's threat, it just goes for it
+ * sometimes when it still has cards, and always stops when its stop would finish the spirit.
+ */
+function casualDecide(run: RunState, rng: Rng): 'stop' | 'koikoi' {
+  const f = run.fight as FightState;
+  const h = f.hand;
+  const preview = previewPlayerStop(run);
+  if (!preview || preview.damage >= f.hp) return 'stop';
+  if (h.hands[0].length < 3 || h.koikoiCalls[0] >= 2) return 'stop';
+  return rng.next() < 0.3 ? 'koikoi' : 'stop';
 }
 
 /** Fight-aware koi-koi decision for the smart bot. */
