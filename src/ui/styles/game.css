@@ -24,15 +24,29 @@
   position: absolute;
   left: 6px;
   right: 6px;
-  border-radius: 18px;
+  border-radius: 14px;
+  /* A flat lacquered board with a faint wood grain, framed in ink. */
   background:
-    radial-gradient(ellipse 80% 90% at 50% 45%, rgba(255, 255, 255, 0.05), transparent 70%),
-    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.05) 0 2px, transparent 2px 7px),
-    linear-gradient(180deg, color-mix(in srgb, var(--season-b) 45%, #1b1512), #15100d);
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0 2px, transparent 2px 7px),
+    color-mix(in srgb, var(--season-b) 30%, #140e0b);
+  border: 2.5px solid var(--line);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    inset 0 10px 30px rgba(0, 0, 0, 0.45),
-    0 1px 0 rgba(255, 255, 255, 0.05);
+    inset 0 0 0 1.5px rgba(244, 234, 211, 0.07),
+    0 4px 0 var(--line);
+}
+
+/* Winter: a pale moon low in the bokashi sky, behind everything. */
+.winter-moon {
+  position: absolute;
+  right: -34px;
+  top: 17%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #e9ecdf;
+  border: 3px solid var(--line);
+  opacity: 0.22;
+  pointer-events: none;
 }
 
 .particles {
@@ -51,9 +65,25 @@
   opacity: 0.55;
   animation: fall linear infinite;
 }
+/* Autumn: maple leaves. */
 [data-season='autumn'] .particle {
-  border-radius: 20% 60% 20% 60%;
-  background: #d8581e;
+  width: 11px;
+  height: 11px;
+  border-radius: 0;
+  background: #e0602a;
+  opacity: 0.7;
+  clip-path: polygon(
+    50% 0,
+    62% 35%,
+    100% 30%,
+    70% 58%,
+    82% 100%,
+    50% 78%,
+    18% 100%,
+    30% 58%,
+    0 30%,
+    38% 35%
+  );
 }
 [data-season='winter'] .particle {
   border-radius: 50%;
@@ -153,8 +183,7 @@
   /* The thick stiff card: a dark edge under the face. */
   box-shadow:
     0 1.5px 0 #0c0705,
-    0 2.5px 0 #0c0705,
-    0 4px 6px rgba(0, 0, 0, 0.45);
+    0 3px 0 #0c0705;
 }
 .card.down .card-flip {
   transform: rotateY(180deg);
@@ -182,13 +211,13 @@
 .card.dragging .card-flip {
   box-shadow:
     0 1.5px 0 #0c0705,
-    0 2.5px 0 #0c0705,
-    0 12px 18px rgba(0, 0, 0, 0.5);
+    0 3px 0 #0c0705,
+    0 12px 0 rgba(0, 0, 0, 0.3);
 }
 .card.mini .card-flip {
   box-shadow:
     0 1px 0 #0c0705,
-    0 2px 3px rgba(0, 0, 0, 0.4);
+    0 2px 0 #0c0705;
 }
 
 /* Training wheels: month number and flower name. */
@@ -241,12 +270,10 @@
   font-size: 10px;
   color: #fff;
   background: var(--vermilion);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.5),
-    0 1px 2px rgba(0, 0, 0, 0.5);
+  border: 1.5px solid var(--line);
 }
 .enh-gilded {
-  background: linear-gradient(135deg, #f8dc7a, #c9901c);
+  background: var(--gold);
   color: #3a2406;
 }
 .enh-blessed {
@@ -254,7 +281,7 @@
   color: #b0221c;
 }
 .enh-lacquered {
-  background: linear-gradient(135deg, #7a1812, #2a0806);
+  background: #5a1410;
 }
 .enh-inked {
   background: #111;
@@ -263,12 +290,12 @@
   background: #8a7a62;
 }
 .enh-lucky {
-  background: radial-gradient(circle, #ffe38a, #d99a1e);
+  background: var(--mon);
   color: #5a3406;
   border-radius: 50%;
 }
 .enh-moonlit {
-  background: radial-gradient(circle, #ffffff, #9fb6d8);
+  background: #dfe8f5;
   color: #1d2a44;
   border-radius: 50%;
 }
@@ -279,14 +306,10 @@
   pointer-events: none;
 }
 .enh-glow-gilded {
-  box-shadow:
-    inset 0 0 0 2px rgba(240, 200, 90, 0.9),
-    0 0 8px rgba(240, 200, 90, 0.55);
+  box-shadow: inset 0 0 0 2.5px var(--gold);
 }
 .enh-glow-moonlit {
-  box-shadow:
-    inset 0 0 0 2px rgba(210, 225, 255, 0.9),
-    0 0 10px rgba(190, 210, 255, 0.7);
+  box-shadow: inset 0 0 0 2.5px #c9d8ee;
 }
 .enh-glow-lacquered {
   background: linear-gradient(
@@ -314,7 +337,7 @@
   background: radial-gradient(circle at 50% 50%, #1d1712 0 3px, #fff 3.5px 5px, #c42a1c 5.5px);
   box-shadow:
     0 0 0 1.5px #fff,
-    0 0 8px rgba(210, 40, 20, 0.9);
+    0 0 0 3px var(--line);
   animation: pulse-want 1.6s ease-in-out infinite;
 }
 @keyframes pulse-want {
@@ -331,15 +354,16 @@
   margin-left: -5px;
   border-radius: 50%;
   background: var(--gold-2);
-  box-shadow: 0 0 8px 2px rgba(246, 210, 122, 0.8);
+  border: 2px solid var(--line);
 }
 
 .card.match .card-flip,
 .card.option .card-flip {
+  /* A thick gold frame with an ink edge: printed, not glowing. */
   box-shadow:
-    0 0 0 2.5px #ffe07a,
-    0 0 16px 4px rgba(255, 210, 90, 0.75),
-    0 3px 0 #0c0705;
+    0 0 0 3px #ffd84a,
+    0 0 0 5px var(--line),
+    0 7px 0 var(--line);
 }
 .card.option .card-body {
   animation: bob 900ms ease-in-out infinite;

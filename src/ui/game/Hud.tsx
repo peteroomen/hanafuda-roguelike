@@ -68,8 +68,9 @@ export function SpiritBar(props: {
               <span>Its face hides its plan</span>
             ) : props.intent ? (
               <span>
-                <span className="intent-name">
-                  Chasing <b>{yakuDef(props.intent.id).name}</b>
+                {/* The red eye already says "it wants": the name alone fits the long ones. */}
+                <span className="intent-name" title="The spirit is chasing this yaku">
+                  <b>{yakuDef(props.intent.id).name}</b>
                 </span>
                 <span className="intent-count">
                   {props.intent.have}/{props.intent.need}

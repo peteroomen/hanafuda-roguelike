@@ -37,14 +37,14 @@
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 3px 0 var(--line));
 }
 .portrait.boss::after {
   content: '';
   position: absolute;
-  inset: -4px;
+  inset: -3px;
   border-radius: 50%;
-  box-shadow: 0 0 14px 2px rgba(227, 169, 42, 0.55);
+  box-shadow: 0 0 0 2.5px var(--gold);
   pointer-events: none;
 }
 .portrait.calmed img {
@@ -85,6 +85,7 @@
   background: var(--gold);
   color: #2a1a06;
   font-weight: 700;
+  border: 1.5px solid var(--line);
 }
 .spirit-hp {
   display: flex;
@@ -105,10 +106,10 @@
 .hpbar {
   position: relative;
   flex: 1;
-  height: 9px;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.45);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  height: 10px;
+  border-radius: 3px;
+  background: #2e211b;
+  border: 1.5px solid var(--line);
   overflow: hidden;
 }
 .hpbar-fill,
@@ -117,7 +118,6 @@
   left: 0;
   top: 0;
   bottom: 0;
-  border-radius: 5px;
 }
 .hpbar-fill {
   z-index: 2;
@@ -129,10 +129,10 @@
   transition: width 900ms ease 380ms;
 }
 .hpbar-spirit .hpbar-fill {
-  background: linear-gradient(180deg, #ff7a57, #c12a17);
+  background: var(--vermilion);
 }
 .hpbar-player .hpbar-fill {
-  background: linear-gradient(180deg, #ffb3c6, #d9577a);
+  background: #e87d9a;
 }
 .intent-row {
   display: flex;
@@ -147,9 +147,9 @@
   flex: 0 1 auto;
   height: 22px;
   padding: 0 8px 0 5px;
-  border-radius: 11px;
-  background: rgba(20, 8, 6, 0.55);
-  box-shadow: inset 0 0 0 1px rgba(210, 57, 31, 0.5);
+  border-radius: 6px;
+  background: var(--sumi);
+  border: 1.5px solid var(--line);
   font-size: 11px;
   white-space: nowrap;
   overflow: hidden;
@@ -172,8 +172,7 @@
   font-weight: 700;
 }
 .intent.none {
-  opacity: 0.6;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  opacity: 0.7;
 }
 .intent .eye {
   flex: none;
@@ -187,13 +186,14 @@
   white-space: nowrap;
   height: 22px;
   padding: 0 6px;
-  border-radius: 11px;
+  border-radius: 6px;
   display: flex;
   gap: 2px;
   align-items: center;
   font-family: var(--font-display);
   font-size: 12px;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--sumi);
+  border: 1.5px solid var(--line);
   color: #ffcf9e;
 }
 .top-buttons {
@@ -242,9 +242,9 @@
   left: 8px;
   right: 8px;
   height: 40px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.18);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  border-radius: 9px;
+  background: rgba(8, 4, 3, 0.24);
+  border: 1.5px solid var(--line);
 }
 .cap-count {
   position: absolute;
@@ -252,8 +252,9 @@
   padding: 0 4px;
   border-radius: 6px;
   font-size: 9px;
-  line-height: 13px;
-  background: rgba(0, 0, 0, 0.55);
+  line-height: 12px;
+  background: var(--sumi);
+  border: 1px solid var(--line);
   color: #f4ead3;
   z-index: 60;
   pointer-events: none;
@@ -272,7 +273,7 @@
   font-size: 11px;
   background: var(--vermilion);
   color: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  border: 1.5px solid var(--line);
   pointer-events: none;
 }
 .cap-dot {
@@ -298,22 +299,23 @@
   flex: none;
   height: 22px;
   padding: 0 8px;
-  border-radius: 11px;
+  border-radius: 6px;
   font-size: 11px;
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(244, 234, 211, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(244, 234, 211, 0.18);
+  background: var(--sumi);
+  border: 1.5px solid var(--line);
   white-space: nowrap;
 }
 .tracker .chip b {
   color: var(--gold-2);
 }
 .tracker .chip.formed {
-  background: linear-gradient(180deg, #f6d27a, #d99a1e);
+  background: var(--gold);
   color: #2a1a06;
-  box-shadow: 0 0 10px rgba(246, 210, 122, 0.5);
+  font-weight: 700;
+  box-shadow: 0 2px 0 var(--line);
 }
 .tracker .chip.formed b {
   color: #7a1d10;
@@ -333,16 +335,16 @@
   display: flex;
   gap: 6px;
   align-items: center;
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35));
 }
 .hp-pill {
   flex: none;
   width: 92px;
   height: 48px;
   padding: 4px 7px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.35);
-  box-shadow: inset 0 0 0 1px rgba(241, 154, 178, 0.35);
+  border-radius: 10px;
+  background: var(--sumi);
+  border: var(--edge);
+  box-shadow: var(--print);
   display: grid;
   grid-template-columns: 18px 1fr;
   grid-template-rows: 18px 8px 12px;
@@ -358,9 +360,8 @@
 }
 @keyframes low {
   50% {
-    box-shadow:
-      inset 0 0 0 1.5px #ff5a4a,
-      0 0 12px rgba(255, 90, 74, 0.5);
+    border-color: var(--vermilion);
+    background: #3a1410;
   }
 }
 .hp-pill-text {
@@ -393,9 +394,10 @@
 .slot {
   display: grid;
   place-items: center;
-  border-radius: 9px;
-  background: rgba(0, 0, 0, 0.3);
-  box-shadow: inset 0 0 0 1px rgba(244, 234, 211, 0.14);
+  border-radius: 8px;
+  background: var(--sumi-2);
+  border: var(--edge);
+  box-shadow: var(--print);
 }
 .slot.charm {
   width: 34px;
@@ -406,8 +408,9 @@
   height: 48px;
 }
 .slot.empty {
-  background: rgba(0, 0, 0, 0.15);
-  box-shadow: inset 0 0 0 1px rgba(244, 234, 211, 0.08);
+  background: transparent;
+  border: 1.5px dashed rgba(244, 234, 211, 0.2);
+  box-shadow: none;
 }
 .slot.empty::after {
   content: '';
@@ -417,12 +420,11 @@
   background: rgba(244, 234, 211, 0.15);
 }
 .slot.ofuda.ready {
-  box-shadow:
-    inset 0 0 0 1px rgba(246, 210, 122, 0.6),
-    0 0 8px rgba(246, 210, 122, 0.35);
+  border-color: var(--gold);
 }
 .slot:active:not(.empty) {
-  transform: scale(0.92);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--line);
 }
 .charm-row.big .slot.charm {
   width: 46px;
@@ -433,12 +435,18 @@
   position: absolute;
   left: 0;
   right: 0;
-  text-align: center;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 3px 10px;
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--edge);
+  box-shadow: var(--print);
   font-size: 11px;
-  color: rgba(244, 234, 211, 0.75);
+  font-weight: 700;
   pointer-events: none;
   z-index: 950;
-  text-shadow: 0 1px 2px #000;
 }
 .thinking {
   position: absolute;
@@ -462,15 +470,11 @@
   text-align: center;
   padding: 12px 26px 14px;
   min-width: 220px;
-  border-radius: 6px;
+  border-radius: 10px;
   color: #fff8e6;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(20, 12, 8, 0.9) 18%,
-    rgba(20, 12, 8, 0.9) 82%,
-    transparent
-  );
+  background: var(--sumi);
+  border: 2.5px solid var(--line);
+  box-shadow: 0 4px 0 var(--line);
   animation: banner-in 260ms cubic-bezier(0.2, 1.3, 0.4, 1) both;
 }
 @keyframes banner-in {
@@ -510,8 +514,7 @@
   color: var(--season-a);
 }
 .banner-calm .banner-title {
-  color: #fff;
-  text-shadow: 0 0 16px var(--season-a);
+  color: var(--season-a);
 }
 
 .floater {
@@ -521,9 +524,12 @@
   font-weight: 800;
   font-size: 26px;
   pointer-events: none;
+  /* An inked outline, printed. */
   text-shadow:
-    0 2px 0 #000,
-    0 0 10px rgba(0, 0, 0, 0.6);
+    0 2px 0 var(--line),
+    1.5px 0 0 var(--line),
+    -1.5px 0 0 var(--line),
+    0 -1.5px 0 var(--line);
   animation: float-up 1.3s ease-out forwards;
 }
 .floater-dmg {
@@ -574,18 +580,19 @@
   height: 50px;
   flex: none;
   border-radius: 50%;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 3px 0 var(--line));
 }
 .guide-text {
   position: relative;
   flex: 1;
   padding: 10px 12px;
-  border-radius: 14px 14px 14px 4px;
-  background: #f7efdc;
+  border-radius: 12px 12px 12px 3px;
+  background: var(--paper);
   color: var(--ink);
   font-size: 13px;
   line-height: 1.4;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  border: var(--edge);
+  box-shadow: var(--print);
 }
 .guide-ok {
   display: block;
@@ -611,15 +618,17 @@
   gap: 10px;
   align-items: center;
   padding: 7px 12px;
-  border-radius: 12px;
-  background: rgba(20, 12, 8, 0.9);
-  box-shadow: 0 0 0 1px rgba(246, 210, 122, 0.5);
+  border-radius: 9px;
+  background: var(--sumi);
+  border: 2px solid var(--gold);
+  box-shadow: var(--print);
   font-size: 12px;
   line-height: 1.35;
   text-align: center;
 }
 
 /* Decision -------------------------------------------------------------- */
+/* The frog's choice still dims the table; stop/koi-koi doesn't (see .decide-panel). */
 .decision-scrim {
   position: absolute;
   inset: 0;
@@ -627,67 +636,87 @@
   display: flex;
   align-items: flex-end;
   padding: 0 10px 16px;
-  background: linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.65));
+  background: rgba(8, 5, 4, 0.45);
 }
 .decision {
   width: 100%;
   padding: 14px 14px 16px;
 }
-.decision-yaku {
+/* Stop or koi-koi: a printed panel over your hand and the bottom bar, near your thumb. The
+   field, both captured lanes and the tracker stay in view above it. */
+.decide-panel {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 1150;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px 12px 12px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2.5px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 4px 0 var(--line);
+  transition: transform 220ms cubic-bezier(0.3, 0.9, 0.3, 1);
+  animation: decide-in 260ms cubic-bezier(0.2, 1.2, 0.4, 1) both;
 }
-.yaku-pill {
-  display: inline-flex;
-  gap: 6px;
+@keyframes decide-in {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+/* Holding the peek button slides the panel down, leaving only its top row. */
+.decide-panel.peeking {
+  transform: translateY(calc(100% - 40px));
+}
+.decide-top {
+  display: flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #f6d27a, #d99a1e);
-  font-weight: 700;
-  font-size: 13px;
-}
-.yaku-pill .kanji {
-  font-family: var(--font-display);
-}
-.yaku-pill b {
-  color: #7a1d10;
-}
-.decision-cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 8px;
+  min-height: 28px;
 }
-.decision-col {
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(90, 60, 30, 0.08);
-  text-align: center;
+.peek-btn {
+  flex: none;
+  margin-left: auto;
+  height: 30px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+  border: 2px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 700;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
-.decision-col.koikoi {
-  background: rgba(200, 50, 30, 0.08);
+.peek-eye {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--vermilion);
+  border: 2.5px solid var(--line);
+}
+.decide-q {
+  font-size: 13px;
+  min-width: 0;
+}
+.decide-q b {
+  font-family: var(--font-display);
+  font-size: 18px;
 }
 .decision-head {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 15px;
-  opacity: 0.8;
-}
-.decision-big {
-  font-size: 30px;
-  line-height: 1.1;
-  color: #1f3f86;
-}
-.decision-col.koikoi .decision-big {
-  color: #b8261a;
-}
-.decision-note {
-  font-size: 11px;
-  line-height: 1.35;
-  opacity: 0.85;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.75;
 }
 .good {
   color: #2f7a2a;
@@ -695,20 +724,58 @@
 .bad {
   color: #b8261a;
 }
-.decision-meta {
-  margin: 8px 0 10px;
-  text-align: center;
-  font-size: 11px;
-  opacity: 0.65;
-}
 .decision-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
-.decision-buttons .btn {
-  min-height: 56px;
-  font-size: 22px;
+.decision-buttons {
+  gap: 8px;
+}
+/* Each choice is one big button: what it's called, what it does, and what it costs. */
+.decide-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 6px 8px;
+  border-radius: 10px;
+  border: 2.5px solid var(--line);
+  color: var(--ink);
+  transition:
+    transform 90ms ease,
+    box-shadow 90ms ease;
+}
+.decide-btn:active {
+  transform: translateY(3px);
+}
+.decide-btn.stop {
+  background: var(--gold);
+  box-shadow: 0 4px 0 #6b4808;
+}
+.decide-btn.koikoi {
+  background: var(--vermilion);
+  color: #fff;
+  box-shadow: 0 4px 0 #5a120c;
+}
+.decide-btn:active.stop,
+.decide-btn:active.koikoi {
+  box-shadow: 0 1px 0 var(--line);
+}
+.decide-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.1;
+}
+.decide-big {
+  font-size: 30px;
+  line-height: 1;
+}
+.decide-note {
+  font-size: 10.5px;
+  line-height: 1.25;
+  opacity: 0.85;
 }
 .decision.frog {
   text-align: center;
@@ -718,7 +785,8 @@
   margin: 10px auto 14px;
   display: block;
   border-radius: 8px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  border: var(--edge);
+  box-shadow: 0 4px 0 var(--line);
 }
 
 .handover {
@@ -728,7 +796,7 @@
   display: flex;
   align-items: flex-end;
   padding: 0 14px 90px;
-  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.5));
+  background: rgba(8, 5, 4, 0.3);
 }
 .handover-card {
   width: 100%;
@@ -762,12 +830,13 @@
   width: 100%;
   max-width: 366px;
   padding: 14px 12px 16px;
-  border-radius: 16px;
+  border-radius: 12px;
   text-align: center;
-  background: linear-gradient(180deg, #2a1d16, #17100c);
+  background: var(--sumi);
+  border: 2.5px solid var(--line);
   box-shadow:
-    0 0 0 1px rgba(246, 210, 122, 0.35),
-    0 20px 40px rgba(0, 0, 0, 0.6);
+    inset 0 0 0 1.5px rgba(246, 210, 122, 0.3),
+    0 5px 0 var(--line);
 }
 .score-yaku {
   display: flex;
@@ -778,10 +847,11 @@
 }
 .score-yaku-name {
   padding: 3px 9px;
-  border-radius: 12px;
+  border-radius: 7px;
   font-size: 13px;
   font-weight: 700;
-  background: rgba(246, 210, 122, 0.12);
+  background: var(--sumi-2);
+  border: 1.5px solid var(--line);
   color: var(--gold-2);
   transition: transform 150ms ease;
 }
@@ -811,7 +881,8 @@
 }
 .score-cards img.active {
   transform: translateY(-8px) scale(1.18);
-  filter: brightness(1.2) drop-shadow(0 0 6px rgba(120, 180, 255, 0.9));
+  outline: 2.5px solid #7fb2ff;
+  outline-offset: 1px;
 }
 .chips-mult {
   display: flex;
@@ -827,14 +898,15 @@
   font-weight: 800;
   font-size: 30px;
   color: #fff;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  text-shadow: 0 2px 0 var(--line);
+  border: 2.5px solid var(--line);
 }
 .box.chips {
-  background: linear-gradient(180deg, #4d8df0, #2b5fbe);
+  background: var(--chips);
   box-shadow: 0 4px 0 #173a7a;
 }
 .box.mult {
-  background: linear-gradient(180deg, #f2603f, #c2321c);
+  background: var(--mult);
   box-shadow: 0 4px 0 #6a160c;
 }
 .box.bump {
@@ -878,7 +950,8 @@
   color: #ffd166;
   text-shadow:
     0 4px 0 #6a3a06,
-    0 0 20px rgba(255, 200, 80, 0.6);
+    2px 0 0 var(--line),
+    -2px 0 0 var(--line);
   transition:
     opacity 200ms ease,
     height 200ms ease;
@@ -959,10 +1032,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 26px 22px 20px;
-  background:
-    radial-gradient(ellipse 90% 50% at 50% 30%, var(--season-glow), transparent 70%),
-    linear-gradient(180deg, var(--season-bg2), var(--season-bg1) 60%);
+  padding: 22px 22px 20px;
+  /* The season's bokashi sky. */
+  background: linear-gradient(
+    180deg,
+    var(--season-sky) 0%,
+    var(--season-bg2) 28%,
+    var(--season-bg1) 65%
+  );
   text-align: center;
   overflow-y: auto;
 }
@@ -986,10 +1063,24 @@
   letter-spacing: 0.15em;
   opacity: 0.5;
 }
+/* The portrait with the spirit's opening line in its mood's speech bubble, up and to the right. */
+.intro-hero {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 6px;
+}
+.intro-bubble {
+  position: absolute;
+  right: -10px;
+  top: -8px;
+  width: 196px;
+}
 .intro-face {
   width: 168px;
   height: 168px;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(0 4px 0 var(--line));
   animation: intro-face 700ms cubic-bezier(0.2, 1.2, 0.4, 1) both;
 }
 .intro-face.boss {
@@ -1035,9 +1126,10 @@
 .intro-rule {
   width: 100%;
   padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(210, 57, 31, 0.18);
-  box-shadow: inset 0 0 0 1px rgba(255, 138, 112, 0.5);
+  border-radius: 10px;
+  background: #3a1410;
+  border: 2px solid var(--line);
+  box-shadow: var(--print);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -1055,16 +1147,12 @@
 .intro-stage {
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(244, 234, 211, 0.08);
-}
-.intro-taunt {
-  margin: 12px 0 14px;
-  font-family: var(--font-display);
-  font-size: 16px;
-  color: var(--season-a);
+  background: var(--sumi);
+  border: 1.5px solid var(--line);
 }
 .intro-begin {
   margin-top: auto;
+  flex: none;
   width: 100%;
   min-height: 56px;
   font-size: 22px;
@@ -1078,7 +1166,7 @@
   display: flex;
   align-items: flex-end;
   padding: 10px;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(8, 5, 4, 0.55);
 }
 .sheet {
   width: 100%;
@@ -1113,8 +1201,9 @@
   display: flex;
   gap: 4px;
   background: rgba(90, 60, 30, 0.1);
+  border: 1.5px solid var(--line);
   padding: 3px;
-  border-radius: 11px;
+  border-radius: 10px;
 }
 .tabs.wrap {
   flex-wrap: wrap;
@@ -1131,6 +1220,7 @@
 .tabs button.on {
   background: var(--vermilion);
   color: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--line);
 }
 .item-sheet {
   gap: 10px;
@@ -1181,7 +1271,8 @@
 }
 .sheet .btn.ghost {
   color: var(--ink);
-  box-shadow: inset 0 0 0 1.5px rgba(29, 23, 18, 0.25);
+  border-color: var(--line);
+  box-shadow: none;
 }
 .sheet-face {
   width: 70px;
@@ -1232,6 +1323,7 @@
   height: 28px;
   border-radius: 14px;
   background: rgba(90, 60, 30, 0.25);
+  border: 2px solid var(--line);
   position: relative;
   transition: background 150ms ease;
   cursor: pointer;
@@ -1239,13 +1331,13 @@
 .setting input[type='checkbox']::after {
   content: '';
   position: absolute;
-  left: 3px;
-  top: 3px;
-  width: 22px;
-  height: 22px;
+  left: 2px;
+  top: 2px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--line);
   transition: transform 150ms ease;
 }
 .setting input[type='checkbox']:checked {
@@ -1264,6 +1356,7 @@
   padding: 2px;
   border-radius: 9px;
   background: rgba(90, 60, 30, 0.12);
+  border: 1.5px solid var(--line);
 }
 .seg button {
   min-height: 32px;
@@ -1275,6 +1368,117 @@
 .seg button.on {
   background: var(--vermilion);
   color: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+
+/* Fukidashi: the spirits' speech bubbles ------------------------------------ */
+.fukidashi {
+  position: relative;
+  aspect-ratio: 300 / 132;
+  pointer-events: none;
+}
+.fukidashi svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.fk-shape {
+  fill: var(--paper);
+  stroke: var(--line);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+.fk-text {
+  position: absolute;
+  left: 13%;
+  right: 13%;
+  top: 19%;
+  bottom: 26%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.25;
+  font-size: 15px;
+}
+/* The tail points up: the body sits lower in the box. */
+.tail-up .fk-text {
+  top: 26%;
+  bottom: 19%;
+}
+.fk-mid {
+  font-size: 13.5px;
+}
+.fk-long {
+  font-size: 12px;
+}
+.mood-whisper .fk-shape {
+  fill: #e9dfcc;
+  stroke: #6a5a4a;
+  stroke-width: 2.5;
+  stroke-dasharray: 3 6;
+  stroke-linecap: round;
+}
+.mood-whisper .fk-text {
+  color: #5a4a3a;
+  font-weight: 500;
+  font-style: italic;
+}
+.mood-shout .fk-shape {
+  fill: #fff6e0;
+  stroke-linejoin: miter;
+}
+.mood-shout .fk-text {
+  left: 20%;
+  right: 20%;
+  text-transform: uppercase;
+}
+.mood-menace .fk-shape {
+  fill: #150b08;
+  stroke: var(--vermilion);
+  stroke-linejoin: miter;
+}
+.mood-menace .fk-text {
+  left: 20%;
+  right: 20%;
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.mood-cold .fk-shape {
+  fill: #dfeaf3;
+  stroke: #2a3a52;
+  stroke-width: 2.5;
+}
+.mood-cold .fk-text {
+  color: #2a3a52;
+  font-weight: 500;
+  top: 14%;
+  bottom: 30%;
+}
+.mood-cold.tail-up .fk-text {
+  top: 30%;
+  bottom: 14%;
+}
+/* In a fight: under the spirit's portrait, the tail pointing up at it. */
+.speech {
+  position: absolute;
+  left: 40px;
+  width: 236px;
+  z-index: 1120;
+  pointer-events: none;
+  animation: speech-in 240ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  transform-origin: 15% 0;
+}
+@keyframes speech-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
 }
 
 @keyframes dots {

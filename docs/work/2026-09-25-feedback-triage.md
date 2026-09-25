@@ -4,7 +4,7 @@
 **Source:** Google Doc "koi koi feedback" (19 items, written after a play session).
 **Branch:** `claude/game-bugs-triage-plan-iewzo2` (this plan only; each workstream below gets its
 own branch and PR, per CLAUDE.md).
-**Status:** PRs A and B merged together (#7), PR C merged (#8). PR D (language) is done. PR E is next.
+**Status:** PRs A–D merged (#7, #8, #9), plus the audio fix (#10). PR E (style pass) is done. PR F (balance) is next.
 
 ## Goal
 
@@ -158,6 +158,37 @@ As built:
 - **Consistency (#15 part 1).** Use one button style, one panel style and one pill style, and
   remove anything they make redundant. The big design pass is a separate plan later.
 
+As built, after the style board (https://claude.ai/artifact/DBpo59ARbihxRnWc8iAzEX) and the
+user's answers (keep Shippori Mincho as the hero font; spirits speak mid-fight; peek is
+hold-to-see):
+
+- **Woodblock tokens** in `global.css`: `--line` (ink), `--edge` (2px ink border), `--print`
+  (a hard 3px shadow straight down), `--sumi` and `--sumi-2` (flat dark surfaces). Buttons, icon
+  buttons, paper panels, pills, HP bars, slots, lanes, the table, banners, hints, the Rain Man's
+  bubble, score and strike panels, shop tiles, deck and omen pickers, tabs and toggles all use
+  them. There are no soft glows or blurred shadows left in the UI. Card highlights (matches,
+  choices) are a thick gold frame with an ink edge.
+- **Gradients left on purpose:** the bokashi skies (`--season-sky` over the season's night on
+  every screen and the intro), the table's wood grain, card effects (lacquer sheen, frost, the
+  red flash when you're hurt) and a few icons drawn with hard colour stops.
+- **Seasons:** spring plum sky with petals, summer indigo with fireflies, autumn persimmon with
+  maple leaves (a clip-path leaf), winter slate with snow and a pale moon.
+- **Stop / koi-koi** (`DecisionSheet`): no scrim. A compact panel over the hand and bottom bar:
+  "N points. Stop, or koi-koi?" and a **Hold: hand** button on top, then two big buttons that
+  carry their own numbers (Stop: damage and what it leaves; Koi-koi!: the stake, cards left and
+  the risk). The yaku are on the tracker just above, so the panel doesn't repeat them. Holding
+  the button slides the panel down, leaving its top row; letting go brings it back.
+  `e2e/peek.spec.ts` covers it.
+- **Fukidashi** (`Fukidashi.tsx`): six bubble shapes by mood. The intro shows the spirit's
+  opening line beside its portrait. In a fight, lines appear under the portrait for 2.8 s.
+- **Spirit voices** (`src/content/voices.ts`): a mood and lines per spirit for when it hits you,
+  when you hurt it, when it or you call koi-koi, when it's calmed, when you take more than 12 s
+  over your turn (impatient and eerie spirits only), and when a boss rule fires (once per hand).
+  Oni and Kamaitachi never call koi-koi, so they have no line for it. The Nopperabō says only
+  "…" until it's calmed. `voices.test.ts` checks every spirit has the lines a fight needs, and
+  that every line fits a bubble.
+- The intent pill drops the word "Chasing" (the red eye already means it) so long yaku names fit.
+
 ### PR F: Balance (#8)
 
 The play report was 7 hands to beat the Tengu (a boss), finishing on 6 HP. That's a war of
@@ -252,3 +283,6 @@ before building UI.
 9. **PR A and PR B ship as one PR.**
 10. **Shop (PR C):** services get the confirm step, and tiles keep the three lines (name, short
     line, price).
+11. **Style (PR E):** keep Shippori Mincho (it suits woodblock); spirits speak mid-fight with a
+    few personality lines each (including an impatient taunt when you take too long); peek is
+    hold, not tap.

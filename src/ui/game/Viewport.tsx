@@ -44,6 +44,7 @@ export function Viewport({
   const size = useStageSize();
   return (
     <div className="viewport washi" data-season={season}>
+      {season === 'winter' && <div className="winter-moon" aria-hidden />}
       <Particles season={season} />
       <div
         className="stage"

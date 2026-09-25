@@ -4,11 +4,13 @@ import { deckDef } from '@/content/decks';
 import { ofudaDef } from '@/content/ofuda';
 import { apparentMatches, canUseTalisman } from '@/engine/hand';
 import { type FightState, type RunState, waitingOn } from '@/engine/run';
-import { setState, useStore } from '@/ui/state/store';
+import { setState, speedFactor, useStore } from '@/ui/state/store';
+import { IDLE_TAUNT_MS } from '@/content/voices';
 import * as sfx from '@/ui/audio/audio';
 import { haptics } from '@/ui/audio/haptics';
 import { CardLayer, type CardMarks } from './CardLayer';
 import { DecisionSheet, FrogSheet, HandOverPanel, Hint } from './Decision';
+import { Fukidashi } from './Fukidashi';
 import { BottomBar, CapturedCounts, SpiritBar, Tracker } from './Hud';
 import { IntroOverlay } from './Intro';
 import { CARD_H, CARD_W, makeStage, type Placement, placements, STAGE_W } from './layout';
@@ -82,6 +84,15 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
     }
   }, [playing]);
   useEffect(() => () => endPress.current?.(), []);
+
+  // An impatient spirit pipes up if your turn sits too long. Once per turn.
+  const turnKey = `${fight.handNo}:${hand.turn}`;
+  const say = api.say;
+  useEffect(() => {
+    if (!playing || speedFactor() === 0) return;
+    const t = setTimeout(() => say('idle'), IDLE_TAUNT_MS);
+    return () => clearTimeout(t);
+  }, [playing, turnKey, say]);
 
   // If the player aimed at a specific field card and a choice came up, take it.
   useEffect(() => {
@@ -387,6 +398,17 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
         )}
         {view.hurt > 0 && <div className="hurt-flash" key={`hurt-${view.hurt}`} />}
       </div>
+
+      {view.speech && (
+        <div
+          className="speech"
+          key={view.speech.id}
+          style={{ top: stage.topBar - 4 }}
+          data-testid="speech"
+        >
+          <Fukidashi mood={view.speech.mood} text={view.speech.text} tail="up" />
+        </div>
+      )}
 
       <BannerView banner={view.banner} />
       <Floaters floaters={view.floaters} stageH={stageH} />
