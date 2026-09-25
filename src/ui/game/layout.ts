@@ -57,7 +57,8 @@ export function makeStage(h: number, fieldCount: number): Stage {
   const playerCapY = handY - capH - 18;
   const trackerY = playerCapY - 30;
   const topBar = 78;
-  const spiritCapY = topBar + 2;
+  // A clear gap under the spirit's intent and ferocity chips.
+  const spiritCapY = topBar + 10;
   // The spirit's lane, then its group counts underneath.
   const top = spiritCapY + capH + 20;
   const bottom = trackerY - 6;

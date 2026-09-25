@@ -43,6 +43,10 @@ export function runSuite(runs: number): string {
     summary: batch(runs, { kind: 'smart', archetype: 'auto' }),
   });
   rows.push({
+    label: 'casual bot (a learning player)',
+    summary: batch(runs, { kind: 'casual', archetype: 'auto' }),
+  });
+  rows.push({
     label: 'smart bot, guided year',
     summary: batch(runs, { kind: 'smart', archetype: 'auto' }, { guided: true }),
   });
@@ -80,13 +84,13 @@ export function runSuite(runs: number): string {
   md.push('## Targets and verdict');
   md.push('');
   md.push(
-    '- **Winnable:** a strong player (the smart bot) should clear the year a little over half the time at Clear Sky, so that human players, who play less precisely, land nearer 30–45%. Spirits are eased in months 1–6 (`monthEase`) and sometimes play their second-best move (`spiritSlip`). A player who never calls koi-koi should win less; a player who taps at random should never win.',
+    '- **Winnable:** a strong player (the smart bot) should clear the year about 45% of the time at Clear Sky, and a learning player (the casual bot: no lookahead, loose plays, whimsical koi-koi) about 25–30%. Spirits are eased in months 1–6 (`monthEase`) and sometimes play their second-best move (`spiritSlip`). A player who never calls koi-koi should win less; a player who taps at random should never win.',
   );
   md.push(
     '- **Varied:** every archetype and every seasonal deck should be viable, within about 15 points of the best.',
   );
   md.push(
-    '- **Tense:** fights last two to three hands, the bosses (months 3, 6, 9, 12) are the walls, and the final boss is the hardest fight of the year.',
+    '- **Tense:** fights last two to three hands, and every spirit hit matters: about 10% of your HP in month 1, 15% at the first boss, and 25–30% by December. The heal after a fight (15%, 50% after a boss) no longer undoes a whole fight. The bosses (months 3, 6, 9, 12) are the walls, and the final boss is the hardest fight of the year.',
   );
   md.push('- **Omens** should make each difficulty step clearly harder, ending in single digits.');
   md.push('');
@@ -101,18 +105,24 @@ export function runSuite(runs: number): string {
   }
   md.push('');
   const main = rows[2]?.summary as Summary;
-  md.push('## Month by month (smart bot, auto archetype)');
-  md.push('');
-  md.push(
-    '| Month | Fights | Win | Hands/fight | HP at start | Damage taken | Player stop damage p25 / p50 / p90 | Spirit hit |',
-  );
-  md.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
-  for (const m of main.months) {
+  const casual = rows[3]?.summary as Summary;
+  for (const [title, s] of [
+    ['smart bot, auto archetype', main],
+    ['casual bot', casual],
+  ] as const) {
+    md.push(`## Month by month (${title})`);
+    md.push('');
     md.push(
-      `| ${m.month} | ${m.fights} | ${pc(m.winRate)} | ${m.avgHands.toFixed(2)} | ${m.hpAtStart.toFixed(0)} | ${m.avgDamageTaken.toFixed(1)} | ${m.playerDamage.p25} / ${m.playerDamage.p50} / ${m.playerDamage.p90} | ${m.spiritHitAvg.toFixed(1)} |`,
+      '| Month | Fights | Win | Hands/fight | HP at start | Damage taken | Player stop damage p25 / p50 / p90 | Spirit hit |',
     );
+    md.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
+    for (const m of s.months) {
+      md.push(
+        `| ${m.month} | ${m.fights} | ${pc(m.winRate)} | ${m.avgHands.toFixed(2)} | ${m.hpAtStart.toFixed(0)} | ${m.avgDamageTaken.toFixed(1)} | ${m.playerDamage.p25} / ${m.playerDamage.p50} / ${m.playerDamage.p90} | ${m.spiritHitAvg.toFixed(1)} |`,
+      );
+    }
+    md.push('');
   }
-  md.push('');
   md.push('## Archetypes (smart bot committed to one archetype)');
   md.push('');
   md.push('| Archetype | Win rate | Avg month reached |');

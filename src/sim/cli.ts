@@ -20,7 +20,7 @@ function arg(name: string, fallback?: string): string | undefined {
 }
 
 if (process.argv.includes('--help')) {
-  console.log(`pnpm sim [--runs N] [--seed S] [--bot random|greedy|smart] [--archetype auto|brights|...]
+  console.log(`pnpm sim [--runs N] [--seed S] [--bot random|greedy|smart|casual] [--archetype auto|brights|...]
           [--omen 0-5] [--deck pine|plum|...] [--guided] [--json out.json]
 pnpm sim --suite [--runs N]   writes docs/balance/report.md`);
   process.exit(0);

@@ -4,7 +4,7 @@
 **Source:** Google Doc "koi koi feedback" (19 items, written after a play session).
 **Branch:** `claude/game-bugs-triage-plan-iewzo2` (this plan only; each workstream below gets its
 own branch and PR, per CLAUDE.md).
-**Status:** PRs A–D merged (#7, #8, #9), plus the audio fix (#10). PR E (style pass) is done. PR F (balance) is next.
+**Status:** PRs A–E merged (#7–#11), plus the audio fix (#10). PR F (balance) is done. PR G is next.
 
 ## Goal
 
@@ -223,6 +223,26 @@ Proposed direction (question 2 has the choices):
 
 This builds on the unmerged "ease the early months" commit (`1735cca`, see question 1).
 
+As built (answer 2: "model it"):
+
+- **A casual bot** (`kind: 'casual'` in `src/sim/bots.ts`) stands in for a learning player. It
+  has no lookahead and barely blocks the spirit, plays a loose card 20% of the time, and calls
+  koi-koi 30% of the time when it has 3+ cards. It shops like the smart bot but never sells or
+  restocks. It's in the suite report with its own month-by-month table. Even this bot beat v1.0
+  46% of the time with 2.5-hand fights, so real players (7 hands against the Tengu) are well
+  below any bot. The tuning therefore targets the feel the user described, not a hands number.
+- **Numbers** (`src/content/balance.ts`), chosen from six variants run on the suite's seeds:
+  - Spirit HP −28% (`monthHp` 72 → 1368).
+  - Ferocity about 1.9× v1.0 early, tapering to 1.15× by December (`monthFerocity` 1.9 → 2.59).
+  - Heal after a fight 20% → 15% of missing HP; after a boss 60% → 55%.
+- **Result** (400 runs each):
+  - Win rates: smart 44% (was 53%), casual 35%.
+  - Omens: 44 / 37 / 30 / 20 / 12 / 7%.
+  - Spirit hits (smart bot): about 7 in month 1, 12 at the first boss, 13 at the second, 17 at
+    the third and 22 at the finale, against 80 HP.
+  - Fights: 2.0–2.7 hands.
+  - Archetypes: 36–52% (greed lowest); decks 41–50%.
+
 ### PR G: Score deck and charm unlocks (#9, #11)
 
 - **New deck, the "Firework Deck" (花火, Hanabi).** Start with Carp Streamer. Every yaku's mult
@@ -264,6 +284,20 @@ before building UI.
     through `ready()`, which skips it while the context isn't running, so nothing queues up.
     `e2e/audio.spec.ts` fakes a hidden tab and checks the context suspends and resumes.
 
+- **Peek: press-and-hold selects text and buzzes** (reported after PR E). The hold triggers the
+  browser's long-press text selection and its haptic tick. Fix: `user-select: none` and
+  `-webkit-touch-callout: none` on the whole decision panel (not just the button), and call
+  `preventDefault` on the button's `pointerdown` / `touchstart`. Small; can ride any UI PR.
+- **You can't see your HP while deciding stop or koi-koi** (reported after PR E). The panel covers
+  the bottom bar, where HP lives, and HP is exactly what the risk depends on. Queued for the big
+  design pass, together with "persistent things (HP, mon, charms) get one fixed home that's never
+  covered". Until then, the Koi-koi! button could show "risk ~14 of your 52 HP".
+- **UI sounds don't fit the theme** (reported after PR E). Today's UI taps and ticks are synthetic
+  blips. Replace them with paper, wood and nature sounds, still synthesised in `audio.ts` (no
+  files): a paper rustle for sheets and the shop, a soft wooden tock for buttons, a bamboo clack
+  for confirms, a brushed-paper swish for tabs, and a water-drop for the peek. The card slap, koto
+  and taiko already fit and stay. Small, self-contained PR.
+
 ## Manual test steps (all PRs)
 
 1. `pnpm lint`, `pnpm typecheck` and `pnpm test`.
@@ -300,3 +334,6 @@ before building UI.
 11. **Style (PR E):** keep Shippori Mincho (it suits woodblock); spirits speak mid-fight with a
     few personality lines each (including an impatient taunt when you take too long); peek is
     hold, not tap.
+12. **Balance (PR F):** fine, but model it. Also after PR E: centre the intro portrait, with the
+    speech bubble up and to the right, overlapping only slightly, with more padding and slightly
+    smaller text.

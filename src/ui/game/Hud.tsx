@@ -87,13 +87,26 @@ export function SpiritBar(props: {
               <span>Biding its time</span>
             )}
           </button>
-          <div className="ferocity" title="The spirit hits for its yaku points times this">
-            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+          <div
+            className="ferocity"
+            title="Its hits take its yaku points × this from your HP"
+            aria-label="Damage to you"
+          >
+            {/* A cracked heart: this multiplies the damage it deals to your HP (the heart). */}
+            <svg width="14" height="13" viewBox="0 0 14 13" aria-hidden>
               <path
-                d="M3.5 1 Q2 6 2.5 11 M7 1 Q5.5 6 6 11 M10.5 1 Q9 6 9.5 11"
+                d="M7 12.2 C3 9.2 0.8 7 0.8 4.2 C0.8 2.2 2.3 0.8 4.1 0.8 C5.3 0.8 6.4 1.5 7 2.5 C7.6 1.5 8.7 0.8 9.9 0.8 C11.7 0.8 13.2 2.2 13.2 4.2 C13.2 7 11 9.2 7 12.2 Z"
+                fill="#e87d9a"
+                stroke="#0d0806"
+                strokeWidth="1.2"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M7 2.6 L5.6 5.4 L8.2 6.8 L6.4 10"
                 fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
+                stroke="#0d0806"
+                strokeWidth="1.3"
+                strokeLinejoin="round"
                 strokeLinecap="round"
               />
             </svg>
