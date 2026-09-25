@@ -7,12 +7,21 @@ async function centre(page: Page, id: number): Promise<{ x: number; y: number }>
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 }
 
+/** Wait until we can play a card, answering any "which match?" choice along the way. */
 async function waitForMyTurn(page: Page) {
   await expect
     .poll(async () => {
       const h = await hook(page);
       const hand = h?.run.fight?.hand;
-      return Boolean(h?.canAct && hand?.phase === 'play' && hand.active === 0);
+      if (!h?.canAct || !hand || hand.active !== 0) return false;
+      const option = hand.pending?.options[0];
+      if ((hand.phase === 'flipChoice' || hand.phase === 'playChoice') && option !== undefined) {
+        const card = page.getByTestId(`card-${option}`);
+        await card.dispatchEvent('pointerdown', { pointerId: 1 });
+        await card.dispatchEvent('pointerup', { pointerId: 1 });
+        return false;
+      }
+      return hand.phase === 'play';
     })
     .toBe(true);
 }

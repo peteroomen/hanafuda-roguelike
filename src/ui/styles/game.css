@@ -196,7 +196,8 @@
   position: absolute;
   left: 2px;
   bottom: 3px;
-  max-width: 46px;
+  /* Fits the longest short flower name (Paulownia). */
+  max-width: 51px;
   display: flex;
   align-items: center;
   gap: 1px;

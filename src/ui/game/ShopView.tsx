@@ -36,7 +36,7 @@ function offerText(o: ShopOffer, run: RunState): string {
   if (o.kind === 'ofuda') return ofudaDef(o.id).text;
   const y = yakuDef(o.id);
   const lv = (run.poems[o.id] ?? 0) + 1;
-  return `${y.name} to Lv ${lv}: +${y.poem.chips} chips and +${y.poem.mult} mult each time it scores.`;
+  return `${y.name} to Lv ${lv}: +${y.poem.chips} Chips and +${y.poem.mult} Mult each time it scores.`;
 }
 
 type Service = 'shrine' | 'heal' | 'reroll';
@@ -282,6 +282,7 @@ export function ShopView({ api }: { api: GameApi }) {
               {ARCHETYPE_LABEL[omamoriDef(o.id).archetype]}
             </div>
           )}
+          {o.kind === 'poem' && <div className="detail-sub">{yakuDef(o.id).gloss}</div>}
           {o.kind === 'poem' && (
             <div className="haiku">
               {yakuDef(o.id).haiku.map((l) => (

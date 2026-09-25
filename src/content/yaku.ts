@@ -24,10 +24,13 @@ export type YakuFamily = 'brights' | 'sake' | 'animals' | 'ribbons' | 'chaff' | 
 
 export interface YakuDef {
   readonly id: YakuId;
+  /**
+   * The yaku's name everywhere in the game: its Japanese name in English letters (Sankō, Tan).
+   * Card types stay English (Brights, Ribbons), and kanji are decoration only.
+   */
   readonly name: string;
-  /** Compact name for chips and trackers. */
-  readonly short?: string;
-  readonly romaji: string;
+  /** What the name means, in English. Shown once, as a subtitle (yaku book, poem details). */
+  readonly gloss: string;
   readonly kanji: string;
   readonly requirement: string;
   readonly family: YakuFamily;
@@ -50,8 +53,8 @@ export interface YakuDef {
 export const YAKU: readonly YakuDef[] = [
   {
     id: 'goko',
-    name: 'Five Brights',
-    romaji: 'Gokō',
+    name: 'Gokō',
+    gloss: 'Five Brights',
     kanji: '五光',
     requirement: 'All 5 Brights',
     family: 'brights',
@@ -69,8 +72,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'shiko',
-    name: 'Four Brights',
-    romaji: 'Shikō',
+    name: 'Shikō',
+    gloss: 'Four Brights',
     kanji: '四光',
     requirement: '4 Brights, without the Rain Man',
     family: 'brights',
@@ -88,8 +91,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'ameShiko',
-    name: 'Rainy Four',
-    romaji: 'Ame-Shikō',
+    name: 'Ame-Shikō',
+    gloss: 'Rainy Four Brights',
     kanji: '雨四光',
     requirement: '4 Brights, including the Rain Man',
     family: 'brights',
@@ -103,8 +106,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'sanko',
-    name: 'Three Brights',
-    romaji: 'Sankō',
+    name: 'Sankō',
+    gloss: 'Three Brights',
     kanji: '三光',
     requirement: '3 Brights, without the Rain Man',
     family: 'brights',
@@ -118,8 +121,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'tsukimi',
-    name: 'Moon Viewing',
-    romaji: 'Tsukimi-zake',
+    name: 'Tsukimi-zake',
+    gloss: 'Moon Viewing',
     kanji: '月見酒',
     requirement: 'Full Moon + Sake Cup',
     family: 'sake',
@@ -132,8 +135,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'hanami',
-    name: 'Flower Viewing',
-    romaji: 'Hanami-zake',
+    name: 'Hanami-zake',
+    gloss: 'Flower Viewing',
     kanji: '花見酒',
     requirement: 'Curtain + Sake Cup',
     family: 'sake',
@@ -146,9 +149,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'inoshikacho',
-    name: 'Boar, Deer, Butterflies',
-    short: 'Ino-Shika-Chō',
-    romaji: 'Inoshikachō',
+    name: 'Ino-Shika-Chō',
+    gloss: 'Boar, Deer, Butterflies',
     kanji: '猪鹿蝶',
     requirement: 'Boar + Deer + Butterflies. +1 per extra Animal',
     family: 'animals',
@@ -161,9 +163,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'akaao',
-    name: 'Red and Blue Poems',
-    short: 'Red + Blue',
-    romaji: 'Akatan-Aotan',
+    name: 'Akatan-Aotan',
+    gloss: 'Red and Blue Ribbons',
     kanji: '赤短青短',
     requirement: '3 red poetry + 3 blue ribbons. +1 per extra Ribbon',
     family: 'ribbons',
@@ -177,8 +178,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'akatan',
-    name: 'Red Poems',
-    romaji: 'Akatan',
+    name: 'Akatan',
+    gloss: 'Red Poetry Ribbons',
     kanji: '赤短',
     requirement: '3 red poetry ribbons. +1 per extra Ribbon',
     family: 'ribbons',
@@ -192,8 +193,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'aotan',
-    name: 'Blue Ribbons',
-    romaji: 'Aotan',
+    name: 'Aotan',
+    gloss: 'Blue Ribbons',
     kanji: '青短',
     requirement: '3 blue ribbons. +1 per extra Ribbon',
     family: 'ribbons',
@@ -207,8 +208,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'tane',
-    name: 'Animals',
-    romaji: 'Tane',
+    name: 'Tane',
+    gloss: 'Animals',
     kanji: 'タネ',
     requirement: 'Any 5 Animals. +1 per extra',
     family: 'animals',
@@ -221,8 +222,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'tan',
-    name: 'Ribbons',
-    romaji: 'Tan',
+    name: 'Tan',
+    gloss: 'Ribbons',
     kanji: 'タン',
     requirement: 'Any 5 Ribbons. +1 per extra',
     family: 'ribbons',
@@ -235,8 +236,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'kasu',
-    name: 'Chaff',
-    romaji: 'Kasu',
+    name: 'Kasu',
+    gloss: 'Chaff',
     kanji: 'カス',
     requirement: 'Any 10 Chaff. +1 per extra',
     family: 'chaff',
@@ -249,8 +250,8 @@ export const YAKU: readonly YakuDef[] = [
   },
   {
     id: 'tsukifuda',
-    name: 'Month Cards',
-    romaji: 'Tsukifuda',
+    name: 'Tsukifuda',
+    gloss: 'Month Cards',
     kanji: '月札',
     requirement: "All 4 cards of this fight's month",
     family: 'month',
@@ -269,11 +270,6 @@ export function yakuDef(id: YakuId): YakuDef {
   const y = BY_ID.get(id);
   if (!y) throw new Error(`Unknown yaku ${id}`);
   return y;
-}
-
-export function yakuShort(id: YakuId): string {
-  const d = yakuDef(id);
-  return d.short ?? d.name;
 }
 
 export const YAKU_IDS: readonly YakuId[] = YAKU.map((y) => y.id);

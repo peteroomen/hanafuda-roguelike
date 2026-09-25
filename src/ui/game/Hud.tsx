@@ -1,6 +1,6 @@
 import { type OfudaId } from '@/content/ofuda';
 import { spiritDef } from '@/content/spirits';
-import { yakuDef, yakuShort } from '@/content/yaku';
+import { yakuDef } from '@/content/yaku';
 import type { Intent } from '@/engine/ai';
 import type { HandState } from '@/engine/hand';
 import type { FightState, RunState } from '@/engine/run';
@@ -69,7 +69,7 @@ export function SpiritBar(props: {
             ) : props.intent ? (
               <span>
                 <span className="intent-name">
-                  Chasing <b>{yakuShort(props.intent.id)}</b>
+                  Chasing <b>{yakuDef(props.intent.id).name}</b>
                 </span>
                 <span className="intent-count">
                   {props.intent.have}/{props.intent.need}
@@ -179,12 +179,12 @@ export function Tracker({ hand, onOpen }: { hand: HandState; onOpen: () => void 
       )}
       {formed.map((h) => (
         <span key={h.id} className="chip formed">
-          {yakuShort(h.id)} <b>{h.points}</b>
+          {yakuDef(h.id).name} <b>{h.points}</b>
         </span>
       ))}
       {prog.map((p) => (
         <span key={p.id} className="chip">
-          {yakuShort(p.id)}{' '}
+          {yakuDef(p.id).name}{' '}
           <b>
             {p.have}/{p.need}
           </b>
