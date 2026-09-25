@@ -12,7 +12,13 @@ export type Zone =
   | { readonly z: 'field' }
   | { readonly z: 'cap'; readonly seat: Seat }
   /** In the air above the field; `choosing` while its player picks which match to take. */
-  | { readonly z: 'held'; readonly seat: Seat; readonly choosing?: boolean }
+  | {
+      readonly z: 'held';
+      readonly seat: Seat;
+      readonly choosing?: boolean;
+      /** Where it came from, so a card waiting on a choice waits near there. */
+      readonly from?: 'hand' | 'pile';
+    }
   | { readonly z: 'flip' }
   | { readonly z: 'land'; readonly on: CardId }
   | { readonly z: 'reveal' }
@@ -94,7 +100,12 @@ export function visualFromHand(h: HandState, prev?: Visual): Visual {
     }
   }
   if (h.pending) {
-    zone[h.pending.card] = { z: 'held', seat: h.active, choosing: true };
+    zone[h.pending.card] = {
+      z: 'held',
+      seat: h.active,
+      choosing: true,
+      from: h.pending.kind === 'flipChoice' ? 'pile' : 'hand',
+    };
     faceUp[h.pending.card] = true;
   }
   if (h.revealed !== null) {
@@ -189,7 +200,17 @@ export function applyEvent(v: Visual, e: HandEvent, final: HandState): Visual {
       return slam(withZone(v, e.card, { z: 'land', on: e.with[0] as CardId }, true), e.card);
     case 'choice':
       return {
-        ...withZone(v, e.card, { z: 'held', seat: e.seat, choosing: true }, true),
+        ...withZone(
+          v,
+          e.card,
+          {
+            z: 'held',
+            seat: e.seat,
+            choosing: true,
+            from: v.zone[e.card]?.z === 'flip' ? 'pile' : 'hand',
+          },
+          true,
+        ),
         options: e.seat === 0 ? e.options.slice() : [],
       };
     case 'capture': {

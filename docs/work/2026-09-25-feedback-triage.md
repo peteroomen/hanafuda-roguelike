@@ -189,6 +189,20 @@ hold-to-see):
   that every line fits a bubble.
 - The intent pill drops the word "Chasing" (the red eye already means it) so long yaku names fit.
 
+Follow-ups reported during PR E, fixed in the same PR:
+
+- **Matched cards still zipped to the deck sometimes.** Two causes. (1) Aiming at one of two
+  matches (tapping or dropping onto it) played the card, let the engine ask "which one?", parked
+  the card over the draw pile, then answered for you. Now `play` takes an optional `target`, and
+  the engine takes that match at once, so the card flies straight to it. (2) A card waiting on a
+  real choice (dropped on the field with two matches, or the spirit choosing) parked over the
+  draw pile. It now waits near where it came from: just above your hand, or beside the spirit's
+  hand. A drawn card still waits by the pile.
+- **Tooltips for the Japanese yaku names.** Tap a yaku on your tracker or on the spirit's intent
+  to see its English meaning, what it needs and its points. Another tap, a tap elsewhere, or
+  5 seconds closes it. The empty tracker's 役 mark and the top bar's 役 button still open the
+  yaku book.
+
 ### PR F: Balance (#8)
 
 The play report was 7 hands to beat the Tengu (a boss), finishing on 6 HP. That's a war of
