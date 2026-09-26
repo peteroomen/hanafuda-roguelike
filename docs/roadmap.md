@@ -44,8 +44,20 @@ Small, and worth doing before the design pass.
   seals on Setup and the Collection's deck tab (`Setup.tsx`, `Collection.tsx`). Then check that
   those layouts don't leave an awkward gap where the seal was (the yaku book has a seal column).
 
-Together these are still one small PR (CSS, `useGame.ts`, `Overlays.tsx` and a handful of
-kiwi removals, plus a test for the speech budget).
+- **Cards should turn over in flight, not before they leave.** Dealt cards should leave the pile
+  face down and flip over in 3D on the way if they land face up (your hand, the field), and the
+  same whenever a card changes side (the flip from the pile, the spirit playing from its hand,
+  gathering cards back into the pile). The 3D flip exists already (`.card-flip` rotates on Y
+  when `.card.down` toggles, `game.css`), but the deal's stagger (`delays` in `useGame.ts`,
+  applied as `transitionDelay` on `.card` in `CardLayer.tsx`) only delays the _move_. The flip
+  has no delay, so every card turns face up at once on the pile and then flies out. Fix: give
+  the flip the same delay (one CSS variable for both), time it to turn over mid-flight (a
+  little lift or scale at the halfway point helps it read), and only show the face-up overlays
+  (month labels, enhancements) once the flip has turned.
+
+Together these are one PR, but at the upper end of small: the flip timing is the fiddly one and
+needs looking at in slow motion (e2e screenshots mid-deal). If it grows, split it into a
+"table animation" PR and a "polish" PR for the rest.
 
 ## Next: the design pass
 
