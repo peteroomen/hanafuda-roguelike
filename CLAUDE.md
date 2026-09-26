@@ -136,6 +136,7 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
     grants anything already earned. Collection has a Decks tab, locked-charm silhouettes and
     more records. Plum: talismans 1 mon cheaper (`ofudaDiscount`). Four weak charms buffed. The
     suite has a starter-set row (43% vs 44% with everything).
-  - What comes after (the design pass, including HP visible while deciding, and the mechanics
-    to model) lives in `docs/roadmap.md`.
+  - All seven triage PRs are merged (#7–#14). Everything still open (the design pass, including
+    HP visible while deciding; the mechanics to model; a greed-aware sim bot and a charm
+    re-audit) lives in `docs/roadmap.md`. Start there next session.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

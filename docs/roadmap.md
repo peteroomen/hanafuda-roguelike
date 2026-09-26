@@ -5,8 +5,9 @@ up, it gets its own plan in `docs/work/`.
 
 ## Now
 
-- **PR G: decks, charm unlocks and the record book.** Built; see
-  `docs/work/2026-09-25-decks-and-unlocks.md`.
+Nothing in progress. The 2026-09-25 play-test feedback is fully shipped (PRs A–G, #7–#14; see
+`docs/work/2026-09-25-feedback-triage.md`). Everything still open from it is below. Pick up from
+**Next** when work resumes.
 
 ## Next: the design pass
 
@@ -36,9 +37,20 @@ From feedback item #10 (discussion first, then sim each before building). See th
   is an instant win in traditional koi-koi).
 - **Self-match** talisman: match two cards of one month from your own hand.
 
+## Later: sim and balance
+
+- **A greed-aware smart bot.** The bot calls koi-koi about once every two runs, so it can't
+  measure the koi-koi charms (Gambler's Dice, Paper Umbrella, Koi Pond). Have it lean into
+  koi-koi when it holds them, then re-check those charms with the start-owned A/B from PR G
+  (`docs/work/2026-09-25-decks-and-unlocks.md`, "Balance after the build").
+- **Re-audit the charms with that A/B, not the "runs that owned it" table.** The owned table is
+  confounded (Sake Barrel looked weak at 32% but is 44% when owned from the start). Leaf Pile
+  (54%) and Bonsai (64%) are the outliers worth a look now that they're locked.
+- **Deck spread:** Plum jumped from 43% to 48% with cheaper talismans; Gambler's and Firework
+  sit at 42%. All within target, but check again after any shop change.
+
 ## Ideas parked
 
-- **Sim: a greed-aware smart bot.** The bot calls koi-koi about once every two runs, so it can't
-  measure the koi-koi charms (Gambler's Dice, Paper Umbrella, Koi Pond). Have it lean into
-  koi-koi when it holds them. Found in PR G.
 - A settings toggle for the spirits' idle taunts, if they grate.
+- More unlockables once the record book has been played with: omen-gated charms, a deck per
+  season boss, Balatro-style deck stickers beyond the best-omen seal.

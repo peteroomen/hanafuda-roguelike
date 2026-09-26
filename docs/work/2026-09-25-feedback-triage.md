@@ -4,7 +4,8 @@
 **Source:** Google Doc "koi koi feedback" (19 items, written after a play session).
 **Branch:** `claude/game-bugs-triage-plan-iewzo2` (this plan only; each workstream below gets its
 own branch and PR, per CLAUDE.md).
-**Status:** PRs A–E merged (#7–#11), plus the audio fix (#10). PR F (balance) is done. PR G is next.
+**Status:** Complete. PRs A–G merged (#7–#14), plus the audio fix (#10). What's still open (the
+design pass, HP while deciding, the mechanics to model) lives in `docs/roadmap.md`.
 
 ## Goal
 
