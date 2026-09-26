@@ -139,6 +139,14 @@ const GROUPS: Record<string, Variant[]> = {
       ]),
     ];
   })(),
+  // Every charm owned from the start, one at a time: how much each lifts a run.
+  audit: [
+    { name: 'baseline' },
+    ...OMAMORI.map((d) => ({
+      name: `${d.id} (${d.rarity})`,
+      startCharms: [d.id],
+    })),
+  ],
   economy: [
     { name: 'baseline' },
     {
@@ -183,12 +191,18 @@ const bands: [string, number, number][] = [
 ];
 
 console.log(
-  `| Variant | Win | Koi-koi/run | One-stop wins ${bands.map((b) => b[0]).join(' / ')} | 1st stop ÷ HP ${bands.map((b) => b[0]).join(' / ')} | Charms in month 4 / 7 | Mon at 1st shop | Cranes at end |`,
+  `| Variant | Win | Koi-koi/run | One-stop wins ${bands.map((b) => b[0]).join(' / ')} | 1st stop ÷ HP ${bands.map((b) => b[0]).join(' / ')} | Charms in month 4 / 7 | Mon at 1st shop | Cranes at end | Rares seen in shop / owned at end |`,
 );
-console.log('| --- | --- | --- | --- | --- | --- | --- |');
+console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- |');
 const snapshot = JSON.stringify(BALANCE);
+const charmTiers = OMAMORI.map((d) => [d.rarity, d.price] as const);
 for (const v of GROUPS[group] ?? []) {
   Object.assign(B, JSON.parse(snapshot) as Balance);
+  OMAMORI.forEach((d, i) => {
+    const [rarity, price] = charmTiers[i] as readonly [string, number];
+    (d as { rarity: string }).rarity = rarity;
+    (d as { price: number }).price = price;
+  });
   cranesPer = 15;
   v.tweak?.();
   cranesEffect.chips.perUnit = cranesPer;
@@ -197,6 +211,8 @@ for (const v of GROUPS[group] ?? []) {
   const fightsWon = new Array<number>(13).fill(0);
   const charmsAtShop: number[][] = Array.from({ length: 13 }, () => []);
   const cranes: number[] = [];
+  let raresSeen = 0;
+  let raresOwned = 0;
   const monAtShop: number[][] = Array.from({ length: 13 }, () => []);
   const charmsByMonth: number[][] = Array.from({ length: 13 }, () => []);
   let wins = 0;
@@ -228,6 +244,12 @@ for (const v of GROUPS[group] ?? []) {
           }
         }
         if (run.phase === 'shop' && lastPhase !== 'shop') {
+          raresSeen += (run.shop?.offers ?? []).filter(
+            (o) =>
+              o.kind === 'omamori' &&
+              !(o as { free?: boolean }).free &&
+              OMAMORI.find((d) => d.id === o.id)?.rarity === 'rare',
+          ).length;
           shops += 1;
           charmsAtShop[shops]?.push(run.omamori.length);
           monAtShop[shops]?.push(run.mon);
@@ -235,6 +257,9 @@ for (const v of GROUPS[group] ?? []) {
         lastPhase = run.phase;
       },
     });
+    raresOwned += r.finalState.omamori.filter(
+      (m) => OMAMORI.find((d) => d.id === m.id)?.rarity === 'rare',
+    ).length;
     if (r.won) wins += 1;
     koikoi += r.koikoiCalls;
     const c = r.finalState.omamori.find((m) => m.id === 'thousandCranes');
@@ -252,7 +277,7 @@ for (const v of GROUPS[group] ?? []) {
     return w ? o / w : 0;
   };
   console.log(
-    `| ${v.name} | ${pct(wins / runs)} | ${(koikoi / runs).toFixed(1)} | ${bands.map((b) => pct(oneStopBand(b[1], b[2]))).join(' / ')} | ${bands.map((b) => band(b[1], b[2], (m) => ratio[m] ?? []).toFixed(1)).join(' / ')} | ${med(charmsByMonth[4] ?? [])} / ${med(charmsByMonth[7] ?? [])} | ${med(monAtShop[1] ?? [])} | ${cranes.length ? `+${med(cranes)} chips` : '–'} |`,
+    `| ${v.name} | ${pct(wins / runs)} | ${(koikoi / runs).toFixed(1)} | ${bands.map((b) => pct(oneStopBand(b[1], b[2]))).join(' / ')} | ${bands.map((b) => band(b[1], b[2], (m) => ratio[m] ?? []).toFixed(1)).join(' / ')} | ${med(charmsByMonth[4] ?? [])} / ${med(charmsByMonth[7] ?? [])} | ${med(monAtShop[1] ?? [])} | ${cranes.length ? `+${med(cranes)} chips` : '–'} | ${(raresSeen / runs).toFixed(1)} / ${(raresOwned / runs).toFixed(1)} |`,
   );
 }
 Object.assign(B, JSON.parse(snapshot) as Balance);

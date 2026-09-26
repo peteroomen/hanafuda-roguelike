@@ -123,7 +123,9 @@ From feedback item #10 (discussion first, then sim each before building). See th
 Modelled 2026-09-26 in `docs/work/2026-09-26-balance-model.md`: a typical stop deals 2–3× a
 spirit's HP, so 85% of fights end with the first stop and koi-koi is never needed; Thousand
 Cranes is the outlier charm. Proposed: nerf Cranes, raise spirit HP with softer hits, ease the
-early months less, drop the Swift Victory bonus, and make rarity visible. Waiting on decisions.
+early months less, drop the Swift Victory bonus, and make rarity visible. Agreed plan (see "The
+plan" in that doc): a mostly-common shop, a free pick of 1 of 3 rares after each boss, Bonsai,
+Thousand Cranes and Leaf Pile moved to rare, and the spirit retune. Next up to build.
 
 ## Later: sim and balance
 

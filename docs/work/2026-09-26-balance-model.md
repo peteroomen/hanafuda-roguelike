@@ -1,6 +1,6 @@
 # Balance: fights are too short, and charms snowball
 
-Status: **modelled, waiting on decisions** (see the end). No balance numbers changed yet.
+Status: **plan agreed (see "The plan" at the end), not built yet.** No balance numbers changed.
 
 ## What prompted it
 
@@ -177,3 +177,70 @@ What this says:
 - Shop shape (idea 6): season markets (charms only after bosses), a reduced shop (one charm
   on offer, three after bosses), or a boss draft plus a one-charm shop? My pick is the boss
   draft plus a one-charm shop, with rares only in drafts.
+
+## Charm audit: which charms define a run?
+
+Each charm owned from the start of a run, alone (`balance-probe.ts audit`, 300 runs, about ±3
+points of noise; baseline 48%):
+
+| Lift     | Charms                                                                                                          |
+| -------- | --------------------------------------------------------------------------------------------------------------- |
+| **+22**  | Bonsai (uncommon)                                                                                               |
+| **+17**  | Thousand Cranes (uncommon)                                                                                      |
+| **+8**   | Leaf Pile (uncommon)                                                                                            |
+| +3 to +5 | Daruma (rare), Stone Lantern, Gold Koban, Rice Bale, Red Seal, Picnic Box, Obi Sash, Willow Wind, Lightning Rod |
+| about 0  | most of the rest, including Yata Mirror (rare)                                                                  |
+| −3 to −7 | Koi Pond (rare), Phoenix Plume (rare), Calligrapher, Bird Whistle, Boar Tusk, Sweeper                           |
+
+The strongest charms are uncommon, and today's rares are weak. Phoenix Plume and Koi Pond are
+build-arounds (Brights, koi-koi) the bots can't play to, so they undersell them, but a rare
+should be strong without a perfect build.
+
+## The plan (agreed 2026-09-26)
+
+The player's design, modelled:
+
+- **The shop after a regular fight** keeps 3 charm offers, rolled mostly common: weights 75
+  common / 22 uncommon / 12 rare per charm, which works out at about 1.4 rares seen in shops per
+  run. You mostly see commons and the odd uncommon.
+- **After each boss** (before months 4, 7 and 10), a free **draft: pick 1 of 3 rare charms**.
+  Rares are the run-defining ones; you can find one in a shop, but realistically they come from
+  bosses.
+- **Rare tier re-cut:** Bonsai, Thousand Cranes and Leaf Pile become rare (price 8), joining
+  Daruma, Yata Mirror, Phoenix Plume and Koi Pond.
+- **Spirit retune:** HP ×2.5, ferocity ×0.58, early easing no lower than 0.9, no Swift Victory
+  bonus, fight rewards −1 mon.
+- **Rarity made visible:** bronze / silver / gold on shop tiles, charm slots and the draft.
+
+| Variant (400 runs)                         | Win       | Koi-koi/run | First-stop wins 2–4 / 5–8 / 9–12 | First stop ÷ HP   | Rares seen in shop / owned at end |
+| ------------------------------------------ | --------- | ----------- | -------------------------------- | ----------------- | --------------------------------- |
+| Today, smart                               | 48%       | 0.5         | 85% / 84% / 75%                  | 2.8 / 2.5 / 1.7   | 0.6 / 0.3                         |
+| Today, casual                              | 35%       | 0.4         | 84% / 83% / 73%                  | 2.7 / 2.3 / 1.5   | 0.6 / 0.2                         |
+| **Plan, smart**                            | **53%**   | **2.0**     | 55% / 58% / 49%                  | 1.1 / 1.1 / 0.9   | 1.4 / 2.5                         |
+| **Plan, casual**                           | **33%**   | 1.4         | 49% / 53% / 38%                  | 0.9 / 1.0 / 0.6   | 1.3 / 1.1                         |
+| Plan, rare weight 8 (smart / casual)       | 51% / 33% | 2.1 / 1.5   | 55% / 58% / 48%                  | 1.1 / 1.1 / 0.8   | 0.9 / 2.5                         |
+| Plan, lucky: Bonsai + Cranes from month 1  | 88%       | 0.1         | 100% / 99% / 96%                 | 3.6 / 4.9 / 4.1   | –                                 |
+| Today, lucky: Bonsai + Cranes from month 1 | 70%       | 0.0         | 100% / 100% / 97%                | 10.5 / 10.9 / 8.4 | –                                 |
+
+- On target (smart about 50%, casual about 33%), with half the fights needing a second exchange
+  or a koi-koi, and koi-koi called about four times as often as today.
+- The Thousand Cranes nerf is no longer needed once it's a rare you draft (it moved the win rate
+  by a point). Keep it at +15.
+- Two growth rares together from month 1 is still a walkover (88%). The draft makes that
+  unlikely before month 4, but Bonsai (+3 Mult per fight won) is the one to trim in the final
+  tune if drafted runs snowball.
+
+### Things the build has to handle
+
+- **Unlocks.** Six of the seven rares (Bonsai, Leaf Pile, Phoenix Plume, Koi Pond, Yata Mirror,
+  Daruma) start locked, so a new player's draft would only ever offer Thousand Cranes. Rework
+  `src/content/unlocks.ts` so at least four rares are open from the start and the rest unlock
+  over time, or let the draft offer locked rares as a preview.
+- **Rare pool size.** Seven rares, three drafts of three: you'd see nearly all of them every run.
+  Worth adding rares over time, and buffing Phoenix Plume and Koi Pond so every rare feels
+  run-defining.
+- **The casual bot takes about one draft rare per run** (it never sells, so a full slot blocks
+  it). A person would swap a common for a free rare; the draft UI should make that easy (pick,
+  then choose which charm to let go if slots are full).
+- **The draft screen** is new UI: three rare charms, gold-edged, after the boss reward.
+- The sim bots need to pick from the draft (the smart bot already scores charms).
