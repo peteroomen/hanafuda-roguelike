@@ -4,7 +4,9 @@
 **Source:** play-test feedback items #9 (a high-score deck) and #11 (charms behind achievements),
 plus the answers in `2026-09-25-feedback-triage.md`: lock about 6 charms for now, audit every
 charm and deck, add a Balatro-style record of runs and unlocks, and model the score deck.
-**Status:** Plan, awaiting confirmation. The Firework Deck is already prototyped (below).
+**Status:** Built (see "As built" at the end). All three questions answered yes: lock the 7,
+buff the weak charms and give Plum an identity in this PR, and sim with everything unlocked plus a
+starter-set row.
 
 ## Goal
 
@@ -130,7 +132,50 @@ count), `koikoiTotal`, `calmSpirit` and `spiritsCalmed`.
   stay in the roadmap.
 - The design pass, including HP visibility while deciding (see `docs/roadmap.md`).
 
-## Questions
+## As built
+
+- **Content:** `src/content/unlocks.ts` holds the 7 charm unlocks (`CHARM_UNLOCKS`,
+  `LOCKED_AT_START`) and the `UnlockCondition` kinds shared with decks.
+- **Engine:** `newRun({ lockedCharms })` stores the list on the run (omitted for sims and old
+  saves, which means everything is available). `rollCharms` in `shop.ts` skips it, in the first
+  roll and in rerolls. A new deck modifier `ofudaDiscount` takes 1 mon off talismans (Plum).
+- **Profile:** `unlockedCharms`, `deckRecords` (years, completed, best omen) and `biggestHitDeck`.
+  Older saves get the defaults from the shallow merge on load, and `refreshUnlocks()` (on app
+  start) silently grants anything already earned.
+- **Collection:** a Decks tab (rule or unlock condition, record, best omen as a red seal), locked
+  charms as silhouettes with their condition, and more records (spirits calmed, charms and decks
+  unlocked, most-scored yaku, the deck of your biggest hit). The end screen lists charm unlocks.
+- **Buffs:** Sake Barrel +15 Mult, Two Moons also Hanami-zake ×1.5, Paper Umbrella also +5 Mult
+  per koi-koi, Gambler's Dice +15 per koi-koi.
+- **Tests:** `src/engine/shop.test.ts` (locked charms never offered; Plum prices),
+  `src/ui/state/meta.test.ts` (conditions, defaults, the veteran refresh) and
+  `e2e/collection.spec.ts` (every tab, silhouettes, a veteran save).
+
+### Balance after the build (`pnpm sim --suite --runs 400`)
+
+- Smart 44%, casual 34%, **starter set 43%**: locking the 7 costs a new player about 1 point.
+- Decks: Pine 44%, Plum 48% (was 43%), Moon 48%, Willow 49%, Maple 50%, Gambler's 42%,
+  Paulownia 47%, Firework 42%. All within 8 points.
+- Omens 44/37/31/21/12/8%.
+- **The weak-charm buffs don't show up in the bot numbers.** The "runs that owned it" figures
+  stayed low (Sake Barrel 32%, Two Moons 31%, Gambler's Dice 36%, Paper Umbrella 28%), so I ran an
+  A/B instead, starting 300 suite-seed runs with each charm owned (baseline 42%):
+
+  | Charm           | Old | New |
+  | --------------- | --- | --- |
+  | Sake Barrel     | 44% | 44% |
+  | Two Moons       | 44% | 44% |
+  | Paper Umbrella  | 42% | 42% |
+  | Gambler's Dice  | 41% | 41% |
+  | Leaf Pile (ref) | 54% |     |
+  | Bonsai (ref)    | 64% |     |
+
+  The sake charms were never weak: the low "owned" figure is the confound (bought while chasing
+  a risky sake build). The two koi-koi charms are neutral **for the bot** because it calls koi-koi
+  about once every two runs. A player who calls koi-koi gets the value, so the buffs stay. Making
+  the smart bot lean into koi-koi when it holds greed charms is queued in the roadmap.
+
+## Questions (answered)
 
 1. **Which charms to lock:** are these 7 right, and are the conditions fun? Too easy or too hard?
 2. **Weak-charm buffs and the Plum Deck:** in this PR, or later?

@@ -2,7 +2,8 @@
  * The balance suite: every bot, archetype and omen, summarised as markdown.
  */
 import { DECKS, type DeckId } from '@/content/decks';
-import type { Archetype } from '@/content/omamori';
+import type { Archetype, OmamoriId } from '@/content/omamori';
+import { LOCKED_AT_START } from '@/content/unlocks';
 import type { BotConfig } from './bots';
 import { playRun, type RunSummary } from './driver';
 import { summarise, type Summary } from './report';
@@ -15,7 +16,13 @@ interface Row {
 function batch(
   runs: number,
   bot: BotConfig,
-  extra: { omen?: number; guided?: boolean; seed?: number; deckId?: DeckId } = {},
+  extra: {
+    omen?: number;
+    guided?: boolean;
+    seed?: number;
+    deckId?: DeckId;
+    lockedCharms?: readonly OmamoriId[];
+  } = {},
 ): Summary {
   const out: RunSummary[] = [];
   for (let i = 0; i < runs; i++) {
@@ -26,6 +33,7 @@ function batch(
         omen: extra.omen ?? 0,
         guided: extra.guided ?? false,
         ...(extra.deckId ? { deckId: extra.deckId } : {}),
+        ...(extra.lockedCharms ? { lockedCharms: extra.lockedCharms } : {}),
       }),
     );
   }
@@ -45,6 +53,10 @@ export function runSuite(runs: number): string {
   rows.push({
     label: 'casual bot (a learning player)',
     summary: batch(runs, { kind: 'casual', archetype: 'auto' }),
+  });
+  rows.push({
+    label: 'smart bot, starter charms (none unlocked)',
+    summary: batch(runs, { kind: 'smart', archetype: 'auto' }, { lockedCharms: LOCKED_AT_START }),
   });
   rows.push({
     label: 'smart bot, guided year',

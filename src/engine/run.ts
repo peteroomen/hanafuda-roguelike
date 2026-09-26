@@ -136,6 +136,8 @@ export interface RunState {
   readonly deckId: DeckId;
   readonly omen: number;
   readonly guided: boolean;
+  /** Charms the shop never offers (not yet unlocked). Missing on old saves and sims = none. */
+  readonly lockedCharms?: readonly OmamoriId[];
   month: Month;
   hp: number;
   maxHp: number;
@@ -209,6 +211,8 @@ export interface NewRunOptions {
   readonly deckId?: DeckId;
   readonly omen?: number;
   readonly guided?: boolean;
+  /** Charms the player hasn't unlocked yet; the shop never offers them. Omitted = all. */
+  readonly lockedCharms?: readonly OmamoriId[];
 }
 
 // ---------------------------------------------------------------------------
@@ -271,6 +275,7 @@ export function newRun(opts: NewRunOptions): RunStepResult {
     deckId: deck.id,
     omen,
     guided: opts.guided ?? false,
+    ...(opts.lockedCharms?.length ? { lockedCharms: opts.lockedCharms.slice() } : {}),
     month: 1,
     hp: maxHp,
     maxHp,
@@ -900,6 +905,7 @@ function shopCtx(run: RunState) {
     seed: run.seed,
     month: run.month,
     owned: run.omamori.map((m) => m.id),
+    locked: run.lockedCharms ?? [],
     deckId: run.deckId,
     omen: run.omen,
     discount: shopDiscount(run),
