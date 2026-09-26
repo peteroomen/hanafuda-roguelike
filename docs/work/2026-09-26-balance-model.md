@@ -107,6 +107,39 @@ Prototyped in the engine for the sim only (not committed):
   would then need less HP. It doesn't change the fight texture on its own (one-stop wins still
   about 65%).
 
+### A smaller shop, and a boss draft
+
+Two more shapes, prototyped the same way. Here the charm count applies to restocks too (the
+first "charms only after bosses" prototype only emptied the first roll, so restocks leaked
+charms back in; corrected below). "Boss draft" is a free pick of one charm out of three after
+each boss (before months 4, 7 and 10).
+
+| Variant                                        | Win (smart / casual) | First-stop wins 2–4 / 5–8 / 9–12 | Charms in month 4 / 7 |
+| ---------------------------------------------- | -------------------- | -------------------------------- | --------------------- |
+| Today                                          | 48% / 34%            | 85% / 85% / 75%                  | 4 / 5                 |
+| 1 charm on offer each month, 3 after bosses    | 44% / 36%            | 79% / 82% / 71%                  | 3 / 5                 |
+| 1 charm on offer each month, 4 after bosses    | 44% / 35%            | 79% / 82% / 71%                  | 3 / 5                 |
+| Charms only after bosses (3 on offer)          | 37% / 23%            | 69% / 65% / 65%                  | 2 / 3                 |
+| Boss draft only, no charms in the shop         | 26% / 16%            | 68% / 60% / 60%                  | 1 / 2                 |
+| Boss draft + 1 charm on offer each month       | 47% / 34%            | 79% / 83% / 75%                  | 4 / 5                 |
+| Draft after month 1 and each boss + 1 on offer | 47% / 42%            | 86% / 84% / 76%                  | 5 / 5                 |
+| Boss draft + today's shop                      | 49% / 36%            | 85% / 86% / 74%                  | 5 / 5                 |
+
+What this says:
+
+- **The five charm slots are the real ceiling.** Under almost any shop, a year fills them by
+  month 7. Shop shape changes how _fast_ you get there, which is pacing, not how fights play:
+  first-stop wins stay at 65–85% unless charms are cut so hard that the game gets much harder.
+  Fight texture still needs the spirit retune (idea 2).
+- **A reduced shop (one charm on offer, three after bosses) is a gentle nudge.** Slightly harder
+  (44% / 36%), one fewer charm by month 4, same by month 7.
+- **The boss draft plus a one-charm shop is difficulty-neutral** (47% / 34%, same as today),
+  but it moves where power comes from: a free pick after each boss, so beating a boss is a
+  reward moment and a strong charm there is earned. The draft is the natural place for rares
+  (for example: draft picks roll uncommon or better, and rares appear only in drafts).
+- **Draft only (no shop charms) is too harsh**, and a draft on top of today's shop just adds
+  power.
+
 ## Ideas, in order of confidence
 
 1. **Nerf Thousand Cranes** (+15 → +8 Chips per hand won), and consider making it rare. The
@@ -127,9 +160,12 @@ Prototyped in the engine for the sim only (not committed):
    finishing a fight. Prototyped: the sim bots don't koi-koi, so they just take more hits and the
    win rate falls to 19%. Can't judge it until the greed-aware bot exists, and it changes the
    rules a lot. Parked.
-6. **Charms only at the season markets** (after each boss), with a small monthly shop for the
-   rest. Strong on pacing and on making charms feel earned; pairs with idea 2. See "Fewer
-   shops" above.
+6. **Change the shop's shape for pacing.** Best of the variants: a **boss draft** (pick one of
+   three charms free after each boss, uncommon or better, the only place rares appear) plus a
+   shop with **one charm on offer** in other months. Same difficulty as today, but power comes
+   in bursts you earn by beating bosses. Alternatives: season markets (charms only after
+   bosses; harder) or a reduced shop (one charm, three after bosses; a gentle nudge). See
+   "Fewer shops" and "A smaller shop, and a boss draft" above.
 7. **Ruled out by the model:** fewer charm offers, a stingier rarity roll, more HP without
    softer hits, and closing the shop entirely between bosses.
 
@@ -138,4 +174,6 @@ Prototyped in the engine for the sim only (not committed):
 - Go with the package (ideas 1–3) as one balance PR, tuned to the targets in idea 2?
 - Rarity (idea 4): colour-code, and hold rares back early? Make Thousand Cranes rare?
 - The ward (idea 5): park until the greed-aware bot, or not at all?
-- Season markets (idea 6): in, with the spirit retune tuned around it?
+- Shop shape (idea 6): season markets (charms only after bosses), a reduced shop (one charm
+  on offer, three after bosses), or a boss draft plus a one-charm shop? My pick is the boss
+  draft plus a one-charm shop, with rares only in drafts.
