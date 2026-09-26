@@ -32,9 +32,20 @@ Small, and worth doing before the design pass.
   `Fukidashi` (mood-shaped bubbles). Give him a `Fukidashi` from his portrait with his own calm
   mood (`playful` or a new one), keeping "tap to dismiss", the 44px target and the `guide` test id
   the e2e specs use. It shows in fights and in the shop (`ShopView.tsx`).
+- **Fewer kiwis.** Use the kiwi only where it stands in for an icon that would otherwise be
+  missing, not as decoration next to text. In Aotearoa, where Nippon shows kanji, show nothing
+  instead, except the kiwi stays on:
+  - the yaku book button in the fight header and the empty-tracker button (`Hud.tsx`, `役`
+    in Nippon),
+  - the poem icon's paper strip (`PoemIcon` in `Icons.tsx`), which would otherwise be blank.
 
-Together these are one small PR (roughly CSS, `useGame.ts` and `Overlays.tsx`, plus a test for
-the speech budget).
+  Remove it from the score screen's yaku names (`Sequences.tsx`), the month line on the intro
+  (`Intro.tsx`), the yaku book entries and card gallery months (`YakuBook.tsx`), and the deck
+  seals on Setup and the Collection's deck tab (`Setup.tsx`, `Collection.tsx`). Then check that
+  those layouts don't leave an awkward gap where the seal was (the yaku book has a seal column).
+
+Together these are still one small PR (CSS, `useGame.ts`, `Overlays.tsx` and a handful of
+kiwi removals, plus a test for the speech budget).
 
 ## Next: the design pass
 
