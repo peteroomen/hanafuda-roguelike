@@ -83,6 +83,30 @@ is earned, but by midsummer they're finishing fights in one stop 86% of the time
 The casual bot drops to 26%, below the 30–35% target, so the ferocity or rewards need a final
 tune when this is built.
 
+### Fewer shops (asked after the first write-up)
+
+Prototyped in the engine for the sim only (not committed):
+
+| Variant                                                                              | Win | Koi-koi/run | First-stop wins 2–4 / 5–8 / 9–12 | First stop ÷ HP | Charms in month 4 / 7 | Mon at 1st shop |
+| ------------------------------------------------------------------------------------ | --- | ----------- | -------------------------------- | --------------- | --------------------- | --------------- |
+| Today                                                                                | 48% | 0.4         | 85% / 85% / 75%                  | 2.8 / 2.5 / 1.7 | 4 / 5                 | 10              |
+| Shop only after bosses (months 3, 6, 9)                                              | 32% | 0.6         | 66% / 73% / 69%                  | 1.8 / 1.6 / 1.4 | 3 / 5                 | 29              |
+| … casual bot                                                                         | 18% | 0.5         | 64% / 72% / 67%                  | 1.7 / 1.5 / 1.2 | 3 / 5                 | 29              |
+| Shop every other month                                                               | 41% | 0.5         | 75% / 80% / 72%                  | 2.0 / 2.2 / 1.6 | 3 / 5                 | 18              |
+| Charms only after bosses; a small shop (talismans, poems, shrine, onsen) every month | 36% | 0.6         | 69% / 65% / 65%                  | 1.8 / 1.3 / 1.3 | 2 / 3                 | 10              |
+| … casual bot                                                                         | 23% | 0.6         | 68% / 66% / 69%                  | 1.7 / 1.2 / 1.3 | 2 / 3                 | 10              |
+
+- **Shop only after bosses** is harder, but blunt. Mon piles up (about 29 at the first shop), so
+  you buy three to five charms at once and the slots are full by month 7 anyway. Months 1–3
+  have no charms at all, and the onsen (the only heal you can buy) is gone for most of the year.
+- **Charms only after bosses, with a small shop every month**, does what the idea is after:
+  charms come slowly (2 by month 4, 3 by month 7, against 4 and 5 today), each change of season
+  is a big market to look forward to, and a strong charm there feels earned. The monthly small
+  shop keeps heals, talismans, poems and the shrine, so mon still has somewhere to go. It's a
+  real difficulty step (36% / 23%), so it would ship together with the spirit retune, which
+  would then need less HP. It doesn't change the fight texture on its own (one-stop wins still
+  about 65%).
+
 ## Ideas, in order of confidence
 
 1. **Nerf Thousand Cranes** (+15 → +8 Chips per hand won), and consider making it rare. The
@@ -103,11 +127,15 @@ tune when this is built.
    finishing a fight. Prototyped: the sim bots don't koi-koi, so they just take more hits and the
    win rate falls to 19%. Can't judge it until the greed-aware bot exists, and it changes the
    rules a lot. Parked.
-6. **Ruled out by the model:** fewer charm offers, a stingier rarity roll, and more HP without
-   softer hits.
+6. **Charms only at the season markets** (after each boss), with a small monthly shop for the
+   rest. Strong on pacing and on making charms feel earned; pairs with idea 2. See "Fewer
+   shops" above.
+7. **Ruled out by the model:** fewer charm offers, a stingier rarity roll, more HP without
+   softer hits, and closing the shop entirely between bosses.
 
 ## Decisions needed
 
 - Go with the package (ideas 1–3) as one balance PR, tuned to the targets in idea 2?
 - Rarity (idea 4): colour-code, and hold rares back early? Make Thousand Cranes rare?
 - The ward (idea 5): park until the greed-aware bot, or not at all?
+- Season markets (idea 6): in, with the spirit retune tuned around it?

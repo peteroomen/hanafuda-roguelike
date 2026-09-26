@@ -183,7 +183,7 @@ const bands: [string, number, number][] = [
 ];
 
 console.log(
-  `| Variant | Win | Koi-koi/run | One-stop wins ${bands.map((b) => b[0]).join(' / ')} | 1st stop ÷ HP ${bands.map((b) => b[0]).join(' / ')} | Charms at shop 3 / 6 | Cranes at end |`,
+  `| Variant | Win | Koi-koi/run | One-stop wins ${bands.map((b) => b[0]).join(' / ')} | 1st stop ÷ HP ${bands.map((b) => b[0]).join(' / ')} | Charms in month 4 / 7 | Mon at 1st shop | Cranes at end |`,
 );
 console.log('| --- | --- | --- | --- | --- | --- | --- |');
 const snapshot = JSON.stringify(BALANCE);
@@ -197,6 +197,8 @@ for (const v of GROUPS[group] ?? []) {
   const fightsWon = new Array<number>(13).fill(0);
   const charmsAtShop: number[][] = Array.from({ length: 13 }, () => []);
   const cranes: number[] = [];
+  const monAtShop: number[][] = Array.from({ length: 13 }, () => []);
+  const charmsByMonth: number[][] = Array.from({ length: 13 }, () => []);
   let wins = 0;
   let koikoi = 0;
   for (let i = 0; i < runs; i++) {
@@ -214,6 +216,7 @@ for (const v of GROUPS[group] ?? []) {
         if (!maxHp && run.fight) maxHp = run.fight.maxHp;
         for (const e of events) {
           if (e.t === 'fightStart') {
+            charmsByMonth[run.month]?.push(run.omamori.length);
             maxHp = run.fight?.maxHp ?? 0;
             stops = 0;
           } else if (e.t === 'playerStop') {
@@ -227,6 +230,7 @@ for (const v of GROUPS[group] ?? []) {
         if (run.phase === 'shop' && lastPhase !== 'shop') {
           shops += 1;
           charmsAtShop[shops]?.push(run.omamori.length);
+          monAtShop[shops]?.push(run.mon);
         }
         lastPhase = run.phase;
       },
@@ -248,7 +252,7 @@ for (const v of GROUPS[group] ?? []) {
     return w ? o / w : 0;
   };
   console.log(
-    `| ${v.name} | ${pct(wins / runs)} | ${(koikoi / runs).toFixed(1)} | ${bands.map((b) => pct(oneStopBand(b[1], b[2]))).join(' / ')} | ${bands.map((b) => band(b[1], b[2], (m) => ratio[m] ?? []).toFixed(1)).join(' / ')} | ${med(charmsAtShop[3] ?? [])} / ${med(charmsAtShop[6] ?? [])} | ${cranes.length ? `+${med(cranes)} chips` : '–'} |`,
+    `| ${v.name} | ${pct(wins / runs)} | ${(koikoi / runs).toFixed(1)} | ${bands.map((b) => pct(oneStopBand(b[1], b[2]))).join(' / ')} | ${bands.map((b) => band(b[1], b[2], (m) => ratio[m] ?? []).toFixed(1)).join(' / ')} | ${med(charmsByMonth[4] ?? [])} / ${med(charmsByMonth[7] ?? [])} | ${med(monAtShop[1] ?? [])} | ${cranes.length ? `+${med(cranes)} chips` : '–'} |`,
   );
 }
 Object.assign(B, JSON.parse(snapshot) as Balance);
