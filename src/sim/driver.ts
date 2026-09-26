@@ -50,6 +50,8 @@ export interface RunOptions {
   readonly guided?: boolean;
   /** Charms kept out of the shop (a new player's starter set). Default: everything unlocked. */
   readonly lockedCharms?: readonly OmamoriId[];
+  /** Charms owned from the start, for A/B tests of a charm or a lucky early shop. */
+  readonly startCharms?: readonly OmamoriId[];
   readonly bot: BotConfig;
   readonly onEvents?: (run: RunState, events: readonly RunEvent[]) => void;
 }
@@ -63,6 +65,12 @@ export function playRun(opts: RunOptions): RunSummary {
     guided: opts.guided ?? false,
     ...(opts.lockedCharms ? { lockedCharms: opts.lockedCharms } : {}),
   });
+  if (opts.startCharms?.length) {
+    state = {
+      ...state,
+      omamori: [...state.omamori, ...opts.startCharms.map((id) => ({ id, counter: 0 }))],
+    };
+  }
   const bot = makeBot(opts.bot, opts.seed * 7919 + 13);
   const fights: FightLog[] = [];
   const playerStops: RunSummary['playerStops'] = [];

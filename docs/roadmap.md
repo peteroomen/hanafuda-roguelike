@@ -118,6 +118,13 @@ From feedback item #10 (discussion first, then sim each before building). See th
   is an instant win in traditional koi-koi).
 - **Self-match** talisman: match two cards of one month from your own hand.
 
+## Next: balance (fights too short, charms snowball)
+
+Modelled 2026-09-26 in `docs/work/2026-09-26-balance-model.md`: a typical stop deals 2–3× a
+spirit's HP, so 85% of fights end with the first stop and koi-koi is never needed; Thousand
+Cranes is the outlier charm. Proposed: nerf Cranes, raise spirit HP with softer hits, ease the
+early months less, drop the Swift Victory bonus, and make rarity visible. Waiting on decisions.
+
 ## Later: sim and balance
 
 - **A greed-aware smart bot.** The bot calls koi-koi about once every two runs, so it can't
