@@ -4,6 +4,7 @@ import { omamoriDef } from '@/content/omamori';
 import { newRun } from '@/engine/run';
 import { cardBackUrl } from '@/ui/art/images';
 import * as sfx from '@/ui/audio/audio';
+import { lockedCharms } from '@/ui/state/meta';
 import { setState, updateProfile, useStore } from '@/ui/state/store';
 import { Viewport } from '@/ui/game/Viewport';
 
@@ -16,7 +17,13 @@ export function Setup() {
   const begin = () => {
     sfx.unlockAudio();
     const seed = (Math.floor(Math.random() * 2 ** 31) ^ Date.now()) >>> 0;
-    const { state } = newRun({ seed, deckId: deck, omen, guided });
+    const { state } = newRun({
+      seed,
+      deckId: deck,
+      omen,
+      guided,
+      lockedCharms: lockedCharms(profile),
+    });
     updateProfile((p) => ({ ...p, runsStarted: p.runsStarted + 1 }));
     setState({ run: state, screen: 'game' });
   };

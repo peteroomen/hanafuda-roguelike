@@ -6,6 +6,7 @@ import { Collection } from '@/ui/screens/Collection';
 import { SettingsScreen } from '@/ui/screens/SettingsScreen';
 import { Setup } from '@/ui/screens/Setup';
 import { Title } from '@/ui/screens/Title';
+import { refreshUnlocks } from '@/ui/state/meta';
 import { setState, speedFactorOf, useStore } from '@/ui/state/store';
 
 export function App() {
@@ -31,6 +32,11 @@ export function App() {
     };
     document.addEventListener('pointerdown', onDown);
     return () => document.removeEventListener('pointerdown', onDown);
+  }, []);
+
+  // Stats earned before an unlock existed (or on an older version) unlock it silently on load.
+  useEffect(() => {
+    refreshUnlocks();
   }, []);
 
   // Decode the chosen card faces up front so nothing flashes in during play.
