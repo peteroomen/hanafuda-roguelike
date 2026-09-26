@@ -6,8 +6,27 @@ up, it gets its own plan in `docs/work/`.
 ## Now
 
 Nothing in progress. The 2026-09-25 play-test feedback is fully shipped (PRs A–G, #7–#14; see
-`docs/work/2026-09-25-feedback-triage.md`). Everything still open from it is below. Pick up from
-**Next** when work resumes.
+`docs/work/2026-09-25-feedback-triage.md`), and so is the Aotearoa land (#15). Everything still
+open is below. Pick up from **Next** when work resumes.
+
+## Next: fixes from play (2026-09-26)
+
+Small, and worth doing before the design pass.
+
+- **The new-year (Setup) screen is squashed at the bottom.** The Land picker added about 90px,
+  and at 360×640 the "Guided first months" row is clipped (its text runs under the Begin
+  button). The deck list has a fixed `max-height: 318px` (`.decks` in `screens.css`). Make the
+  deck list take whatever height is left (flex) instead, and check at 360×640 and 390×844.
+- **Spirits talk far too much.** A line should be a fun, rare surprise: aim for 2–3 per hand.
+  Today `say()` in `useGame.ts` speaks on every trigger (each koi-koi call, each hit, each hurt,
+  the idle timer in `FightView.tsx`); only boss-rule lines are limited to once a hand. Add a
+  per-hand budget (about 3) and a chance per moment, keep the big moments (calmed, a koi-koi
+  call) most likely to speak, and seed the roll so replays match.
+- **The toggle's knob sits too low.** In `.setting input[type='checkbox']` (`hud.css`) the
+  track is 28px with a 2px border, leaving 24px inside, but the knob is 20px plus a 2px border
+  (24px) placed at `top: 2px`, so it hangs 2px below the middle. Centre it (`top: 0`, or
+  `top: 50%` with `translateY(-50%)`) and check the checked state too. It's the same control in
+  Setup and Settings.
 
 ## Next: the design pass
 
