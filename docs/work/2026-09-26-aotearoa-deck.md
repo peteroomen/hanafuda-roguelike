@@ -251,7 +251,6 @@ only retune if the Aotearoa set moves a bot's win rate by more than a few points
 
 - The Te Reo yaku names other than Te Pō, Kōkōwai and Pounamu are drafts and need a fluent
   speaker's check (and the card and month names a second look).
-- The licence for the Aotearoa art (`public/cards/aotearoa/LICENSE.md` says "to be confirmed").
 - Charm names that mention Japanese cards (Boar Tusk, Deer Call, Thousand Cranes, Phoenix Plume)
   are unchanged; their descriptions already use the Aotearoa words.
 - The README's known issues: the Kuaka and Toetoe clump cards are due for regeneration. Rerun

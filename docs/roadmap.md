@@ -25,6 +25,37 @@ big dedicated design pass later"). PR E (the woodblock style) was part one.
 - **More game-like moments:** transitions between screens, a proper month-change beat, and a
   victory sequence for the year.
 
+## Later: Aotearoa
+
+The Aotearoa land shipped in #15 with its own cards, Te Reo names and NZ seasons; everything else
+in the run is still Japanese. See `docs/work/2026-09-26-aotearoa-deck.md`. In rough order:
+
+- **A fluent speaker's check of the Te Reo.** Most of the yaku names are drafts (only Te Pō,
+  Kōkōwai and Pounamu came from the deck's designer), and the card names, month names and
+  descriptions deserve a look too. Worth doing before anything below adds more Te Reo.
+- **Opponents from Māori mythology.** Twelve spirits and eight bosses, each with a portrait,
+  lore, voice lines and (for bosses) a rule. The spirit schedule is already per quarter, so a
+  land can bring its own roster. Lean on creatures and beings of story (taniwha, patupaiarehe,
+  ponaturi, maero, Kurangaituku) rather than atua, and get cultural advice on which figures are
+  appropriate to fight in a game at all.
+- **A charm and shop pass.** Same effects, new theming: omamori become taonga (pounamu,
+  hei-tiki, kete), ofuda become something one-shot, the onsen becomes hot pools, mon perhaps
+  stays as coin. Charm names that point at Japanese cards (Boar Tusk, Deer Call, Thousand
+  Cranes, Phoenix Plume, Two Moons) would change with it.
+- **The guide.** The Rain Man narrates the guided months in both lands. Aotearoa could have its
+  own guide (Ua's frog, or a pīwakawaka) with a portrait and its own tips.
+- **Sound.** The music and UI plucks use a Japanese koto scale. Aotearoa could have its own
+  palette: birdsong for captures and yaku (tūī, korimako, ruru), and something flute-like in
+  the spirit of taonga pūoro (with care: some of those instruments carry real significance).
+- **Small touches.** Falling pōhutukawa stamens instead of cherry petals on the menus; an
+  Aotearoa title screen; land-specific unlocks (a deck back per land) in the record book.
+- **Art.** Regenerate the Kuaka and Toetoe clump cards (the designer's known issues), then
+  rerun `scripts/aotearoa-cards.ts`.
+- **Maybe, later: land-specific yaku.** For example a Matariki yaku. This changes gameplay, so
+  it needs its own plan and a balance run; the lands are level today.
+- **Watch the balance.** The two lands are within noise of each other, but the 400-run suite
+  has had Aotearoa a few points easier. Recheck after the charm pass.
+
 ## Later: mechanics to model
 
 From feedback item #10 (discussion first, then sim each before building). See the table in

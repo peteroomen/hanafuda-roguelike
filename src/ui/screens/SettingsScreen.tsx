@@ -53,7 +53,8 @@ export function SettingsScreen() {
             </p>
             <p>
               Aotearoa card faces: an original deck of New Zealand plants, birds and skies, made for
-              Twelve Petals. Ribbon lettering in Yuji Boku (SIL Open Font License).
+              Twelve Petals. © 2026 Peter Oomen, all rights reserved. Ribbon lettering in Yuji Boku
+              (SIL Open Font License).
             </p>
             <p>The drawn card style, spirit portraits and sound are made for Twelve Petals.</p>
           </div>

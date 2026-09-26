@@ -151,5 +151,6 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
     (`Seal` in `src/ui/art/Kiwi.tsx`).
   - Art: `scripts/aotearoa-cards.ts` converts `art-source/cards/aotearoa/*.svg`. Fonts get
     macron vowels built in by `scripts/subset-fonts.py`: rerun it after adding new non-ASCII text.
-  - Open: a fluent speaker's check of the draft Te Reo yaku names, and the art's licence.
+  - The Aotearoa art is © Peter Oomen, all rights reserved (`public/cards/aotearoa/LICENSE.md`,
+    Settings → Credits). Follow-ups for Aotearoa are in `docs/roadmap.md`.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.
