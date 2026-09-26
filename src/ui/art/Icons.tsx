@@ -4,7 +4,9 @@
  */
 import { ofudaDef, type OfudaId } from '@/content/ofuda';
 import { omamoriDef, type OmamoriId } from '@/content/omamori';
-import { yakuDef, type YakuId } from '@/content/yaku';
+import type { Land } from '@/content/cards';
+import { KIWI_PATH, KIWI_VIEWBOX } from './Kiwi';
+import { yakuDef, type YakuId, yakuText } from '@/content/yaku';
 
 function vertical(text: string, x: number, y: number, size: number, fill: string, maxChars = 3) {
   const chars = Array.from(text).slice(0, maxChars);
@@ -108,8 +110,9 @@ export function OfudaIcon({ id, size = 30 }: { id: OfudaId; size?: number }) {
   );
 }
 
-export function PoemIcon({ id, size = 30 }: { id: YakuId; size?: number }) {
+export function PoemIcon({ id, land, size = 30 }: { id: YakuId; land: Land; size?: number }) {
   const d = yakuDef(id);
+  const text = yakuText(id, land);
   const color =
     d.family === 'ribbons'
       ? '#c8321e'
@@ -122,13 +125,13 @@ export function PoemIcon({ id, size = 30 }: { id: YakuId; size?: number }) {
             : d.family === 'chaff'
               ? '#8a6a3a'
               : '#2b4f9c';
-  const k = d.kanji.replace('・', '').slice(0, 3);
+  const k = text.kanji.replace('・', '').slice(0, 3);
   return (
     <svg
       width={size}
       height={size * (80 / 36)}
       viewBox="0 0 36 80"
-      aria-label={`${d.name} poem`}
+      aria-label={`${text.name} poem`}
       role="img"
     >
       <path
@@ -139,7 +142,13 @@ export function PoemIcon({ id, size = 30 }: { id: YakuId; size?: number }) {
         strokeLinejoin="round"
       />
       <path d="M9 6 L27 6 L28 74 L8 74 Z" fill="#f7efdc" />
-      {vertical(k, 18, 40, k.length >= 3 ? 11 : 13, '#1d1712')}
+      {land === 'aotearoa' ? (
+        <svg x="8" y="30" width="20" height="20" viewBox={KIWI_VIEWBOX}>
+          <path d={KIWI_PATH} fill="#1d1712" fillRule="evenodd" />
+        </svg>
+      ) : (
+        vertical(k, 18, 40, k.length >= 3 ? 11 : 13, '#1d1712')
+      )}
     </svg>
   );
 }

@@ -1,6 +1,7 @@
 import { monthDef, seasonOf } from '@/content/cards';
+import { cap } from '@/content/lands';
 import { spiritDef } from '@/content/spirits';
-import { yakuDef, type YakuId } from '@/content/yaku';
+import { type YakuId, yakuText } from '@/content/yaku';
 import type { RunState } from '@/engine/run';
 import { spiritUrl } from '@/ui/art/images';
 import { Crest, OmamoriIcon } from '@/ui/art/Icons';
@@ -24,7 +25,7 @@ export function EndView({ run, unlocks }: { run: RunState; unlocks: string[] }) 
         killer && (
           <img
             className="end-face"
-            src={spiritUrl(killer.id, seasonOf(run.month), killer.boss, 'full')}
+            src={spiritUrl(killer.id, seasonOf(run.month, run.land), killer.boss, 'full')}
             alt=""
           />
         )
@@ -32,8 +33,8 @@ export function EndView({ run, unlocks }: { run: RunState; unlocks: string[] }) 
       <div className="end-title display">{won ? 'The year is complete' : 'Your petals fall'}</div>
       <div className="end-sub">
         {won
-          ? 'Twelve spirits calmed. Spring comes again.'
-          : `In ${monthDef(run.month).flower} month, ${killer?.name ?? 'a spirit'} took the last of your petals.`}
+          ? `Twelve spirits calmed. ${cap(seasonOf(1, run.land))} comes again.`
+          : `In ${monthDef(run.month, run.land).flower} month, ${killer?.name ?? 'a spirit'} took the last of your petals.`}
       </div>
       <div className="end-stats paper">
         <div>
@@ -58,7 +59,7 @@ export function EndView({ run, unlocks }: { run: RunState; unlocks: string[] }) 
           Favourite yaku:{' '}
           {topYaku.map(([id, n]) => (
             <span key={id}>
-              {yakuDef(id).name} ×{n}
+              {yakuText(id, run.land).name} ×{n}
             </span>
           ))}
         </div>

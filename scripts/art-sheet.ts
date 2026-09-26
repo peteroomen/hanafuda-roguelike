@@ -6,7 +6,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { chromium } from '@playwright/test';
-import { CARDS } from '@/content/cards';
+import { landCards } from '@/content/cards';
 import { cardBackSvg, cardFaceSvg } from '@/ui/art/cards';
 import { SPIRITS } from '@/content/spirits';
 import { rainManSvg, spiritSvg } from '@/ui/art/spirits';
@@ -39,10 +39,12 @@ img{display:block;filter:drop-shadow(0 3px 2px rgba(0,0,0,.5))}`;
 
 if (which === 'cards' || which === 'all') {
   const w = Number(process.argv[process.argv.indexOf('--w') + 1] || 120) || 120;
-  const cells = CARDS.map(
-    (c) =>
-      `<div class="cell"><img width="${w}" src="${dataUri(cardFaceSvg(c.id))}"/><span>${c.month} ${c.name}</span></div>`,
-  ).join('');
+  const cells = landCards('nippon')
+    .map(
+      (c) =>
+        `<div class="cell"><img width="${w}" src="${dataUri(cardFaceSvg(c.id))}"/><span>${c.month} ${c.name}</span></div>`,
+    )
+    .join('');
   const back = `<div class="cell"><img width="${w}" src="${dataUri(cardBackSvg())}"/><span>back</span></div>`;
   await shoot(
     'cards',

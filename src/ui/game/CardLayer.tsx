@@ -1,5 +1,6 @@
 import { memo, type PointerEvent } from 'react';
-import { CARDS, type CardId } from '@/content/cards';
+import { ALL_CARDS, type CardId } from '@/content/cards';
+import { useLand } from '@/ui/state/store';
 import { shortFlower } from './labels';
 import type { EnhancementId } from '@/engine/types';
 import { enhancementDef } from '@/content/enhancements';
@@ -42,7 +43,7 @@ interface CardProps {
 
 const Card = memo(function Card(props: CardProps) {
   const { id, p } = props;
-  const c = CARDS[id];
+  const c = ALL_CARDS[id];
   if (!c) return null;
   const w = CARD_W * p.scale;
   const h = CARD_H * p.scale;
@@ -91,7 +92,7 @@ const Card = memo(function Card(props: CardProps) {
             {props.monthLabels && (
               <div className="tw">
                 <span className="tw-n">{shownMonth}</span>
-                <span className="tw-name">{shortFlower(shownMonth)}</span>
+                <span className="tw-name">{shortFlower(shownMonth, c.land)}</span>
               </div>
             )}
             {props.enhancement && (
@@ -125,7 +126,8 @@ export interface CardLayerProps {
 }
 
 export function CardLayer({ visual, placements, marks, delays, onPress }: CardLayerProps) {
-  const back = cardBackUrl(marks.deckHue);
+  const land = useLand();
+  const back = cardBackUrl(marks.deckHue, land);
   const cards: CardId[] = [];
   for (const id of placements.keys()) cards.push(id);
   cards.sort((a, b) => a - b);
@@ -146,7 +148,7 @@ export function CardLayer({ visual, placements, marks, delays, onPress }: CardLa
             disguisedAs={zone?.z === 'field' ? disguise : undefined}
             faceUrl={
               zone?.z === 'field' && disguise !== undefined
-                ? disguiseUrl(disguise as 1)
+                ? disguiseUrl(disguise as 1, land)
                 : cardFaceUrl(id)
             }
             option={visual.options.includes(id)}

@@ -3,6 +3,7 @@
  * season; the last month of each season is a boss with a rule change.
  */
 import type { Season } from './cards';
+import type { LandText } from './lands';
 import type { YakuFamily, YakuId } from './yaku';
 
 export interface AiPersona {
@@ -46,7 +47,7 @@ export interface BossRule {
 }
 
 export interface SpiritPassive {
-  readonly text: string;
+  readonly text: LandText;
   readonly hiddenIntent?: boolean;
   readonly bonusMon?: number;
   readonly flatDamage?: number;
@@ -222,7 +223,7 @@ export const SPIRITS: readonly SpiritDef[] = [
     hp: 1,
     ferocity: 1,
     persona: { ...calm, prefs: { ribbons: 2 }, focus: 1.2, stopAt: 5 },
-    passive: { text: 'Its Tan needs only 4 Ribbons.', need: { tan: 4 } },
+    passive: { text: (t) => `Its ${t.y.tan} needs only 4 Ribbons.`, need: { tan: 4 } },
   },
   {
     id: 'nopperabo',

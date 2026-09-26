@@ -203,6 +203,45 @@
   opacity: 0.5;
   filter: grayscale(0.7);
 }
+.lands {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.land {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  border-radius: 12px;
+  background: var(--sumi);
+  border: var(--edge);
+  box-shadow: var(--print);
+  text-align: left;
+}
+.land img {
+  width: 24px;
+  height: 39px;
+  border-radius: 3px;
+}
+.land b {
+  font-size: 15px;
+}
+.land.on {
+  background: #4a1a12;
+  border-color: var(--vermilion);
+  box-shadow: 0 3px 0 var(--vermilion-2);
+}
+.land-text {
+  margin: 4px 2px 2px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+.kiwi {
+  display: inline-block;
+  vertical-align: -0.12em;
+}
 .omens {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

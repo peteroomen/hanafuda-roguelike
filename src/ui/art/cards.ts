@@ -2,7 +2,7 @@
  * Original card faces for all 48 cards, drawn as SVG strings (viewBox 100×164).
  * Inspired by the traditional 19th-century motifs; no modern deck is copied.
  */
-import { CARDS, type CardId } from '@/content/cards';
+import { ALL_CARDS, type CardId } from '@/content/cards';
 import {
   artRng,
   blossom,
@@ -30,7 +30,7 @@ export const CARD_H = 164;
 type Kind = 'bright' | 'animal' | 'ribbon' | 'chaff1' | 'chaff2' | 'chaff3';
 
 function kindOf(id: CardId): Kind {
-  const c = CARDS[id];
+  const c = ALL_CARDS[id];
   if (!c) return 'chaff1';
   if (c.type === 'chaff') return `chaff${Math.min(3, c.variant)}` as Kind;
   return c.type;
@@ -1403,7 +1403,7 @@ const MONTH_ART: Record<number, (k: Kind) => string> = {
 
 /** Full SVG markup for a card face. */
 export function cardFaceSvg(id: CardId): string {
-  const c = CARDS[id];
+  const c = ALL_CARDS[id];
   if (!c) throw new Error(`no card ${id}`);
   const art = (MONTH_ART[c.month] as (k: Kind) => string)(kindOf(id));
   const clip = `cf${id}`;
@@ -1453,4 +1453,26 @@ export function cardBackSvg(hue = 0): string {
       'stroke-width': 1.2,
     },
   )}</svg>`;
+}
+
+/**
+ * The Aotearoa card back, after the deck's own 00-back.svg: a dark card, a thin inset frame and
+ * a small cluster of stars (Matariki). Hue 0 is the original kōkōwai red.
+ */
+export function aotearoaBackSvg(hue = 0): string {
+  const accent = hue === 0 ? '#7a2a22' : `hsl(${hue},48%,32%)`;
+  const star = (x: number, y: number, r: number) => {
+    const k = r * 0.24;
+    return path(
+      `M${x},${y - r} L${x + k},${y - k} L${x + r},${y} L${x + k},${y + k} L${x},${y + r} L${x - k},${y + k} L${x - r},${y} L${x - k},${y - k}Z`,
+      { fill: accent },
+    );
+  };
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CARD_W} ${CARD_H}">${rect(0, 0, CARD_W, CARD_H, { rx: 6.5, fill: '#1c1411' })}${rect(
+    4.3,
+    4.7,
+    CARD_W - 8.6,
+    CARD_H - 9.4,
+    { rx: 2.2, fill: 'none', stroke: accent, 'stroke-width': 0.8 },
+  )}${star(50, 82, 6)}${star(41.6, 73.9, 2.1)}${star(57.6, 71.2, 1.8)}</svg>`;
 }

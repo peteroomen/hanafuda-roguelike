@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_CARD_IDS, CARDS } from '@/content/cards';
+import { ALL_CARDS, LANDS, landCardIds } from '@/content/cards';
+import { landText } from '@/content/lands';
 import { OMAMORI_IDS, omamoriDef } from '@/content/omamori';
 import { OFUDA_IDS } from '@/content/ofuda';
 import { SPIRITS, spiritDef } from '@/content/spirits';
@@ -193,12 +194,13 @@ describe('content sanity', () => {
   it('every charm has text, a price and at least one effect', () => {
     for (const id of OMAMORI_IDS) {
       const d = omamoriDef(id);
-      expect(d.text.length).toBeGreaterThan(5);
+      expect(landText(d.text, 'nippon').length).toBeGreaterThan(5);
       expect(d.price).toBeGreaterThan(0);
       expect(d.effects.length).toBeGreaterThan(0);
     }
   });
   it('the card table is intact', () => {
-    expect(CARDS).toHaveLength(ALL_CARD_IDS.length);
+    expect(ALL_CARDS).toHaveLength(LANDS.length * 48);
+    for (const land of LANDS) expect(landCardIds(land)).toHaveLength(48);
   });
 });

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="card back" viewBox="0 0 1024 1536" width="1024" height="1536">
+  <rect width="1024" height="1536" fill="#1C1411"/>
+  <rect x="44" y="44" width="936" height="1448" rx="18" fill="none" stroke="#7A2A22" stroke-width="6"/>
+  <g transform="translate(512 768)" fill="#7A2A22">
+    <path d="M0 -58 L14 -14 L58 0 L14 14 L0 58 L-14 14 L-58 0 L-14 -14 Z"/>
+    <path d="M-86 -96 L-80 -82 L-66 -76 L-80 -70 L-86 -56 L-92 -70 L-106 -76 L-92 -82 Z"/>
+    <path d="M78 -118 L83 -106 L95 -101 L83 -96 L78 -84 L73 -96 L61 -101 L73 -106 Z"/>
+  </g>
+</svg>

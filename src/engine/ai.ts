@@ -4,7 +4,7 @@
  * v1 per the brief: greedy capture toward a declared intent, plus denial, with a
  * per-spirit stop / koi-koi threshold. Deterministic: no randomness at all.
  */
-import { CARDS, type CardId } from '@/content/cards';
+import { ALL_CARDS, type CardId } from '@/content/cards';
 import type { AiPersona } from '@/content/spirits';
 import { yakuDef, type YakuId } from '@/content/yaku';
 import {
@@ -41,9 +41,9 @@ export function valueMap(
   persona: AiPersona | null,
   intent: YakuId | null,
 ): Float64Array {
-  const v = new Float64Array(48);
+  const v = new Float64Array(ALL_CARDS.length);
   for (const id of s.deckIds) {
-    const c = CARDS[id];
+    const c = ALL_CARDS[id];
     if (c) v[id] = TYPE_BASE[c.type];
   }
   for (const p of progressFor(s, seat)) {
@@ -74,7 +74,7 @@ export function unseenFor(s: HandState, seat: Seat, seesHand: boolean): CardId[]
 
 function sameMonthUnseen(unseen: readonly CardId[], month: number): number {
   let k = 0;
-  for (const id of unseen) if (CARDS[id]?.month === month) k++;
+  for (const id of unseen) if (ALL_CARDS[id]?.month === month) k++;
   return k;
 }
 
@@ -121,7 +121,7 @@ export function makeEvaluator(
 
 /** Value to `seat` of capturing card x (own gain plus denying the opponent). */
 export function gain(ev: Evaluator, x: CardId): number {
-  const c = CARDS[x];
+  const c = ALL_CARDS[x];
   const base = c ? TYPE_BASE[c.type] : 0;
   const deny = Math.max(0, (ev.opp[x] ?? 0) - base * 0.5);
   return (ev.own[x] ?? 0) + ev.persona.denial * deny;
@@ -145,15 +145,15 @@ function matchesFor(s: HandState, ev: Evaluator, card: CardId): CardId[] {
 
 /** Risk of leaving `card` on the field for the opponent. */
 function placeRisk(s: HandState, ev: Evaluator, card: CardId): number {
-  const month = CARDS[card]?.month ?? 0;
+  const month = ALL_CARDS[card]?.month ?? 0;
   const oppHand = s.hands[other(ev.seat)];
   let p: number;
-  if (ev.seesHand) p = oppHand.some((h) => CARDS[h]?.month === month) ? 1 : 0;
+  if (ev.seesHand) p = oppHand.some((h) => ALL_CARDS[h]?.month === month) ? 1 : 0;
   else p = probHolds(sameMonthUnseen(ev.unseen, month), oppHand.length, ev.unseen.length);
   const oppValue = (ev.opp[card] ?? 0) + 0.6;
   let risk = p * oppValue;
   // Holding a partner of the same month means we may take it back next turn.
-  const partner = s.hands[ev.seat].some((h) => h !== card && CARDS[h]?.month === month);
+  const partner = s.hands[ev.seat].some((h) => h !== card && ALL_CARDS[h]?.month === month);
   if (partner) risk -= (1 - p) * 0.5 * gain(ev, card);
   return risk;
 }
@@ -169,9 +169,9 @@ function flipEV(
   if (pool.length === 0) return 0;
   let total = 0;
   for (const u of pool) {
-    const um = CARDS[u]?.month;
+    const um = ALL_CARDS[u]?.month;
     const matches: CardId[] = [];
-    for (const f of field) if (!frozen.includes(f) && CARDS[f]?.month === um) matches.push(f);
+    for (const f of field) if (!frozen.includes(f) && ALL_CARDS[f]?.month === um) matches.push(f);
     if (matches.length) total += captureValue(ev, u, matches);
   }
   // Only a fraction of unseen cards are actually in the pile.
@@ -277,9 +277,9 @@ export function chooseIntent(
 ): Intent | null {
   const prog = progressFor(s, seat);
   const hand = s.hands[seat];
-  const handMonths = new Set(hand.map((h) => CARDS[h]?.month));
+  const handMonths = new Set(hand.map((h) => ALL_CARDS[h]?.month));
   const fieldMonths = new Set(
-    s.field.filter((f) => !s.frozen.includes(f)).map((f) => CARDS[f]?.month),
+    s.field.filter((f) => !s.frozen.includes(f)).map((f) => ALL_CARDS[f]?.month),
   );
   let best: YakuProgress | null = null;
   let bestScore = 0;
@@ -290,7 +290,7 @@ export function chooseIntent(
     const rem = p.need - p.have;
     let reach = 0;
     for (const w of p.wanted) {
-      const m = CARDS[w]?.month;
+      const m = ALL_CARDS[w]?.month;
       if (s.field.includes(w) && handMonths.has(m)) reach += 1;
       else if (hand.includes(w) && fieldMonths.has(m)) reach += 1;
     }

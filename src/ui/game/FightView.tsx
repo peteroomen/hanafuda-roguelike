@@ -6,7 +6,7 @@ import { apparentMatches, canUseTalisman } from '@/engine/hand';
 import { type FightState, type RunState, waitingOn } from '@/engine/run';
 import { setState, speedFactor, useStore } from '@/ui/state/store';
 import { IDLE_TAUNT_MS } from '@/content/voices';
-import { yakuDef, type YakuId } from '@/content/yaku';
+import { yakuDef, type YakuId, yakuText } from '@/content/yaku';
 import * as sfx from '@/ui/audio/audio';
 import { haptics } from '@/ui/audio/haptics';
 import { CardLayer, type CardMarks } from './CardLayer';
@@ -331,7 +331,7 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
     return { ok: true };
   };
 
-  const season = seasonOf(run.month);
+  const season = seasonOf(run.month, run.land);
   const doneScore = useCallback(() => api.resolveWait('score'), [api]);
   const fieldBottom = stage.fieldTop + stage.fieldH;
   const decide = myTurn && hand.phase === 'decide';
@@ -431,10 +431,10 @@ export function FightView({ api, stageH }: { api: GameApi; stageH: number }) {
           data-testid="gloss"
         >
           <div className="gloss-name">
-            <b>{yakuDef(gloss.id).name}</b> · {yakuDef(gloss.id).gloss}
+            <b>{yakuText(gloss.id, run.land).name}</b> · {yakuText(gloss.id, run.land).gloss}
           </div>
           <div className="gloss-req">
-            {yakuDef(gloss.id).requirement} · {yakuDef(gloss.id).points} pt
+            {yakuText(gloss.id, run.land).requirement} · {yakuDef(gloss.id).points} pt
             {yakuDef(gloss.id).points === 1 ? '' : 's'}
           </div>
         </div>

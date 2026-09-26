@@ -1,6 +1,8 @@
 /**
  * The balance suite: every bot, archetype and omen, summarised as markdown.
  */
+import type { Land } from '@/content/cards';
+import { landText } from '@/content/lands';
 import { DECKS, type DeckId } from '@/content/decks';
 import type { Archetype } from '@/content/omamori';
 import type { BotConfig } from './bots';
@@ -15,7 +17,7 @@ interface Row {
 function batch(
   runs: number,
   bot: BotConfig,
-  extra: { omen?: number; guided?: boolean; seed?: number; deckId?: DeckId } = {},
+  extra: { omen?: number; guided?: boolean; seed?: number; deckId?: DeckId; land?: Land } = {},
 ): Summary {
   const out: RunSummary[] = [];
   for (let i = 0; i < runs; i++) {
@@ -26,6 +28,7 @@ function batch(
         omen: extra.omen ?? 0,
         guided: extra.guided ?? false,
         ...(extra.deckId ? { deckId: extra.deckId } : {}),
+        ...(extra.land ? { land: extra.land } : {}),
       }),
     );
   }
@@ -47,6 +50,14 @@ export function runSuite(runs: number): string {
     summary: batch(runs, { kind: 'casual', archetype: 'auto' }),
   });
   rows.push({
+    label: 'smart bot, Aotearoa',
+    summary: batch(runs, { kind: 'smart', archetype: 'auto' }, { land: 'aotearoa' }),
+  });
+  rows.push({
+    label: 'casual bot, Aotearoa',
+    summary: batch(runs, { kind: 'casual', archetype: 'auto' }, { land: 'aotearoa' }),
+  });
+  rows.push({
     label: 'smart bot, guided year',
     summary: batch(runs, { kind: 'smart', archetype: 'auto' }, { guided: true }),
   });
@@ -66,7 +77,7 @@ export function runSuite(runs: number): string {
     summary: batch(runs, { kind: 'smart', archetype: a }),
   }));
   const deckRows: Row[] = DECKS.map((d) => ({
-    label: d.name,
+    label: landText(d.name, 'nippon'),
     summary: batch(runs, { kind: 'smart', archetype: 'auto' }, { deckId: d.id }),
   }));
   const omenRows: Row[] = [1, 2, 3, 4, 5].map((o) => ({

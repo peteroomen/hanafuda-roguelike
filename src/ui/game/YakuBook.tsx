@@ -1,46 +1,60 @@
 import { usePaperOnOpen } from '@/ui/audio/usePaper';
 import { useState } from 'react';
-import { CARDS, type CardId, MONTHS, cardWithTag } from '@/content/cards';
+import {
+  card,
+  type CardId,
+  cardWithTag,
+  type CardTag,
+  type Land,
+  landCards,
+  landMonths,
+} from '@/content/cards';
 import { DEFAULT_RULES } from '@/content/rules';
-import { YAKU, type YakuId } from '@/content/yaku';
+import { YAKU, type YakuId, yakuText } from '@/content/yaku';
 import { cardFaceUrl } from '@/ui/art/images';
+import { Kiwi, Seal } from '@/ui/art/Kiwi';
+import { useLand } from '@/ui/state/store';
 
-const EXAMPLES: Record<YakuId, CardId[]> = {
-  goko: ['crane', 'curtain', 'moon', 'rainMan', 'phoenix'].map((t) => cardWithTag(t as never)),
-  shiko: ['crane', 'curtain', 'moon', 'phoenix'].map((t) => cardWithTag(t as never)),
-  ameShiko: ['crane', 'curtain', 'moon', 'rainMan'].map((t) => cardWithTag(t as never)),
-  sanko: ['crane', 'curtain', 'phoenix'].map((t) => cardWithTag(t as never)),
-  tsukimi: ['moon', 'sakeCup'].map((t) => cardWithTag(t as never)),
-  hanami: ['curtain', 'sakeCup'].map((t) => cardWithTag(t as never)),
-  inoshikacho: ['boar', 'deer', 'butterflies'].map((t) => cardWithTag(t as never)),
-  akaao: CARDS.filter((c) => c.tags.includes('redPoetry') || c.tags.includes('blueRibbon')).map(
-    (c) => c.id,
-  ),
-  akatan: CARDS.filter((c) => c.tags.includes('redPoetry')).map((c) => c.id),
-  aotan: CARDS.filter((c) => c.tags.includes('blueRibbon')).map((c) => c.id),
-  tane: CARDS.filter((c) => c.type === 'animal')
-    .slice(0, 5)
-    .map((c) => c.id),
-  tan: CARDS.filter((c) => c.type === 'ribbon')
-    .slice(3, 8)
-    .map((c) => c.id),
-  kasu: CARDS.filter((c) => c.type === 'chaff')
-    .slice(0, 10)
-    .map((c) => c.id),
-  tsukifuda: CARDS.filter((c) => c.month === 3).map((c) => c.id),
-};
+function examples(land: Land): Record<YakuId, CardId[]> {
+  const CARDS = landCards(land);
+  const tagged = (tags: CardTag[]) => tags.map((t) => cardWithTag(t, land));
+  const where = (f: (c: (typeof CARDS)[number]) => boolean) => CARDS.filter(f).map((c) => c.id);
+  const flowerMonth = card(cardWithTag('curtain', land)).month;
+  return {
+    goko: tagged(['crane', 'curtain', 'moon', 'rainMan', 'phoenix']),
+    shiko: tagged(['crane', 'curtain', 'moon', 'phoenix']),
+    ameShiko: tagged(['crane', 'curtain', 'moon', 'rainMan']),
+    sanko: tagged(['crane', 'curtain', 'phoenix']),
+    tsukimi: tagged(['moon', 'sakeCup']),
+    hanami: tagged(['curtain', 'sakeCup']),
+    inoshikacho: tagged(['boar', 'deer', 'butterflies']),
+    akaao: where((c) => c.tags.includes('redPoetry') || c.tags.includes('blueRibbon')),
+    akatan: where((c) => c.tags.includes('redPoetry')),
+    aotan: where((c) => c.tags.includes('blueRibbon')),
+    tane: where((c) => c.type === 'animal').slice(0, 5),
+    tan: where((c) => c.type === 'ribbon').slice(3, 8),
+    kasu: where((c) => c.type === 'chaff').slice(0, 10),
+    // The flower-viewing month: March in Nippon, September in Aotearoa.
+    tsukifuda: where((c) => c.month === flowerMonth),
+  };
+}
 
 export function YakuList({ poems }: { poems?: Partial<Record<YakuId, number>> }) {
+  const land = useLand();
+  const ex = examples(land);
   return (
     <div className="yaku-list">
       {YAKU.map((y) => {
+        const t = yakuText(y.id, land);
         const lv = poems?.[y.id] ?? 0;
         return (
           <div key={y.id} className="yaku-entry">
             <div className="yaku-head">
-              <span className="yaku-kanji display">{y.kanji}</span>
+              <span className="yaku-kanji display">
+                <Seal land={land} kanji={t.kanji} />
+              </span>
               <span className="yaku-name">
-                <b>{y.name}</b> <small>{y.gloss}</small>
+                <b>{t.name}</b> <small>{t.gloss}</small>
               </span>
               <span className="yaku-pts">
                 {y.points}
@@ -48,7 +62,7 @@ export function YakuList({ poems }: { poems?: Partial<Record<YakuId, number>> })
               </span>
             </div>
             <div className="yaku-req">
-              {y.requirement}
+              {t.requirement}
               {y.id === 'tsukifuda' ? ' (uses the fight’s month)' : ''}
               {lv > 0 && (
                 <span className="yaku-lv">
@@ -58,7 +72,7 @@ export function YakuList({ poems }: { poems?: Partial<Record<YakuId, number>> })
               )}
             </div>
             <div className="yaku-cards">
-              {(EXAMPLES[y.id] ?? []).map((c) => (
+              {(ex[y.id] ?? []).map((c) => (
                 <img key={c} src={cardFaceUrl(c)} alt="" />
               ))}
             </div>
@@ -70,26 +84,29 @@ export function YakuList({ poems }: { poems?: Partial<Record<YakuId, number>> })
 }
 
 export function CardGallery() {
+  const land = useLand();
   return (
     <div className="gallery">
-      {MONTHS.map((m) => (
+      {landMonths(land).map((m) => (
         <div key={m.month} className="gallery-month">
           <div className="gallery-head">
             <span className="display">{m.month}</span> {m.flower}{' '}
             <small>
-              {m.flowerJp} {m.kanji}
+              {m.native} {land === 'aotearoa' ? <Kiwi /> : m.kanji}
             </small>
           </div>
           <div className="gallery-cards">
-            {CARDS.filter((c) => c.month === m.month).map((c) => (
-              <figure key={c.id}>
-                <img src={cardFaceUrl(c.id)} alt={c.name} />
-                <figcaption>
-                  {c.type === 'chaff' ? 'Chaff' : c.name}
-                  <small> · {DEFAULT_RULES.chips[c.type]} chips</small>
-                </figcaption>
-              </figure>
-            ))}
+            {landCards(land)
+              .filter((c) => c.month === m.month)
+              .map((c) => (
+                <figure key={c.id}>
+                  <img src={cardFaceUrl(c.id)} alt={c.name} />
+                  <figcaption>
+                    {c.type === 'chaff' ? 'Chaff' : c.name}
+                    <small> · {DEFAULT_RULES.chips[c.type]} chips</small>
+                  </figcaption>
+                </figure>
+              ))}
           </div>
         </div>
       ))}

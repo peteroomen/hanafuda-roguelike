@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_CARD_IDS, CARDS, type CardId } from '@/content/cards';
+import { type CardId, landCardIds, landCards } from '@/content/cards';
 import { DEFAULT_RULES } from '@/content/rules';
 import {
   apparentMonth,
@@ -16,6 +16,9 @@ import {
   swapCards,
 } from './hand';
 import { chaffOf, handWith, playRandom, run, tag } from './testkit';
+
+const CARDS = landCards('nippon');
+const ALL_CARD_IDS = landCardIds('nippon');
 
 // Card ids used below (see content/cards.ts): Jan 0 crane, 1 red poetry, 2-3 chaff;
 // Feb 4 warbler, 5 poetry, 6-7 chaff; Mar 8 curtain; Aug 28 moon; Dec 44 phoenix, 45-47 chaff.

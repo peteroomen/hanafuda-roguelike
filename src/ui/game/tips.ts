@@ -1,14 +1,16 @@
+import type { LandText } from '@/content/lands';
+
 /**
  * The Rain Man's lines: one short line per new idea, at the moment it matters.
  */
-export const TIPS: Record<string, string> = {
+export const TIPS: Record<string, LandText> = {
   matching:
     'Same flower, same month. Tap a card in your hand to lift it, and tap again to play. If a field card shares its flower, you take both.',
   captured: 'Well caught. Each capture strikes the spirit, and Brights strike hardest.',
   flip: 'After you play, the top card of the deck is turned over and matched the same way.',
   strike: 'Your captures wound the spirit. When the cards run out, a new hand is dealt.',
-  yakuIntro:
-    'Now, yaku: sets of cards. Tan is 5 Ribbons (the paper strips), Tane is 5 Animals, and Kasu is 10 plain Chaff. Watch the tracker under the field.',
+  yakuIntro: (t) =>
+    `Now, yaku: sets of cards. ${t.y.tan} is 5 Ribbons (the paper strips), ${t.y.tane} is 5 Animals, and ${t.y.kasu} is 10 plain Chaff. Watch the tracker under the field.`,
   firstYaku:
     'A yaku! Its cards give Chips, its points give Mult. Chips × Mult is the damage you deal.',
   koikoiIntro:

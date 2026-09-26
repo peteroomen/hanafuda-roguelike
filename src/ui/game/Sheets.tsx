@@ -3,12 +3,13 @@ import { seasonOf } from '@/content/cards';
 import { ofudaDef, type OfudaId } from '@/content/ofuda';
 import { omamoriDef } from '@/content/omamori';
 import { spiritDef } from '@/content/spirits';
-import { yakuDef } from '@/content/yaku';
+import { landText } from '@/content/lands';
+import { yakuText } from '@/content/yaku';
 import type { FightState, RunState } from '@/engine/run';
 import { type OmamoriInstance, omamoriText } from '@/engine/scoring';
 import { spiritUrl } from '@/ui/art/images';
 import { OfudaIcon, OmamoriIcon } from '@/ui/art/Icons';
-import { updateSettings, useStore } from '@/ui/state/store';
+import { updateSettings, useLand, useStore } from '@/ui/state/store';
 
 const RARITY: Record<string, string> = { common: 'Common', uncommon: 'Uncommon', rare: 'Rare' };
 
@@ -22,6 +23,7 @@ export function CharmSheet(props: {
   onClose: () => void;
 }) {
   usePaperOnOpen();
+  const land = useLand();
   const d = omamoriDef(props.inst.id);
   return (
     <div className="sheet-scrim fade-in" onClick={props.onClose} data-testid="charm-sheet">
@@ -35,7 +37,7 @@ export function CharmSheet(props: {
             </div>
           </div>
         </div>
-        <div className="item-text">{omamoriText(props.inst)}</div>
+        <div className="item-text">{omamoriText(props.inst, land)}</div>
         <div className="item-actions">
           {props.onMove && (
             <>
@@ -129,7 +131,7 @@ export function SpiritSheet({
         <div className="item-top">
           <img
             className="sheet-face"
-            src={spiritUrl(s.id, seasonOf(run.month), s.boss, 'full')}
+            src={spiritUrl(s.id, seasonOf(run.month, run.land), s.boss, 'full')}
             alt=""
           />
           <div>
@@ -145,14 +147,14 @@ export function SpiritSheet({
             <b>{s.rule.title}.</b> {s.rule.text}
           </div>
         )}
-        {s.passive && <div className="item-rule">{s.passive.text}</div>}
+        {s.passive && <div className="item-rule">{landText(s.passive.text, run.land)}</div>}
         <div className="item-text small">
           Its hit is its yaku points × <b>{fight.ferocity}</b> (it grows fiercer each hand). If you
           have called koi-koi, the hit is doubled.
           {fight.intent && !s.passive?.hiddenIntent && (
             <>
               {' '}
-              It is chasing <b>{yakuDef(fight.intent.id).name}</b>.
+              It is chasing <b>{yakuText(fight.intent.id, run.land).name}</b>.
             </>
           )}
         </div>
@@ -269,7 +271,7 @@ export function SettingsList() {
         />
       </label>
       <div className="setting">
-        <span>Cards</span>
+        <span>Nippon cards</span>
         <div className="seg">
           {(
             [

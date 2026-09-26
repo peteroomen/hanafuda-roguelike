@@ -1,6 +1,7 @@
 /**
  * Meta progression: records runs in the profile and works out what unlocked.
  */
+import { landText } from '@/content/lands';
 import { DECKS, deckDef, OMENS, type UnlockCondition } from '@/content/decks';
 import { yakuDef } from '@/content/yaku';
 import type { RunState } from '@/engine/run';
@@ -57,6 +58,7 @@ export function recordRun(run: RunState, finished: boolean): string[] {
             won,
             month: run.month,
             deck: run.deckId,
+            land: run.land,
             omen: run.omen,
             hit: run.stats.biggestHit,
             date: new Date().toISOString().slice(0, 10),
@@ -69,7 +71,9 @@ export function recordRun(run: RunState, finished: boolean): string[] {
   for (const d of DECKS) {
     if (!decks.has(d.id) && met(d.unlock, next, run)) {
       decks.add(d.id);
-      unlocks.push(`${deckDef(d.id).name}: ${deckDef(d.id).text}`);
+      unlocks.push(
+        `${landText(deckDef(d.id).name, run.land)}: ${landText(deckDef(d.id).text, run.land)}`,
+      );
     }
   }
   next = { ...next, unlockedDecks: [...decks] };

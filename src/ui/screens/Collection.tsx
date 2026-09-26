@@ -1,20 +1,19 @@
 import { useState } from 'react';
-import { seasonOf } from '@/content/cards';
+import { landText } from '@/content/lands';
 import { OMAMORI } from '@/content/omamori';
 import { SPIRITS } from '@/content/spirits';
 import { OmamoriIcon } from '@/ui/art/Icons';
 import { spiritUrl } from '@/ui/art/images';
 import { CardGallery, Rules, YakuList } from '@/ui/game/YakuBook';
 import { Viewport } from '@/ui/game/Viewport';
-import { setState, useStore } from '@/ui/state/store';
+import { setState, useLand, useStore } from '@/ui/state/store';
 
 type Tab = 'yaku' | 'cards' | 'charms' | 'spirits' | 'records' | 'rules';
-
-const SEASON_MONTH = { spring: 1, summer: 4, autumn: 7, winter: 10 } as const;
 
 export function Collection() {
   const [tab, setTab] = useState<Tab>('yaku');
   const profile = useStore((s) => s.profile);
+  const land = useLand();
   const tabs: [Tab, string][] = [
     ['yaku', 'Yaku'],
     ['cards', 'Cards'],
@@ -59,7 +58,7 @@ export function Collection() {
                         <b>{seen ? d.name : '???'}</b>
                         <small>
                           {seen
-                            ? d.text.replace(/\s*\(now[^)]*\)/, '')
+                            ? landText(d.text, land).replace(/\s*\(now[^)]*\)/, '')
                             : `A ${d.rarity} charm not yet found`}
                         </small>
                       </div>
@@ -75,10 +74,7 @@ export function Collection() {
                   const beaten = profile.defeatedSpirits.includes(s.id);
                   return (
                     <div key={s.id} className={`spirit-card ${seen ? '' : 'unseen'}`}>
-                      <img
-                        src={spiritUrl(s.id, seasonOf(SEASON_MONTH[s.season] as 1), s.boss)}
-                        alt=""
-                      />
+                      <img src={spiritUrl(s.id, s.season, s.boss)} alt="" />
                       <b>{seen ? s.name : '???'}</b>
                       <small>
                         {seen

@@ -5,6 +5,7 @@
  *   pnpm sim --suite            (the full balance report, written to docs/balance/)
  */
 import { writeFileSync, mkdirSync } from 'node:fs';
+import type { Land } from '@/content/cards';
 import type { DeckId } from '@/content/decks';
 import type { Archetype } from '@/content/omamori';
 import type { BotConfig } from './bots';
@@ -21,7 +22,7 @@ function arg(name: string, fallback?: string): string | undefined {
 
 if (process.argv.includes('--help')) {
   console.log(`pnpm sim [--runs N] [--seed S] [--bot random|greedy|smart|casual] [--archetype auto|brights|...]
-          [--omen 0-5] [--deck pine|plum|...] [--guided] [--json out.json]
+          [--omen 0-5] [--deck pine|plum|...] [--land nippon|aotearoa] [--guided] [--json out.json]
 pnpm sim --suite [--runs N]   writes docs/balance/report.md`);
   process.exit(0);
 }
@@ -47,6 +48,7 @@ if (process.argv.includes('--suite')) {
         seed: seed + i,
         bot,
         deckId: (arg('deck', 'pine') as DeckId) ?? 'pine',
+        land: (arg('land', 'nippon') as Land) ?? 'nippon',
         omen: Number(arg('omen', '0')),
         guided: process.argv.includes('--guided'),
       }),

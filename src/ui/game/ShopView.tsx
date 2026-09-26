@@ -1,11 +1,12 @@
 import { usePaperOnOpen } from '@/ui/audio/usePaper';
 import { type ReactNode, useState } from 'react';
-import { CARDS, type CardId, MONTHS, monthDef, seasonOf } from '@/content/cards';
+import { type CardId, type Land, landCards, landMonths, monthDef, seasonOf } from '@/content/cards';
+import { landText } from '@/content/lands';
 import { enhancementDef } from '@/content/enhancements';
 import { ofudaDef } from '@/content/ofuda';
 import { type Archetype, omamoriDef } from '@/content/omamori';
 import { spiritDef } from '@/content/spirits';
-import { yakuDef } from '@/content/yaku';
+import { yakuDef, yakuText } from '@/content/yaku';
 import { type RunState, shopDiscount } from '@/engine/run';
 import { omamoriText } from '@/engine/scoring';
 import {
@@ -25,19 +26,19 @@ import type { GameApi } from './useGame';
 import { GuideBubble } from './Overlays';
 import { markTip, useStore } from '@/ui/state/store';
 
-function offerTitle(o: ShopOffer): string {
+function offerTitle(o: ShopOffer, land: Land): string {
   if (o.kind === 'omamori') return omamoriDef(o.id).name;
   if (o.kind === 'ofuda') return ofudaDef(o.id).name;
   // The shelf and the details sheet both say it's a poem.
-  return yakuDef(o.id).name;
+  return yakuText(o.id, land).name;
 }
 
 function offerText(o: ShopOffer, run: RunState): string {
-  if (o.kind === 'omamori') return omamoriText({ id: o.id, counter: 0 });
+  if (o.kind === 'omamori') return omamoriText({ id: o.id, counter: 0 }, run.land);
   if (o.kind === 'ofuda') return ofudaDef(o.id).text;
   const y = yakuDef(o.id);
   const lv = (run.poems[o.id] ?? 0) + 1;
-  return `${y.name} to Lv ${lv}: +${y.poem.chips} Chips and +${y.poem.mult} Mult each time it scores.`;
+  return `${yakuText(o.id, run.land).name} to Lv ${lv}: +${y.poem.chips} Chips and +${y.poem.mult} Mult each time it scores.`;
 }
 
 type Service = 'shrine' | 'heal' | 'reroll';
@@ -128,8 +129,8 @@ export function ShopView({ api }: { api: GameApi }) {
   if (!shop) return null;
   const ctx = { deckId: run.deckId, omen: run.omen, discount: shopDiscount(run) };
   const nextSpirit = spiritDef(run.schedule[run.month - 1] ?? 'kodama');
-  const m = monthDef(run.month);
-  const season = seasonOf(run.month);
+  const m = monthDef(run.month, run.land);
+  const season = seasonOf(run.month, run.land);
 
   const canBuy = (o: ShopOffer) => {
     if (o.sold) return false;
@@ -188,10 +189,10 @@ export function ShopView({ api }: { api: GameApi }) {
           ) : o.kind === 'ofuda' ? (
             <OfudaIcon id={o.id} size={19} />
           ) : (
-            <PoemIcon id={o.id} size={19} />
+            <PoemIcon id={o.id} land={run.land} size={19} />
           )
         }
-        name={offerTitle(o)}
+        name={offerTitle(o, run.land)}
         sub={offerSub(o, run)}
         price={o.sold ? null : offerPrice(o, ctx)}
         picked={isPicked({ kind: 'offer', i })}
@@ -263,10 +264,10 @@ export function ShopView({ api }: { api: GameApi }) {
             ) : o.kind === 'ofuda' ? (
               <OfudaIcon id={o.id} size={19} />
             ) : (
-              <PoemIcon id={o.id} size={19} />
+              <PoemIcon id={o.id} land={run.land} size={19} />
             )
           }
-          name={offerTitle(o)}
+          name={offerTitle(o, run.land)}
           action={o.sold ? 'Sold' : `Buy · ${offerPrice(o, ctx)} mon`}
           enabled={canBuy(o)}
           why={why(o)}
@@ -283,10 +284,10 @@ export function ShopView({ api }: { api: GameApi }) {
               {ARCHETYPE_LABEL[omamoriDef(o.id).archetype]}
             </div>
           )}
-          {o.kind === 'poem' && <div className="detail-sub">{yakuDef(o.id).gloss}</div>}
+          {o.kind === 'poem' && <div className="detail-sub">{yakuText(o.id, run.land).gloss}</div>}
           {o.kind === 'poem' && (
             <div className="haiku">
-              {yakuDef(o.id).haiku.map((l) => (
+              {yakuText(o.id, run.land).haiku.map((l) => (
                 <div key={l}>{l}</div>
               ))}
             </div>
@@ -322,8 +323,8 @@ export function ShopView({ api }: { api: GameApi }) {
       >
         {id === 'shrine' && (
           <p className="detail-text">
-            Bless one card in your deck. {enh.text} The deck is shared, so the spirit may capture it
-            too.
+            Bless one card in your deck. {landText(enh.text, run.land)} The deck is shared, so the
+            spirit may capture it too.
           </p>
         )}
         {id === 'heal' && (
@@ -591,30 +592,34 @@ function ShrinePicker({
           </button>
         </div>
         <div className="shrine-note">
-          {enh ? enhancementDef(enh).text : ''} The deck is shared, so the spirit may capture it
-          too.
+          {enh ? landText(enhancementDef(enh).text, run.land) : ''} The deck is shared, so the
+          spirit may capture it too.
         </div>
         <div className="sheet-body scroll">
-          {MONTHS.map((m) => (
+          {landMonths(run.land).map((m) => (
             <div key={m.month} className="shrine-month">
               <div className="shrine-month-name">
                 {m.month} · {m.flower}
               </div>
               <div className="shrine-cards">
-                {CARDS.filter((c) => c.month === m.month && run.deck.includes(c.id)).map((c) => {
-                  const cur = run.enhancements[String(c.id)];
-                  return (
-                    <button
-                      key={c.id}
-                      className="shrine-card"
-                      onClick={() => onPick(c.id)}
-                      data-testid={`shrine-card-${c.id}`}
-                    >
-                      <img src={cardFaceUrl(c.id)} alt={c.name} />
-                      {cur && <span className={`enh enh-${cur}`}>{enhancementDef(cur).kanji}</span>}
-                    </button>
-                  );
-                })}
+                {landCards(run.land)
+                  .filter((c) => c.month === m.month && run.deck.includes(c.id))
+                  .map((c) => {
+                    const cur = run.enhancements[String(c.id)];
+                    return (
+                      <button
+                        key={c.id}
+                        className="shrine-card"
+                        onClick={() => onPick(c.id)}
+                        data-testid={`shrine-card-${c.id}`}
+                      >
+                        <img src={cardFaceUrl(c.id)} alt={c.name} />
+                        {cur && (
+                          <span className={`enh enh-${cur}`}>{enhancementDef(cur).kanji}</span>
+                        )}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           ))}

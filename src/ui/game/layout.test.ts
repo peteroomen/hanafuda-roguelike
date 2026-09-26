@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CARDS } from '@/content/cards';
+import { landCards } from '@/content/cards';
 import { CARD_H, CARD_W, capLayout, fieldSlotCell, makeStage, sortHand, STAGE_W } from './layout';
 import { dealOrder } from './visual';
 
@@ -54,7 +54,7 @@ describe('capLayout', () => {
 describe('sortHand', () => {
   it('sorts by month, then Bright, Animal, Ribbon, Chaff', () => {
     const pick = (month: number, type: string) =>
-      CARDS.find((c) => c.month === month && c.type === type)?.id as number;
+      landCards('nippon').find((c) => c.month === month && c.type === type)?.id as number;
     const hand = [pick(12, 'chaff'), pick(3, 'ribbon'), pick(1, 'bright'), pick(3, 'bright')];
     expect(sortHand(hand)).toEqual([
       pick(1, 'bright'),

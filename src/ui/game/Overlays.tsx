@@ -1,5 +1,7 @@
 import { rainManUrl } from '@/ui/art/images';
 import type { Banner, Floater } from './useGame';
+import { landText } from '@/content/lands';
+import { useLand } from '@/ui/state/store';
 import { TIPS } from './tips';
 
 export function BannerView({ banner }: { banner: Banner | null }) {
@@ -45,9 +47,11 @@ export function GuideBubble({
   onDismiss: () => void;
   bottom: number;
 }) {
+  const land = useLand();
   if (!tip) return null;
-  const text = TIPS[tip];
-  if (!text) return null;
+  const raw = TIPS[tip];
+  if (!raw) return null;
+  const text = landText(raw, land);
   return (
     <button className="guide pop-in" style={{ bottom }} onClick={onDismiss} data-testid="guide">
       <img src={rainManUrl()} alt="The Rain Man" className="guide-face" />

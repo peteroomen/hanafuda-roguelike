@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { CARDS, type Season } from '@/content/cards';
+import { ALL_CARDS, type Season } from '@/content/cards';
 import { omamoriDef } from '@/content/omamori';
 import { spiritDef, type SpiritId } from '@/content/spirits';
-import { yakuDef } from '@/content/yaku';
+import { yakuText } from '@/content/yaku';
 import { enhancementDef } from '@/content/enhancements';
 import type { ScoreResult, ScoreStep, SpiritHit } from '@/engine/scoring';
 import type { YakuHit } from '@/engine/types';
 import * as sfx from '@/ui/audio/audio';
 import { cardFaceUrl, spiritUrl } from '@/ui/art/images';
 import { OmamoriIcon } from '@/ui/art/Icons';
-import { speedFactor } from '@/ui/state/store';
+import { Seal } from '@/ui/art/Kiwi';
+import { currentLand, speedFactor, useLand } from '@/ui/state/store';
 
 function fmt(x: number): string {
   if (x >= 100000) return `${Math.round(x / 1000)}k`;
@@ -21,11 +22,13 @@ function stepLabel(s: ScoreStep): string {
   const src = s.source;
   switch (src.kind) {
     case 'yaku': {
-      const d = yakuDef(src.id);
+      const d = yakuText(src.id, currentLand());
       return `${d.name}${src.level ? ` · poem Lv ${src.level}` : ''}${src.halved ? ' · halved' : ''}`;
     }
     case 'card':
-      return src.pass > 0 ? `${CARDS[src.card]?.name ?? ''} again!` : (CARDS[src.card]?.name ?? '');
+      return src.pass > 0
+        ? `${ALL_CARDS[src.card]?.name ?? ''} again!`
+        : (ALL_CARDS[src.card]?.name ?? '');
     case 'enhancement':
       return enhancementDef(src.id).name;
     case 'omamori':
@@ -65,6 +68,7 @@ export function ScoreSequence({
   hits: readonly YakuHit[];
   onDone: () => void;
 }) {
+  const land = useLand();
   const [i, setI] = useState(-1);
   const [final, setFinal] = useState(false);
   const skip = useRef(false);
@@ -119,7 +123,10 @@ export function ScoreSequence({
         <div className="score-yaku">
           {hits.map((h) => (
             <span key={h.id} className={`score-yaku-name ${activeYaku === h.id ? 'active' : ''}`}>
-              <span className="kanji">{yakuDef(h.id).kanji}</span> {yakuDef(h.id).name}
+              <span className="kanji">
+                <Seal land={land} kanji={yakuText(h.id, land).kanji} />
+              </span>{' '}
+              {yakuText(h.id, land).name}
             </span>
           ))}
         </div>
@@ -158,6 +165,7 @@ export function StrikeSequence(props: {
   boss: boolean;
   onDone: () => void;
 }) {
+  const land = useLand();
   const [show, setShow] = useState(false);
   const done = useRef(false);
   const { hit } = props;
@@ -194,7 +202,7 @@ export function StrikeSequence(props: {
         <div className="strike-yaku">
           {props.hits.map((h) => (
             <span key={h.id}>
-              {yakuDef(h.id).name} <b>{h.points}</b>
+              {yakuText(h.id, land).name} <b>{h.points}</b>
             </span>
           ))}
         </div>

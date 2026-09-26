@@ -22,7 +22,7 @@ export function GameScreen() {
     }
   }, [run]);
 
-  const season = seasonOf(run.month);
+  const season = seasonOf(run.month, run.land);
   return (
     <Viewport season={season}>
       {(h) => (

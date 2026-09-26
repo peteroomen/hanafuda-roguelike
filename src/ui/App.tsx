@@ -6,7 +6,7 @@ import { Collection } from '@/ui/screens/Collection';
 import { SettingsScreen } from '@/ui/screens/SettingsScreen';
 import { Setup } from '@/ui/screens/Setup';
 import { Title } from '@/ui/screens/Title';
-import { setState, speedFactorOf, useStore } from '@/ui/state/store';
+import { setState, speedFactorOf, useLand, useStore } from '@/ui/state/store';
 
 export function App() {
   const screen = useStore((s) => s.screen);
@@ -34,9 +34,10 @@ export function App() {
   }, []);
 
   // Decode the chosen card faces up front so nothing flashes in during play.
+  const land = useLand();
   useEffect(() => {
-    void preloadCards();
-  }, [settings.cardStyle]);
+    void preloadCards(land);
+  }, [settings.cardStyle, land]);
 
   useEffect(() => {
     if (screen === 'game' && !run) setState({ screen: 'title' });

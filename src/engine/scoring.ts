@@ -6,7 +6,8 @@
  *   Spirit → player:  hit = yaku points × ferocity (× punishment if you called
  *                     koi-koi), a small readable scale for a persistent HP bar.
  */
-import { CARDS, type CardId, type Month, TYPE_ORDER } from '@/content/cards';
+import { landText } from '@/content/lands';
+import { ALL_CARDS, type CardId, type Land, type Month, TYPE_ORDER } from '@/content/cards';
 import { enhancementDef } from '@/content/enhancements';
 import {
   type Amount,
@@ -83,7 +84,7 @@ export interface ScoreResult {
 }
 
 export function cardChips(id: CardId, rules: RuleSet, lightningIsBright: boolean): number {
-  const c = CARDS[id];
+  const c = ALL_CARDS[id];
   if (!c) return 0;
   if (lightningIsBright && c.tags.includes('lightning')) return rules.chips.bright;
   return rules.chips[c.type];
@@ -106,13 +107,13 @@ function quantity(
       return counter;
     case 'capturedChaff':
       return input.captured.filter((id) => {
-        const c = CARDS[id];
+        const c = ALL_CARDS[id];
         return c?.type === 'chaff' || (input.rules.sakeCupIsChaff && c?.tags.includes('sakeCup'));
       }).length;
     case 'capturedRibbons':
-      return input.captured.filter((id) => CARDS[id]?.type === 'ribbon').length;
+      return input.captured.filter((id) => ALL_CARDS[id]?.type === 'ribbon').length;
     case 'capturedAnimals':
-      return input.captured.filter((id) => CARDS[id]?.type === 'animal').length;
+      return input.captured.filter((id) => ALL_CARDS[id]?.type === 'animal').length;
     case 'yakuCount':
       return input.hits.length;
     case 'extraChaff':
@@ -126,7 +127,7 @@ export function amount(a: Amount | undefined, q: (x: Quantity | undefined) => nu
 }
 
 function matchesCard(f: CardFilter, id: CardId, month: Month, highest: CardId): boolean {
-  const c = CARDS[id];
+  const c = ALL_CARDS[id];
   if (!c) return false;
   if (f.type && c.type !== f.type) return false;
   if (f.tag && !c.tags.includes(f.tag)) return false;
@@ -208,8 +209,8 @@ export function scoreStop(input: StopInput): ScoreResult {
 
   // 3. Cards, in order: Brights, Animals, Ribbons, Chaff.
   const cards = scoringCards(hits).sort((a, b) => {
-    const ca = CARDS[a];
-    const cb = CARDS[b];
+    const ca = ALL_CARDS[a];
+    const cb = ALL_CARDS[b];
     if (!ca || !cb) return 0;
     return TYPE_ORDER[ca.type] - TYPE_ORDER[cb.type] || ca.month - cb.month || a - b;
   });
@@ -348,11 +349,11 @@ export function spiritHit(input: SpiritHitInput): SpiritHit {
 }
 
 /** Live value text for growth charms, e.g. Bonsai's current +Mult. */
-export function omamoriText(inst: OmamoriInstance): string {
+export function omamoriText(inst: OmamoriInstance, land: Land): string {
   const def = omamoriDef(inst.id);
   const stop = def.effects.find((e) => e.kind === 'stop');
   const q = (x: Quantity | undefined) => (x === 'counter' ? inst.counter : 0);
-  let text = def.text;
+  let text = landText(def.text, land);
   if (stop && stop.kind === 'stop') {
     text = text
       .replace('{chips}', String(amount(stop.chips, q)))

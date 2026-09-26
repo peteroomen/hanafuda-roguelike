@@ -7,7 +7,6 @@
  *             determinisations of the hidden cards (pile + spirit hand),
  *             measuring damage dealt, damage taken and exhaustion.
  */
-import { CARDS } from '@/content/cards';
 import type { HandState } from '@/engine/hand';
 import { Rng } from '@/engine/rng';
 import { type FightState, previewPlayerStop, type RunState, runStep } from '@/engine/run';
@@ -115,5 +114,5 @@ export function sampleKoikoi(run: RunState, rollouts: number, seed: number): Koi
 }
 
 export function cardsIn(h: HandState): number {
-  return CARDS.length - h.pile.length;
+  return h.deckIds.length - h.pile.length;
 }

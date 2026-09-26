@@ -2,6 +2,7 @@
  * Seasonal decks (run-start variants) and omens (difficulty levels).
  */
 import type { CardTag } from './cards';
+import { byLand, cap, type LandText } from './lands';
 import type { OfudaId } from './ofuda';
 import type { OmamoriId } from './omamori';
 import type { EnhancementId } from '@/engine/types';
@@ -19,9 +20,11 @@ export type UnlockCondition =
 
 export interface DeckDef {
   readonly id: DeckId;
-  readonly name: string;
+  /** Named for a flower of the land, so a LandText. */
+  readonly name: LandText;
+  /** Decoration. Aotearoa shows a little kiwi instead. */
   readonly kanji: string;
-  readonly text: string;
+  readonly text: LandText;
   readonly unlock: UnlockCondition;
   readonly unlockText: string;
   readonly start: {
@@ -51,9 +54,12 @@ export interface DeckDef {
 export const DECKS: readonly DeckDef[] = [
   {
     id: 'pine',
-    name: 'Pine Deck',
+    name: byLand({ nippon: 'Pine Deck', aotearoa: 'Pōhutukawa Deck' }),
     kanji: '松',
-    text: 'The traditional deck. No tricks.',
+    text: byLand({
+      nippon: 'The traditional deck. No tricks.',
+      aotearoa: 'The plain deck. No tricks.',
+    }),
     unlock: { kind: 'always' },
     unlockText: 'Always available.',
     start: {},
@@ -61,7 +67,7 @@ export const DECKS: readonly DeckDef[] = [
   },
   {
     id: 'plum',
-    name: 'Plum Deck',
+    name: byLand({ nippon: 'Plum Deck', aotearoa: 'Mānuka Deck' }),
     kanji: '梅',
     text: 'Start with Frog and Far Sight, and a third talisman slot.',
     unlock: { kind: 'reachMonth', month: 4 },
@@ -73,7 +79,7 @@ export const DECKS: readonly DeckDef[] = [
     id: 'moon',
     name: 'Moon Deck',
     kanji: '月',
-    text: 'Start with Moon Viewer. The Full Moon and the Curtain are Gilded.',
+    text: (t) => `Start with Moon Viewer. ${cap(t.moon)} and ${t.curtain} are Gilded.`,
     unlock: { kind: 'scoreFamily', family: 'brights' },
     unlockText: 'Score a Bright yaku.',
     start: {
@@ -87,7 +93,7 @@ export const DECKS: readonly DeckDef[] = [
   },
   {
     id: 'willow',
-    name: 'Willow Deck',
+    name: byLand({ nippon: 'Willow Deck', aotearoa: 'Tī Kōuka Deck' }),
     kanji: '柳',
     text: 'Start with Willow Wind and a sixth charm slot, but 10 less max HP.',
     unlock: { kind: 'defeatBoss' },
@@ -97,7 +103,7 @@ export const DECKS: readonly DeckDef[] = [
   },
   {
     id: 'maple',
-    name: 'Maple Deck',
+    name: byLand({ nippon: 'Maple Deck', aotearoa: 'Mamaku Deck' }),
     kanji: '紅葉',
     text: 'Start with 10 extra mon. Interest can reach 8 mon.',
     unlock: { kind: 'reachMonth', month: 7 },
@@ -119,7 +125,7 @@ export const DECKS: readonly DeckDef[] = [
   },
   {
     id: 'paulownia',
-    name: 'Paulownia Deck',
+    name: byLand({ nippon: 'Paulownia Deck', aotearoa: 'Harakeke Deck' }),
     kanji: '桐',
     text: 'Poems cost 2 mon. Start with three random Poem levels.',
     unlock: { kind: 'winRun' },

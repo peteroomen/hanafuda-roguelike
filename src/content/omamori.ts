@@ -5,6 +5,7 @@
  * Effects are data in a small language interpreted by @/engine/scoring, so the
  * simulator can tune every number without touching logic.
  */
+import { cap, type LandText } from './lands';
 import type { CardTag, CardType } from './cards';
 import type { YakuFamily, YakuId } from './yaku';
 
@@ -109,7 +110,7 @@ export interface OmamoriDef {
   readonly price: number;
   readonly archetype: Archetype;
   /** Player-facing text. {chips}, {mult} and {xmult} are replaced with live values. */
-  readonly text: string;
+  readonly text: LandText;
   readonly effects: readonly OmamoriEffect[];
   /** Hue for the charm's silk (degrees), used by the icon renderer. */
   readonly hue: number;
@@ -166,7 +167,7 @@ function o(
   kanji: string,
   rarity: Rarity,
   archetype: Archetype,
-  text: string,
+  text: LandText,
   effects: OmamoriEffect[],
   hue: number,
   motif: string,
@@ -262,7 +263,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '柳風',
     'uncommon',
     'brights',
-    'The Rain Man no longer weakens Bright yaku.',
+    (t) => `${cap(t.rainMan)} no longer weakens Bright yaku.`,
     [{ kind: 'rule', rainManPenalty: false }],
     110,
     'willow',
@@ -273,7 +274,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '避雷針',
     'uncommon',
     'brights',
-    'The Lightning card also counts as a Bright.',
+    (t) => `${cap(t.lightning)} also counts as a Bright.`,
     [{ kind: 'rule', lightningIsBright: true }],
     55,
     'bolt',
@@ -286,7 +287,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '書家',
     'uncommon',
     'ribbons',
-    'Red poetry ribbons score twice.',
+    (t) => `${cap(t.redPoetry)} score twice.`,
     [{ kind: 'card', filter: { tag: 'redPoetry' }, retrigger: 1 }],
     355,
     'brush',
@@ -297,7 +298,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '藍染',
     'common',
     'ribbons',
-    'Blue ribbons give +5 Mult when they score.',
+    (t) => `${cap(t.blueRibbons)} give +5 Mult when they score.`,
     [{ kind: 'card', filter: { tag: 'blueRibbon' }, mult: { base: 5 } }],
     220,
     'dye',
@@ -308,7 +309,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '短冊',
     'uncommon',
     'ribbons',
-    'Tan needs only 4 Ribbons.',
+    (t) => `${t.y.tan} needs only 4 Ribbons.`,
     [{ kind: 'rule', need: { tan: 4 } }],
     330,
     'tanzaku',
@@ -332,7 +333,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '猪牙',
     'uncommon',
     'animals',
-    'Ino-Shika-Chō gives ×2.5 Mult.',
+    (t) => `${t.y.inoshikacho} gives ×2.5 Mult.`,
     [{ kind: 'yaku', filter: { ids: ['inoshikacho'] }, xmult: { base: 2.5 } }],
     25,
     'tusk',
@@ -343,7 +344,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '鳥笛',
     'uncommon',
     'animals',
-    'Birds score twice: Crane, Warbler, Cuckoo, Geese, Swallow, Phoenix.',
+    (t) => `Birds score twice: ${t.birds}.`,
     [{ kind: 'card', filter: { tag: 'bird' }, retrigger: 1 }],
     160,
     'whistle',
@@ -354,7 +355,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '種袋',
     'uncommon',
     'animals',
-    'Tane needs only 4 Animals.',
+    (t) => `${t.y.tane} needs only 4 Animals.`,
     [{ kind: 'rule', need: { tane: 4 } }],
     90,
     'pouch',
@@ -378,7 +379,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '箒',
     'uncommon',
     'chaff',
-    'Kasu gives ×2 Mult, and +×0.25 for every Chaff beyond ten.',
+    (t) => `${t.y.kasu} gives ×2 Mult, and +×0.25 for every Chaff beyond ten.`,
     [
       {
         kind: 'yaku',
@@ -406,7 +407,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '落葉',
     'uncommon',
     'chaff',
-    'Kasu needs only 8 Chaff.',
+    (t) => `${t.y.kasu} needs only 8 Chaff.`,
     [{ kind: 'rule', need: { kasu: 8 } }],
     15,
     'leaves',
@@ -498,7 +499,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '月印',
     'uncommon',
     'season',
-    "Tsukifuda needs only 3 of the month's cards, and gives ×2 Mult.",
+    (t) => `${t.y.tsukifuda} needs only 3 of the month's cards, and gives ×2 Mult.`,
     [
       { kind: 'rule', need: { tsukifuda: 3 } },
       { kind: 'yaku', filter: { ids: ['tsukifuda'] }, xmult: { base: 2 } },
@@ -514,7 +515,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '二つ月',
     'uncommon',
     'sake',
-    'The Full Moon also counts as the Curtain for Hanami-zake.',
+    (t) => `${cap(t.moon)} also counts as ${t.curtain} for ${t.y.hanami}.`,
     [{ kind: 'rule', moonIsCurtain: true }],
     230,
     'twomoons',
@@ -525,7 +526,7 @@ export const OMAMORI: readonly OmamoriDef[] = [
     '酒樽',
     'common',
     'sake',
-    'Tsukimi-zake and Hanami-zake each give +8 Mult.',
+    (t) => `${t.y.tsukimi} and ${t.y.hanami} each give +8 Mult.`,
     [{ kind: 'yaku', filter: { family: 'sake' }, mult: { base: 8 } }],
     18,
     'barrel',
