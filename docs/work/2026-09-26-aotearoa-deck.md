@@ -1,6 +1,7 @@
 # Aotearoa deck: a second card set with Te Reo names
 
-Status: **plan, waiting on the card data and the open questions below.**
+Status: **built (2026-09-26)** on `claude/aotearoa-hanafuda-mode-x7xufb`. See "What was built" at
+the end; the sections in between are the plan as first written.
 
 ## Goal
 
@@ -15,7 +16,7 @@ room for that without building it.
 ## Naming
 
 "Deck" already means the seven run-start variants (Pine Deck, Moon Deck, ...). The new concept is
-a **card set**: `CardSetId = 'hanafuda' | 'aotearoa'`. A run has one card set *and* one deck. The
+a **card set**: `CardSetId = 'hanafuda' | 'aotearoa'`. A run has one card set _and_ one deck. The
 player-facing word is up to the user (see open questions); this doc says "card set".
 
 ## What has to change, and why it isn't just a skin
@@ -26,7 +27,7 @@ about 35 places (`hand.ts`, `yaku.ts`, `scoring.ts`, `ai.ts`, `run.ts`) and the 
 files.
 
 If only names and pictures changed, a new image folder and a text overlay would do. But moving a
-special card to another month changes *which cards match which*, so the Aotearoa set needs its own
+special card to another month changes _which cards match which_, so the Aotearoa set needs its own
 card table and the engine must know which table a run uses. That is the core of the work.
 
 ### What stays shared
@@ -43,16 +44,16 @@ card table and the engine must know which table a run uses. That is the core of 
 
 ### What becomes per set
 
-| Data                                    | Today                              | Per set                                  |
-| --------------------------------------- | ---------------------------------- | ---------------------------------------- |
-| Month layout (which card is which)      | `LAYOUT` in `cards.ts`             | `layout` in the set                      |
-| Month names, flower, glyph, season      | `MONTHS` (`flowerJp`, `kanji`)     | `months` in the set                      |
-| Card names                              | `Spec.name`                        | per card in the set                      |
-| Yaku name, gloss, glyph, requirement, haiku | `YAKU` in `yaku.ts`            | text overlay per set; numbers stay in `YAKU` |
-| Deck names and blurbs ("Pine Deck")     | `DECKS`                            | optional name overlay per set            |
-| Card faces                              | `public/cards/traditional/*.webp` or drawn SVG | `public/cards/aotearoa/*.webp` |
-| Card back                               | drawn, tinted by deck hue          | the user's back, if they have one        |
-| Tutorial and tip text naming yaku       | `tips.ts`, guided text             | read the name from the set, not a literal |
+| Data                                        | Today                                          | Per set                                      |
+| ------------------------------------------- | ---------------------------------------------- | -------------------------------------------- |
+| Month layout (which card is which)          | `LAYOUT` in `cards.ts`                         | `layout` in the set                          |
+| Month names, flower, glyph, season          | `MONTHS` (`flowerJp`, `kanji`)                 | `months` in the set                          |
+| Card names                                  | `Spec.name`                                    | per card in the set                          |
+| Yaku name, gloss, glyph, requirement, haiku | `YAKU` in `yaku.ts`                            | text overlay per set; numbers stay in `YAKU` |
+| Deck names and blurbs ("Pine Deck")         | `DECKS`                                        | optional name overlay per set                |
+| Card faces                                  | `public/cards/traditional/*.webp` or drawn SVG | `public/cards/aotearoa/*.webp`               |
+| Card back                                   | drawn, tinted by deck hue                      | the user's back, if they have one            |
+| Tutorial and tip text naming yaku           | `tips.ts`, guided text                         | read the name from the set, not a literal    |
 
 ## Approach
 
@@ -82,7 +83,7 @@ The Japanese deck puts January in spring. In Aotearoa January is summer. `season
 things: the bokashi sky and music (cosmetic), and which spirits fight in which quarter of the year
 (gameplay: `REGULARS_BY_SEASON` in `run.ts`).
 
-Proposal: the spirit schedule keeps using the *game's* quarter (months 1–3, 4–6, ...), so
+Proposal: the spirit schedule keeps using the _game's_ quarter (months 1–3, 4–6, ...), so
 difficulty and bosses are identical in both sets. The Aotearoa set gets its own season per month
 for the sky and music only, so January looks and sounds like summer. (Open question 4.)
 
@@ -104,20 +105,20 @@ Draft yaku names to start the conversation. **These are placeholders, not propos
 they need checking by a fluent speaker (ideally someone with a view on the whole set, including
 tikanga around naming taonga species).
 
-| Yaku (meaning)                | Draft Te Reo          |
-| ----------------------------- | --------------------- |
-| Gokō (Five Brights)           | Rima Mārama           |
-| Shikō (Four Brights)          | Whā Mārama            |
-| Ame-Shikō (Rainy Four Brights)| Whā Mārama Ua         |
-| Sankō (Three Brights)         | Toru Mārama           |
-| Tsukimi (Moon viewing)        | *depends on the Aotearoa moon card* |
-| Hanami (Flower viewing)       | *depends on the curtain card*       |
-| Ino-Shika-Chō                 | *named after the three Aotearoa animals* |
-| Akatan / Aotan / both         | Rīpene Whero / Rīpene Kahurangi / both |
-| Tane (Animals)                | Kararehe (or Manu, if they are all birds) |
-| Tan (Ribbons)                 | Rīpene                |
-| Kasu (Chaff)                  | *e.g. Para*           |
-| Tsukifuda (Month cards)       | *e.g. Ngā Kāri o te Marama* |
+| Yaku (meaning)                 | Draft Te Reo                              |
+| ------------------------------ | ----------------------------------------- |
+| Gokō (Five Brights)            | Rima Mārama                               |
+| Shikō (Four Brights)           | Whā Mārama                                |
+| Ame-Shikō (Rainy Four Brights) | Whā Mārama Ua                             |
+| Sankō (Three Brights)          | Toru Mārama                               |
+| Tsukimi (Moon viewing)         | _depends on the Aotearoa moon card_       |
+| Hanami (Flower viewing)        | _depends on the curtain card_             |
+| Ino-Shika-Chō                  | _named after the three Aotearoa animals_  |
+| Akatan / Aotan / both          | Rīpene Whero / Rīpene Kahurangi / both    |
+| Tane (Animals)                 | Kararehe (or Manu, if they are all birds) |
+| Tan (Ribbons)                  | Rīpene                                    |
+| Kasu (Chaff)                   | _e.g. Para_                               |
+| Tsukifuda (Month cards)        | _e.g. Ngā Kāri o te Marama_               |
 
 Month names: the standard modern names (Kohitātea, Hui-tanguru, Poutū-te-rangi, Paenga-whāwhā,
 Haratua, Pipiri, Hōngongoi, Here-turi-kōkā, Mahuru, Whiringa-ā-nuku, Whiringa-ā-rangi, Hakihea),
@@ -203,3 +204,55 @@ only retune if the Aotearoa set moves a bot's win rate by more than a few points
 - Any rule change beyond the card layout.
 - Drawn-SVG versions of the Aotearoa cards (only the user's art).
 - Translating the whole UI into Te Reo.
+
+## Decisions (from the user)
+
+- Player-facing name: **Land**, with the choices **Nippon** and **Aotearoa**.
+- Aotearoa is available from the first run (the guided months work in either land).
+- Te Reo reaches cards, months, yaku and deck names. Spirits, charms, talismans and the shop stay
+  as they are until the Māori mythology follow-up.
+- January is summer in Aotearoa (sky and music); the spirit schedule still follows the year's
+  quarters, so difficulty is unchanged.
+- Where Nippon shows kanji as decoration (month, yaku, deck and poem seals), Aotearoa shows a
+  little kiwi, traced from the user's drawing.
+
+## What was built
+
+- **Cards** (`src/content/cards.ts`): one table, `ALL_CARDS`, holds both lands. Nippon keeps ids
+  0..47, so old saves are untouched; Aotearoa is 48..95. Walk a land with `landCards(land)`.
+  The global `CARDS` and `ALL_CARD_IDS` are gone, so every site that walked "the deck" had to
+  choose a land. Aotearoa cards carry the role tags of the cards they stand in for (kiwi =
+  `boar`, ruru = `deer`, wētā = `butterflies`, kete = `sakeCup`, Ua = `rainMan`, storm =
+  `lightning`, kōwhai in bloom = `curtain`, Matariki = `phoenix`), so the engine needed no rule
+  changes. Eight Aotearoa cards are birds (Nippon has six), which makes Bird Whistle a little
+  stronger there.
+- **Engine**: `RunState.land` (saves without it load as Nippon, `migrateRun` in `store.ts`);
+  `newRun({ land })` deals that land's 48 cards. Lookups by id go through `ALL_CARDS[id]`.
+- **Words**: yaku text per land (`yakuText(id, land)` in `yaku.ts`; numbers stay in `YAKU`).
+  Charm, deck, spirit, enhancement and tip text that names a yaku or card is a `LandText`, a
+  function of the land's `Terms` (`src/content/lands.ts`). `language.test.ts` checks both lands
+  and fails if a Nippon yaku or card name shows up in Aotearoa text.
+- **Art**: `scripts/aotearoa-cards.ts` turns `art-source/cards/aotearoa/*.svg` into
+  `public/cards/aotearoa/{0..47}.webp` (cropped evenly at the sides to the game's card shape and
+  re-bordered, no squashing). The back is drawn in code (`aotearoaBackSvg`) after `00-back.svg`,
+  so it takes each deck's hue. The kiwi is `src/ui/art/Kiwi.tsx`.
+- **Fonts**: the display and UI fonts had no macron vowels at all (even Sankō's ō fell back to
+  a system font). `scripts/subset-fonts.py` now builds ā ē ī ō ū (and capitals) from each font's
+  own vowel and macron.
+- **UI**: a Land switch on the Setup screen (remembered in settings); the collection shows the
+  land picked last. The Settings card-style switch is now labelled "Nippon cards".
+- **Sim**: `pnpm sim --land aotearoa`, and the suite reports the smart and casual bots in
+  Aotearoa. The two lands are level within noise: over 3,000 runs on the same seeds the smart
+  bot won 50% in Nippon and 48% in Aotearoa (another 1,000-run batch gave 48% and 50%). No retune.
+- **Tests**: composition and role tests for both lands, Aotearoa yaku tests,
+  `e2e/aotearoa.spec.ts` (a whole year in Aotearoa at phone size).
+
+## Still open
+
+- The Te Reo yaku names other than Te Pō, Kōkōwai and Pounamu are drafts and need a fluent
+  speaker's check (and the card and month names a second look).
+- The licence for the Aotearoa art (`public/cards/aotearoa/LICENSE.md` says "to be confirmed").
+- Charm names that mention Japanese cards (Boar Tusk, Deer Call, Thousand Cranes, Phoenix Plume)
+  are unchanged; their descriptions already use the Aotearoa words.
+- The README's known issues: the Kuaka and Toetoe clump cards are due for regeneration. Rerun
+  `pnpm tsx scripts/aotearoa-cards.ts` after replacing an SVG.
