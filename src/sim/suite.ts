@@ -4,7 +4,8 @@
 import type { Land } from '@/content/cards';
 import { landText } from '@/content/lands';
 import { DECKS, type DeckId } from '@/content/decks';
-import type { Archetype } from '@/content/omamori';
+import type { Archetype, OmamoriId } from '@/content/omamori';
+import { LOCKED_AT_START } from '@/content/unlocks';
 import type { BotConfig } from './bots';
 import { playRun, type RunSummary } from './driver';
 import { summarise, type Summary } from './report';
@@ -17,7 +18,14 @@ interface Row {
 function batch(
   runs: number,
   bot: BotConfig,
-  extra: { omen?: number; guided?: boolean; seed?: number; deckId?: DeckId; land?: Land } = {},
+  extra: {
+    omen?: number;
+    guided?: boolean;
+    seed?: number;
+    deckId?: DeckId;
+    land?: Land;
+    lockedCharms?: readonly OmamoriId[];
+  } = {},
 ): Summary {
   const out: RunSummary[] = [];
   for (let i = 0; i < runs; i++) {
@@ -29,6 +37,7 @@ function batch(
         guided: extra.guided ?? false,
         ...(extra.deckId ? { deckId: extra.deckId } : {}),
         ...(extra.land ? { land: extra.land } : {}),
+        ...(extra.lockedCharms ? { lockedCharms: extra.lockedCharms } : {}),
       }),
     );
   }
@@ -56,6 +65,10 @@ export function runSuite(runs: number): string {
   rows.push({
     label: 'casual bot, Aotearoa',
     summary: batch(runs, { kind: 'casual', archetype: 'auto' }, { land: 'aotearoa' }),
+  });
+  rows.push({
+    label: 'smart bot, starter charms (none unlocked)',
+    summary: batch(runs, { kind: 'smart', archetype: 'auto' }, { lockedCharms: LOCKED_AT_START }),
   });
   rows.push({
     label: 'smart bot, guided year',

@@ -2,12 +2,15 @@
  * Meta progression: records runs in the profile and works out what unlocked.
  */
 import { landText } from '@/content/lands';
-import { DECKS, deckDef, OMENS, type UnlockCondition } from '@/content/decks';
+import { DECKS, deckDef, OMENS } from '@/content/decks';
+import { omamoriDef, type OmamoriId } from '@/content/omamori';
+import { CHARM_UNLOCKS, LOCKED_AT_START, type UnlockCondition } from '@/content/unlocks';
 import { yakuDef } from '@/content/yaku';
 import type { RunState } from '@/engine/run';
 import { getState, type Profile, updateProfile } from './store';
 
-function met(c: UnlockCondition, p: Profile, run: RunState | null): boolean {
+/** Exported for tests. */
+export function met(c: UnlockCondition, p: Profile, run: RunState | null): boolean {
   switch (c.kind) {
     case 'always':
       return true;
@@ -23,6 +26,16 @@ function met(c: UnlockCondition, p: Profile, run: RunState | null): boolean {
       return (run?.stats.maxKoikoiInHand ?? 0) >= c.calls || p.koikoiCalls >= 999;
     case 'winRun':
       return p.runsWon > 0;
+    case 'stopDamage':
+      return p.biggestHit >= c.damage;
+    case 'scoreYaku':
+      return (p.yakuScored[c.id] ?? 0) >= c.times;
+    case 'koikoiTotal':
+      return p.koikoiCalls >= c.calls;
+    case 'calmSpirit':
+      return p.defeatedSpirits.includes(c.id);
+    case 'spiritsCalmed':
+      return p.defeatedSpirits.length >= c.count;
   }
 }
 
@@ -66,7 +79,29 @@ export function recordRun(run: RunState, finished: boolean): string[] {
         ]
       : before.history,
   };
+  // Your record with this deck, and where your biggest stop came from.
+  if (finished) {
+    const rec = next.deckRecords[run.deckId] ?? { runs: 0, wins: 0, bestOmen: -1 };
+    next = {
+      ...next,
+      deckRecords: {
+        ...next.deckRecords,
+        [run.deckId]: {
+          runs: rec.runs + 1,
+          wins: rec.wins + (won ? 1 : 0),
+          bestOmen: won ? Math.max(rec.bestOmen, run.omen) : rec.bestOmen,
+        },
+      },
+    };
+  }
+  if (run.stats.biggestHit > before.biggestHit) next = { ...next, biggestHitDeck: run.deckId };
   const unlocks: string[] = [];
+  const charms = newCharmUnlocks(next, run);
+  if (charms.length) {
+    next = { ...next, unlockedCharms: [...next.unlockedCharms, ...charms] };
+    for (const id of charms)
+      unlocks.push(`Charm: ${omamoriDef(id).name}. ${landText(omamoriDef(id).text, run.land)}`);
+  }
   const decks = new Set(next.unlockedDecks);
   for (const d of DECKS) {
     if (!decks.has(d.id) && met(d.unlock, next, run)) {
@@ -83,6 +118,30 @@ export function recordRun(run: RunState, finished: boolean): string[] {
   }
   updateProfile(() => next);
   return unlocks;
+}
+
+/** Locked charms whose condition the profile now meets. */
+function newCharmUnlocks(p: Profile, run: RunState | null): OmamoriId[] {
+  return LOCKED_AT_START.filter((id) => {
+    const u = CHARM_UNLOCKS[id];
+    return u !== undefined && !p.unlockedCharms.includes(id) && met(u.unlock, p, run);
+  });
+}
+
+/** Charms still locked for this profile: the ones a new run keeps out of the shop. */
+export function lockedCharms(p: Profile): OmamoriId[] {
+  return LOCKED_AT_START.filter((id) => !p.unlockedCharms.includes(id));
+}
+
+/**
+ * Unlock anything the profile has already earned (on load: older saves predate charm unlocks,
+ * so a veteran gets theirs at once, without a fanfare).
+ */
+export function refreshUnlocks(): void {
+  updateProfile((p) => {
+    const charms = newCharmUnlocks(p, null);
+    return charms.length ? { ...p, unlockedCharms: [...p.unlockedCharms, ...charms] } : p;
+  });
 }
 
 export function noteSeen(run: RunState): void {

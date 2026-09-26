@@ -1,14 +1,19 @@
 import { useState } from 'react';
+import { DECKS, deckDef, OMENS } from '@/content/decks';
 import { landText } from '@/content/lands';
 import { OMAMORI } from '@/content/omamori';
 import { SPIRITS } from '@/content/spirits';
+import { CHARM_UNLOCKS } from '@/content/unlocks';
+import { type YakuId, yakuText } from '@/content/yaku';
 import { OmamoriIcon } from '@/ui/art/Icons';
-import { spiritUrl } from '@/ui/art/images';
+import { Seal } from '@/ui/art/Kiwi';
+import { cardBackUrl, spiritUrl } from '@/ui/art/images';
 import { CardGallery, Rules, YakuList } from '@/ui/game/YakuBook';
 import { Viewport } from '@/ui/game/Viewport';
+import { lockedCharms } from '@/ui/state/meta';
 import { setState, useLand, useStore } from '@/ui/state/store';
 
-type Tab = 'yaku' | 'cards' | 'charms' | 'spirits' | 'records' | 'rules';
+type Tab = 'yaku' | 'cards' | 'charms' | 'spirits' | 'decks' | 'records' | 'rules';
 
 export function Collection() {
   const [tab, setTab] = useState<Tab>('yaku');
@@ -19,9 +24,14 @@ export function Collection() {
     ['cards', 'Cards'],
     ['charms', 'Charms'],
     ['spirits', 'Spirits'],
+    ['decks', 'Decks'],
     ['records', 'Records'],
     ['rules', 'Rules'],
   ];
+  const locked = lockedCharms(profile);
+  const [topYaku, topYakuTimes] = Object.entries(profile.yakuScored).reduce<
+    [string | null, number]
+  >((best, [id, n]) => ((n ?? 0) > best[1] ? [id, n ?? 0] : best), [null, 0]);
   return (
     <Viewport season="autumn">
       {(h) => (
@@ -38,7 +48,12 @@ export function Collection() {
           </div>
           <div className="tabs wrap">
             {tabs.map(([id, label]) => (
-              <button key={id} className={tab === id ? 'on' : ''} onClick={() => setTab(id)}>
+              <button
+                key={id}
+                className={tab === id ? 'on' : ''}
+                onClick={() => setTab(id)}
+                data-testid={`tab-${id}`}
+              >
                 {label}
               </button>
             ))}
@@ -50,6 +65,17 @@ export function Collection() {
             {tab === 'charms' && (
               <div className="charm-grid">
                 {OMAMORI.map((d) => {
+                  const unlock = CHARM_UNLOCKS[d.id];
+                  if (unlock && locked.includes(d.id))
+                    return (
+                      <div key={d.id} className="charm-card locked" data-testid="charm-locked">
+                        <OmamoriIcon id={d.id} size={40} />
+                        <div>
+                          <b>Locked</b>
+                          <small>{landText(unlock.unlockText, land)}</small>
+                        </div>
+                      </div>
+                    );
                   const seen = profile.seenCharms.includes(d.id);
                   return (
                     <div key={d.id} className={`charm-card ${seen ? '' : 'unseen'}`}>
@@ -59,7 +85,7 @@ export function Collection() {
                         <small>
                           {seen
                             ? landText(d.text, land).replace(/\s*\(now[^)]*\)/, '')
-                            : `A ${d.rarity} charm not yet found`}
+                            : `${d.rarity === 'uncommon' ? 'An' : 'A'} ${d.rarity} charm not yet found`}
                         </small>
                       </div>
                     </div>
@@ -91,6 +117,49 @@ export function Collection() {
                 })}
               </div>
             )}
+            {tab === 'decks' && (
+              <div className="charm-grid">
+                {DECKS.map((d) => {
+                  const open = profile.unlockedDecks.includes(d.id);
+                  const rec = profile.deckRecords[d.id];
+                  const seal = rec && rec.bestOmen >= 0 ? OMENS[rec.bestOmen] : undefined;
+                  return (
+                    <div
+                      key={d.id}
+                      className={`charm-card deck-row ${open ? '' : 'locked'}`}
+                      data-testid={`deck-record-${d.id}`}
+                    >
+                      <span className="deck-row-back">
+                        <img src={cardBackUrl(d.hue, land)} alt="" />
+                        <span className="display">
+                          <Seal land={land} kanji={d.kanji} />
+                        </span>
+                      </span>
+                      <div>
+                        <b>{landText(d.name, land)}</b>
+                        <small>{open ? landText(d.text, land) : `Locked. ${d.unlockText}`}</small>
+                        {open && (
+                          <small className="deck-row-record">
+                            {rec
+                              ? `${rec.runs} ${rec.runs === 1 ? 'year' : 'years'} played · ${rec.wins} completed`
+                              : 'Not played yet'}
+                          </small>
+                        )}
+                      </div>
+                      {seal && (
+                        <span
+                          className="omen-seal display"
+                          title={`Highest omen beaten: ${seal.name}`}
+                          aria-label={`Highest omen beaten: ${seal.name}`}
+                        >
+                          {seal.kanji}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             {tab === 'records' && (
               <div className="records">
                 <div className="record-grid">
@@ -108,7 +177,12 @@ export function Collection() {
                   </div>
                   <div>
                     <b>{profile.biggestHit.toLocaleString('en-US')}</b>
-                    <span>biggest hit</span>
+                    <span>
+                      biggest hit
+                      {profile.biggestHitDeck
+                        ? ` (${landText(deckDef(profile.biggestHitDeck).name, land).replace(' Deck', '')})`
+                        : ''}
+                    </span>
                   </div>
                   <div>
                     <b>{profile.koikoiCalls}</b>
@@ -118,7 +192,31 @@ export function Collection() {
                     <b>{profile.maxOmenWon < 0 ? '—' : profile.maxOmenWon}</b>
                     <span>highest omen beaten</span>
                   </div>
+                  <div>
+                    <b>
+                      {profile.defeatedSpirits.length}/{SPIRITS.length}
+                    </b>
+                    <span>spirits calmed</span>
+                  </div>
+                  <div>
+                    <b>
+                      {OMAMORI.length - locked.length}/{OMAMORI.length}
+                    </b>
+                    <span>charms unlocked</span>
+                  </div>
+                  <div>
+                    <b>
+                      {profile.unlockedDecks.length}/{DECKS.length}
+                    </b>
+                    <span>decks unlocked</span>
+                  </div>
                 </div>
+                {topYaku && (
+                  <div className="record-line">
+                    Most scored: <b>{yakuText(topYaku as YakuId, land).name}</b>, {topYakuTimes}{' '}
+                    {topYakuTimes === 1 ? 'time' : 'times'}
+                  </div>
+                )}
                 <div className="history">
                   {profile.history
                     .slice()
@@ -128,7 +226,8 @@ export function Collection() {
                         <span>{r.date}</span>
                         <span>{r.won ? 'Completed' : `Fell in month ${r.month}`}</span>
                         <span>
-                          {r.deck} · omen {r.omen}
+                          {landText(deckDef(r.deck).name, r.land ?? 'nippon').replace(' Deck', '')}{' '}
+                          · omen {r.omen}
                         </span>
                         <span>{r.hit.toLocaleString('en-US')}</span>
                       </div>

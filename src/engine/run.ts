@@ -147,6 +147,8 @@ export interface RunState {
   readonly land: Land;
   readonly omen: number;
   readonly guided: boolean;
+  /** Charms the shop never offers (not yet unlocked). Missing on old saves and sims = none. */
+  readonly lockedCharms?: readonly OmamoriId[];
   month: Month;
   hp: number;
   maxHp: number;
@@ -221,6 +223,8 @@ export interface NewRunOptions {
   readonly land?: Land;
   readonly omen?: number;
   readonly guided?: boolean;
+  /** Charms the player hasn't unlocked yet; the shop never offers them. Omitted = all. */
+  readonly lockedCharms?: readonly OmamoriId[];
 }
 
 // ---------------------------------------------------------------------------
@@ -285,6 +289,7 @@ export function newRun(opts: NewRunOptions): RunStepResult {
     land,
     omen,
     guided: opts.guided ?? false,
+    ...(opts.lockedCharms?.length ? { lockedCharms: opts.lockedCharms.slice() } : {}),
     month: 1,
     hp: maxHp,
     maxHp,
@@ -383,13 +388,17 @@ function bossHooks(spirit: SpiritDef): HandBossRules {
 }
 
 export function spiritStats(
-  run: Pick<RunState, 'month' | 'omen' | 'guided'>,
+  run: Pick<RunState, 'month' | 'omen' | 'guided' | 'deckId'>,
   spirit: SpiritDef,
 ): { hp: number; ferocity: number } {
   const oe = omenEffects(run.omen);
   const i = run.month - 1;
   let hp =
-    (BALANCE.monthHp[i] ?? 1000) * spirit.hp * (spirit.boss ? BALANCE.bossHp : 1) * oe.hpMult;
+    (BALANCE.monthHp[i] ?? 1000) *
+    spirit.hp *
+    (spirit.boss ? BALANCE.bossHp : 1) *
+    oe.hpMult *
+    (deckDef(run.deckId).modifiers?.spiritHp ?? 1);
   const ferocity =
     (BALANCE.monthFerocity[i] ?? 3) *
     spirit.ferocity *
@@ -522,6 +531,9 @@ export function playerStopInput(run: RunState, hits: readonly YakuHit[]): StopIn
     lightningIsBright: h.yakuMods[0].lightningIsBright,
     ...(deckDef(run.deckId).modifiers?.stakeFactor
       ? { stakeFactor: deckDef(run.deckId).modifiers?.stakeFactor as number }
+      : {}),
+    ...(deckDef(run.deckId).modifiers?.yakuMult
+      ? { yakuMult: deckDef(run.deckId).modifiers?.yakuMult as number }
       : {}),
   };
 }
@@ -910,6 +922,7 @@ function shopCtx(run: RunState) {
     seed: run.seed,
     month: run.month,
     owned: run.omamori.map((m) => m.id),
+    locked: run.lockedCharms ?? [],
     deckId: run.deckId,
     omen: run.omen,
     discount: shopDiscount(run),

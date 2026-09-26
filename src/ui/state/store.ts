@@ -58,6 +58,19 @@ export interface Profile {
     hit: number;
     date: string;
   }[];
+  /** Charms that started locked and have since been unlocked. */
+  unlockedCharms: OmamoriId[];
+  /** Your record with each deck: years finished, years completed, highest omen completed. */
+  deckRecords: Partial<Record<DeckId, DeckRecord>>;
+  /** The deck your biggest single stop was on. */
+  biggestHitDeck: DeckId | null;
+}
+
+export interface DeckRecord {
+  runs: number;
+  wins: number;
+  /** Highest omen completed with this deck (−1 = none). */
+  bestOmen: number;
 }
 
 export interface AppState {
@@ -94,6 +107,9 @@ export const DEFAULT_PROFILE: Profile = {
   yakuScored: {},
   guidedDone: false,
   history: [],
+  unlockedCharms: [],
+  deckRecords: {},
+  biggestHitDeck: null,
 };
 
 const KEYS = { settings: 'tp.settings.v1', profile: 'tp.profile.v1', run: 'tp.run.v1' };

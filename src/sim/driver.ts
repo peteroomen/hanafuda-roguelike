@@ -48,6 +48,8 @@ export interface RunOptions {
   readonly land?: Land;
   readonly omen?: number;
   readonly guided?: boolean;
+  /** Charms kept out of the shop (a new player's starter set). Default: everything unlocked. */
+  readonly lockedCharms?: readonly OmamoriId[];
   readonly bot: BotConfig;
   readonly onEvents?: (run: RunState, events: readonly RunEvent[]) => void;
 }
@@ -59,6 +61,7 @@ export function playRun(opts: RunOptions): RunSummary {
     land: opts.land ?? 'nippon',
     omen: opts.omen ?? 0,
     guided: opts.guided ?? false,
+    ...(opts.lockedCharms ? { lockedCharms: opts.lockedCharms } : {}),
   });
   const bot = makeBot(opts.bot, opts.seed * 7919 + 13);
   const fights: FightLog[] = [];

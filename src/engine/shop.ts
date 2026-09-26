@@ -26,6 +26,8 @@ export interface ShopContext {
   readonly seed: number;
   readonly month: number;
   readonly owned: readonly OmamoriId[];
+  /** Charms not yet unlocked; never offered. */
+  readonly locked?: readonly OmamoriId[];
   readonly deckId: Parameters<typeof deckDef>[0];
   readonly omen: number;
   readonly discount: number;
@@ -49,11 +51,18 @@ const POEM_WEIGHT: Partial<Record<YakuId, number>> = {
   tsukifuda: 2,
 };
 
-function rollCharms(rng: Rng, owned: readonly OmamoriId[], count: number): OmamoriId[] {
+function rollCharms(
+  rng: Rng,
+  owned: readonly OmamoriId[],
+  locked: readonly OmamoriId[],
+  count: number,
+): OmamoriId[] {
   const w = BALANCE.shop.rarityWeights;
   const out: OmamoriId[] = [];
   for (let i = 0; i < count; i++) {
-    const pool = OMAMORI.filter((d) => !owned.includes(d.id) && !out.includes(d.id));
+    const pool = OMAMORI.filter(
+      (d) => !owned.includes(d.id) && !locked.includes(d.id) && !out.includes(d.id),
+    );
     if (!pool.length) break;
     const pick = rng.weighted(pool, (d) => w[d.rarity]);
     out.push(pick.id);
@@ -63,7 +72,7 @@ function rollCharms(rng: Rng, owned: readonly OmamoriId[], count: number): Omamo
 
 export function rollOffers(ctx: ShopContext, rerolls: number): ShopOffer[] {
   const rng = new Rng(deriveSeed(ctx.seed, `shop:${ctx.month}:${rerolls}`));
-  const charms = rollCharms(rng, ctx.owned, BALANCE.shop.charmOffers).map(
+  const charms = rollCharms(rng, ctx.owned, ctx.locked ?? [], BALANCE.shop.charmOffers).map(
     (id) => ({ kind: 'omamori', id, sold: false }) as const,
   );
   const poem = rng.weighted(YAKU, (y) => POEM_WEIGHT[y.id] ?? 1);
@@ -107,7 +116,7 @@ export function offerPrice(
       base = omamoriDef(offer.id).price;
       break;
     case 'ofuda':
-      base = ofudaDef(offer.id).price;
+      base = ofudaDef(offer.id).price - (deckDef(ctx.deckId).modifiers?.ofudaDiscount ?? 0);
       break;
     case 'poem':
       base = deckDef(ctx.deckId).modifiers?.poemPrice ?? 3;

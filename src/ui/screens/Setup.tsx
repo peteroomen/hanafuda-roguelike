@@ -7,6 +7,7 @@ import { newRun } from '@/engine/run';
 import { cardBackUrl, cardFaceUrl } from '@/ui/art/images';
 import { Seal } from '@/ui/art/Kiwi';
 import * as sfx from '@/ui/audio/audio';
+import { lockedCharms } from '@/ui/state/meta';
 import { setState, updateProfile, updateSettings, useStore } from '@/ui/state/store';
 import { Viewport } from '@/ui/game/Viewport';
 
@@ -20,7 +21,14 @@ export function Setup() {
   const begin = () => {
     sfx.unlockAudio();
     const seed = (Math.floor(Math.random() * 2 ** 31) ^ Date.now()) >>> 0;
-    const { state } = newRun({ seed, deckId: deck, land, omen, guided });
+    const { state } = newRun({
+      seed,
+      deckId: deck,
+      land,
+      omen,
+      guided,
+      lockedCharms: lockedCharms(profile),
+    });
     updateProfile((p) => ({ ...p, runsStarted: p.runsStarted + 1 }));
     setState({ run: state, screen: 'game' });
   };

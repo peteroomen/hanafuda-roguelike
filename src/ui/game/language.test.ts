@@ -7,6 +7,7 @@ import { landText, terms } from '@/content/lands';
 import { OFUDA } from '@/content/ofuda';
 import { OMAMORI } from '@/content/omamori';
 import { SPIRITS } from '@/content/spirits';
+import { CHARM_UNLOCKS } from '@/content/unlocks';
 import { YAKU, yakuText } from '@/content/yaku';
 
 /** Every player-facing content text, as the player reads it in a land. */
@@ -21,6 +22,10 @@ function texts(land: Land): [string, string][] {
     ...ENHANCEMENTS.map((d): [string, string] => [`enhancement ${d.id}`, render(d)]),
     ...SPIRITS.map((d): [string, string] => [`spirit ${d.id}`, render(d)]),
     ...DECKS.map((d): [string, string] => [`deck ${d.id}`, render(d)]),
+    ...Object.entries(CHARM_UNLOCKS).map(([id, u]): [string, string] => [
+      `unlock ${id}`,
+      render(u),
+    ]),
     ...OMENS.map((d): [string, string] => [`omen ${d.level}`, render(d)]),
     ...YAKU.map((d): [string, string] => {
       const t = yakuText(d.id, land);

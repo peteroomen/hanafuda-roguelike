@@ -6,17 +6,12 @@ import { byLand, cap, type LandText } from './lands';
 import type { OfudaId } from './ofuda';
 import type { OmamoriId } from './omamori';
 import type { EnhancementId } from '@/engine/types';
-import type { YakuFamily } from './yaku';
 
-export type DeckId = 'pine' | 'plum' | 'moon' | 'willow' | 'maple' | 'paulownia' | 'gambler';
+export type DeckId =
+  'pine' | 'plum' | 'moon' | 'willow' | 'maple' | 'paulownia' | 'gambler' | 'firework';
 
-export type UnlockCondition =
-  | { readonly kind: 'always' }
-  | { readonly kind: 'reachMonth'; readonly month: number }
-  | { readonly kind: 'defeatBoss' }
-  | { readonly kind: 'scoreFamily'; readonly family: YakuFamily }
-  | { readonly kind: 'koikoiInHand'; readonly calls: number }
-  | { readonly kind: 'winRun' };
+export type { UnlockCondition } from './unlocks';
+import type { UnlockCondition } from './unlocks';
 
 export interface DeckDef {
   readonly id: DeckId;
@@ -46,6 +41,12 @@ export interface DeckDef {
     readonly stakeFactor?: number;
     /** Overrides the spirit's koi-koi punishment multiplier. */
     readonly punish?: number;
+    /** Multiplies the Mult every yaku gives when it scores. */
+    readonly yakuMult?: number;
+    /** Multiplies every spirit's HP. */
+    readonly spiritHp?: number;
+    /** Mon off every talisman's price. */
+    readonly ofudaDiscount?: number;
   };
   /** Accent hue for the deck's card back. */
   readonly hue: number;
@@ -69,10 +70,11 @@ export const DECKS: readonly DeckDef[] = [
     id: 'plum',
     name: byLand({ nippon: 'Plum Deck', aotearoa: 'Mānuka Deck' }),
     kanji: '梅',
-    text: 'Start with Frog and Far Sight, and a third talisman slot.',
+    text: 'Talismans cost 1 mon less. Start with Frog and Far Sight, and a third talisman slot.',
     unlock: { kind: 'reachMonth', month: 4 },
     unlockText: 'Reach April.',
     start: { ofuda: ['frog', 'peek'], ofudaSlots: 3 },
+    modifiers: { ofudaDiscount: 1 },
     hue: 340,
   },
   {
@@ -133,6 +135,17 @@ export const DECKS: readonly DeckDef[] = [
     start: { poemLevels: 3 },
     modifiers: { poemPrice: 2 },
     hue: 270,
+  },
+  {
+    id: 'firework',
+    name: 'Firework Deck',
+    kanji: '花火',
+    text: 'Every yaku gives ×2 Mult, but spirits have 50% more HP. Start with Carp Streamer.',
+    unlock: { kind: 'stopDamage', damage: 1000 },
+    unlockText: 'Deal 1,000 damage in one stop.',
+    start: { omamori: ['carpStreamer'] },
+    modifiers: { yakuMult: 2, spiritHp: 1.5 },
+    hue: 20,
   },
 ];
 

@@ -935,3 +935,60 @@
 .credits {
   font-size: 12px;
 }
+
+/* Collection: locked charms, the Decks tab and the extra records (PR G). */
+.charm-card.locked svg {
+  filter: brightness(0) opacity(0.6);
+}
+.charm-card.locked b {
+  opacity: 0.6;
+}
+.deck-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.deck-row-back {
+  position: relative;
+  flex: none;
+  width: 34px;
+}
+.deck-row-back img {
+  display: block;
+  width: 34px;
+  border-radius: 4px;
+  border: 1.5px solid var(--line);
+}
+.deck-row-back span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  writing-mode: vertical-rl;
+  text-shadow: 0 1px 0 var(--line);
+}
+.deck-row.locked .deck-row-back img {
+  filter: grayscale(1) brightness(0.55);
+}
+.deck-row-record {
+  font-weight: 700;
+}
+.omen-seal {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  background: var(--vermilion);
+  color: #fff;
+  font-size: 17px;
+  border: 1.5px solid var(--line);
+  transform: rotate(-6deg);
+}
+.record-line {
+  font-size: 13px;
+  margin-bottom: 12px;
+}

@@ -49,6 +49,8 @@ export interface StopInput {
   readonly drum: number;
   readonly lightningIsBright: boolean;
   /** Overrides rules.koiKoiStake.factor (Gambler's Deck). */
+  /** A deck that multiplies every yaku's Mult (the Firework Deck). */
+  readonly yakuMult?: number;
   readonly stakeFactor?: number;
 }
 
@@ -195,7 +197,10 @@ export function scoreStop(input: StopInput): ScoreResult {
     basePoints += pts;
     push(
       { kind: 'yaku', id: h.id, level, halved: pts !== h.points },
-      { chips: def.baseChips + level * def.poem.chips, mult: pts + level * def.poem.mult },
+      {
+        chips: def.baseChips + level * def.poem.chips,
+        mult: (pts + level * def.poem.mult) * (input.yakuMult ?? 1),
+      },
     );
   }
 

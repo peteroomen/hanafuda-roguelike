@@ -129,8 +129,16 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
   - Queued in the triage doc: HP visible while deciding stop or koi-koi (for the design pass).
   - The build type-checks `e2e/` too: a broken scratch spec fails `pnpm build`, so don't hide
     its output when building for e2e.
-  - Next up: PR G (decks and unlocks). For the later
-    design pass: persistent things (HP, mon, charms) should have one fixed home on every screen.
+  - Decks and unlocks (PR G, `docs/work/2026-09-25-decks-and-unlocks.md`): the Firework Deck
+    (×2 yaku Mult, +50% spirit HP; deck modifiers `yakuMult`, `spiritHp`). 7 charms start
+    locked (`src/content/unlocks.ts`); the run carries `lockedCharms` and the shop skips them.
+    Profile gains `unlockedCharms`, `deckRecords`, `biggestHitDeck`; `refreshUnlocks()` on load
+    grants anything already earned. Collection has a Decks tab, locked-charm silhouettes and
+    more records. Plum: talismans 1 mon cheaper (`ofudaDiscount`). Four weak charms buffed. The
+    suite has a starter-set row (43% vs 44% with everything).
+  - All seven triage PRs are merged (#7–#14). Everything still open (the design pass, including
+    HP visible while deciding; the mechanics to model; a greed-aware sim bot and a charm
+    re-audit) lives in `docs/roadmap.md`. Start there next session.
 - **Lands (2026-09-26):** a year is played in **Nippon** (the traditional deck) or **Aotearoa**
   (the user's New Zealand deck, Te Reo names, NZ seasons). See `docs/work/2026-09-26-aotearoa-deck.md`.
   - All cards of both lands are in `ALL_CARDS` (Nippon ids 0..47, Aotearoa 48..95). Walk one
