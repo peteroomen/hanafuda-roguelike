@@ -27,6 +27,14 @@ Small, and worth doing before the design pass.
   (24px) placed at `top: 2px`, so it hangs 2px below the middle. Centre it (`top: 0`, or
   `top: 50%` with `translateY(-50%)`) and check the checked state too. It's the same control in
   Setup and Settings.
+- **The Rain Man should speak in the same speech bubbles as the spirits.** His tips use their
+  own panel (`GuideBubble` in `Overlays.tsx`: portrait plus a text box); the spirits use
+  `Fukidashi` (mood-shaped bubbles). Give him a `Fukidashi` from his portrait with his own calm
+  mood (`playful` or a new one), keeping "tap to dismiss", the 44px target and the `guide` test id
+  the e2e specs use. It shows in fights and in the shop (`ShopView.tsx`).
+
+Together these are one small PR (roughly CSS, `useGame.ts` and `Overlays.tsx`, plus a test for
+the speech budget).
 
 ## Next: the design pass
 
