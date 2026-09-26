@@ -1,6 +1,8 @@
 /**
  * The balance suite: every bot, archetype and omen, summarised as markdown.
  */
+import type { Land } from '@/content/cards';
+import { landText } from '@/content/lands';
 import { DECKS, type DeckId } from '@/content/decks';
 import type { Archetype, OmamoriId } from '@/content/omamori';
 import { LOCKED_AT_START } from '@/content/unlocks';
@@ -21,6 +23,7 @@ function batch(
     guided?: boolean;
     seed?: number;
     deckId?: DeckId;
+    land?: Land;
     lockedCharms?: readonly OmamoriId[];
   } = {},
 ): Summary {
@@ -33,6 +36,7 @@ function batch(
         omen: extra.omen ?? 0,
         guided: extra.guided ?? false,
         ...(extra.deckId ? { deckId: extra.deckId } : {}),
+        ...(extra.land ? { land: extra.land } : {}),
         ...(extra.lockedCharms ? { lockedCharms: extra.lockedCharms } : {}),
       }),
     );
@@ -53,6 +57,14 @@ export function runSuite(runs: number): string {
   rows.push({
     label: 'casual bot (a learning player)',
     summary: batch(runs, { kind: 'casual', archetype: 'auto' }),
+  });
+  rows.push({
+    label: 'smart bot, Aotearoa',
+    summary: batch(runs, { kind: 'smart', archetype: 'auto' }, { land: 'aotearoa' }),
+  });
+  rows.push({
+    label: 'casual bot, Aotearoa',
+    summary: batch(runs, { kind: 'casual', archetype: 'auto' }, { land: 'aotearoa' }),
   });
   rows.push({
     label: 'smart bot, starter charms (none unlocked)',
@@ -78,7 +90,7 @@ export function runSuite(runs: number): string {
     summary: batch(runs, { kind: 'smart', archetype: a }),
   }));
   const deckRows: Row[] = DECKS.map((d) => ({
-    label: d.name,
+    label: landText(d.name, 'nippon'),
     summary: batch(runs, { kind: 'smart', archetype: 'auto' }, { deckId: d.id }),
   }));
   const omenRows: Row[] = [1, 2, 3, 4, 5].map((o) => ({

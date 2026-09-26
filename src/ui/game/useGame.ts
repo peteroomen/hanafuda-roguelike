@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CardId } from '@/content/cards';
 import { type SpiritId, spiritDef } from '@/content/spirits';
 import { type Mood, SPEECH_MS, type VoiceMoment, voiceOf } from '@/content/voices';
-import { yakuDef, type YakuId } from '@/content/yaku';
+import { type YakuId, yakuText } from '@/content/yaku';
 import type { Intent } from '@/engine/ai';
 import type { HandEvent } from '@/engine/hand';
 import { type RunAction, type RunEvent, type RunState, runStep, waitingOn } from '@/engine/run';
@@ -15,7 +15,7 @@ import type { ScoreResult, SpiritHit } from '@/engine/scoring';
 import type { Seat, YakuHit } from '@/engine/types';
 import * as sfx from '@/ui/audio/audio';
 import { haptics } from '@/ui/audio/haptics';
-import { getState, setState, speedFactor } from '@/ui/state/store';
+import { currentLand, getState, setState, speedFactor } from '@/ui/state/store';
 import {
   applyEvent,
   dealOrder,
@@ -313,7 +313,7 @@ export function useGame(): GameApi {
           if (e.seat === 0) haptics.yaku();
           await banner(
             'yaku',
-            names.map((id) => yakuDef(id).name).join(' · '),
+            names.map((id) => yakuText(id, currentLand()).name).join(' · '),
             1150,
             e.seat === 0
               ? `${e.points} point${e.points === 1 ? '' : 's'}`

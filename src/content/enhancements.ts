@@ -5,12 +5,13 @@
  * (Inked matching, Torn counting) help whoever holds the card.
  */
 import type { EnhancementId } from '@/engine/types';
+import type { LandText } from './lands';
 
 export interface EnhancementDef {
   readonly id: EnhancementId;
   readonly name: string;
   readonly kanji: string;
-  readonly text: string;
+  readonly text: LandText;
   readonly price: number;
   readonly rarity: 'common' | 'uncommon' | 'rare';
   readonly chips?: number;
@@ -60,7 +61,8 @@ export const ENHANCEMENTS: readonly EnhancementDef[] = [
     id: 'torn',
     name: 'Torn',
     kanji: '破',
-    text: 'Counts double toward Tane, Tan and Kasu. Crumbles after it scores for you.',
+    text: (t) =>
+      `Counts double toward ${t.y.tane}, ${t.y.tan} and ${t.y.kasu}. Crumbles after it scores for you.`,
     price: 3,
     rarity: 'common',
   },

@@ -1,24 +1,24 @@
 import { useState } from 'react';
-import { seasonOf } from '@/content/cards';
 import { DECKS, deckDef, OMENS } from '@/content/decks';
+import { landText } from '@/content/lands';
 import { OMAMORI } from '@/content/omamori';
 import { SPIRITS } from '@/content/spirits';
 import { CHARM_UNLOCKS } from '@/content/unlocks';
-import { yakuDef, type YakuId } from '@/content/yaku';
+import { type YakuId, yakuText } from '@/content/yaku';
 import { OmamoriIcon } from '@/ui/art/Icons';
+import { Seal } from '@/ui/art/Kiwi';
 import { cardBackUrl, spiritUrl } from '@/ui/art/images';
 import { CardGallery, Rules, YakuList } from '@/ui/game/YakuBook';
 import { Viewport } from '@/ui/game/Viewport';
 import { lockedCharms } from '@/ui/state/meta';
-import { setState, useStore } from '@/ui/state/store';
+import { setState, useLand, useStore } from '@/ui/state/store';
 
 type Tab = 'yaku' | 'cards' | 'charms' | 'spirits' | 'decks' | 'records' | 'rules';
-
-const SEASON_MONTH = { spring: 1, summer: 4, autumn: 7, winter: 10 } as const;
 
 export function Collection() {
   const [tab, setTab] = useState<Tab>('yaku');
   const profile = useStore((s) => s.profile);
+  const land = useLand();
   const tabs: [Tab, string][] = [
     ['yaku', 'Yaku'],
     ['cards', 'Cards'],
@@ -72,7 +72,7 @@ export function Collection() {
                         <OmamoriIcon id={d.id} size={40} />
                         <div>
                           <b>Locked</b>
-                          <small>{unlock.unlockText}</small>
+                          <small>{landText(unlock.unlockText, land)}</small>
                         </div>
                       </div>
                     );
@@ -84,7 +84,7 @@ export function Collection() {
                         <b>{seen ? d.name : '???'}</b>
                         <small>
                           {seen
-                            ? d.text.replace(/\s*\(now[^)]*\)/, '')
+                            ? landText(d.text, land).replace(/\s*\(now[^)]*\)/, '')
                             : `${d.rarity === 'uncommon' ? 'An' : 'A'} ${d.rarity} charm not yet found`}
                         </small>
                       </div>
@@ -100,10 +100,7 @@ export function Collection() {
                   const beaten = profile.defeatedSpirits.includes(s.id);
                   return (
                     <div key={s.id} className={`spirit-card ${seen ? '' : 'unseen'}`}>
-                      <img
-                        src={spiritUrl(s.id, seasonOf(SEASON_MONTH[s.season] as 1), s.boss)}
-                        alt=""
-                      />
+                      <img src={spiritUrl(s.id, s.season, s.boss)} alt="" />
                       <b>{seen ? s.name : '???'}</b>
                       <small>
                         {seen
@@ -133,12 +130,14 @@ export function Collection() {
                       data-testid={`deck-record-${d.id}`}
                     >
                       <span className="deck-row-back">
-                        <img src={cardBackUrl(d.hue)} alt="" />
-                        <span className="display">{d.kanji}</span>
+                        <img src={cardBackUrl(d.hue, land)} alt="" />
+                        <span className="display">
+                          <Seal land={land} kanji={d.kanji} />
+                        </span>
                       </span>
                       <div>
-                        <b>{d.name}</b>
-                        <small>{open ? d.text : `Locked. ${d.unlockText}`}</small>
+                        <b>{landText(d.name, land)}</b>
+                        <small>{open ? landText(d.text, land) : `Locked. ${d.unlockText}`}</small>
                         {open && (
                           <small className="deck-row-record">
                             {rec
@@ -181,7 +180,7 @@ export function Collection() {
                     <span>
                       biggest hit
                       {profile.biggestHitDeck
-                        ? ` (${deckDef(profile.biggestHitDeck).name.replace(' Deck', '')})`
+                        ? ` (${landText(deckDef(profile.biggestHitDeck).name, land).replace(' Deck', '')})`
                         : ''}
                     </span>
                   </div>
@@ -214,7 +213,7 @@ export function Collection() {
                 </div>
                 {topYaku && (
                   <div className="record-line">
-                    Most scored: <b>{yakuDef(topYaku as YakuId).name}</b>, {topYakuTimes}{' '}
+                    Most scored: <b>{yakuText(topYaku as YakuId, land).name}</b>, {topYakuTimes}{' '}
                     {topYakuTimes === 1 ? 'time' : 'times'}
                   </div>
                 )}
@@ -227,7 +226,8 @@ export function Collection() {
                         <span>{r.date}</span>
                         <span>{r.won ? 'Completed' : `Fell in month ${r.month}`}</span>
                         <span>
-                          {deckDef(r.deck).name.replace(' Deck', '')} · omen {r.omen}
+                          {landText(deckDef(r.deck).name, r.land ?? 'nippon').replace(' Deck', '')}{' '}
+                          · omen {r.omen}
                         </span>
                         <span>{r.hit.toLocaleString('en-US')}</span>
                       </div>

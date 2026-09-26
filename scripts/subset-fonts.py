@@ -15,6 +15,7 @@ import pathlib
 import sys
 
 from fontTools import subset
+from fontTools.ttLib.tables._g_l_y_f import Glyph, GlyphComponent
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = pathlib.Path(os.environ.get("FONT_SRC", "/tmp/fonts"))
@@ -27,7 +28,11 @@ FONTS = {
     "zenmaru-700.woff2": "expo-google-fonts-zen-maru-gothic-0.4.1/700Bold/ZenMaruGothic_700Bold.ttf",
 }
 
-EXTRA = "…—–‘’“”·×÷•★☆✦←→↑↓↺♪©°±½¼¾€¥々〜「」『』、。・ー"
+# Te Reo needs the macron vowels, which these Japanese fonts don't have. add_macrons() builds
+# them from each font's own vowel and macron, so they match the letters around them.
+MACRONS = {"ā": "a", "ē": "e", "ī": "ı", "ō": "o", "ū": "u", "Ā": "A", "Ē": "E", "Ī": "I", "Ō": "O", "Ū": "U"}
+
+EXTRA = "āēīōūĀĒĪŌŪ—–‘’“”·×÷•★☆✦←→↑↓↺♪©°±½¼¾€¥々〜「」『』、。・ー"
 
 
 def collect() -> str:
@@ -40,6 +45,55 @@ def collect() -> str:
             if ord(ch) > 127:
                 chars.add(ch)
     return "".join(sorted(chars))
+
+
+def add_macrons(font) -> None:
+    """Add composite glyphs for the macron vowels: the base letter with the font's macron above."""
+    glyf, hmtx = font["glyf"], font["hmtx"]
+    cmap = font.getBestCmap()
+    macron = cmap.get(0xAF)
+    if macron is None:
+        return
+    mg = glyf[macron]
+    mg.recalcBounds(glyf)
+    order = font.getGlyphOrder()
+    added = {}
+    for ch, base in MACRONS.items():
+        if ord(ch) in cmap:
+            continue
+        bname = cmap.get(ord(base)) or cmap.get(ord("i" if base == "ı" else base))
+        if bname is None:
+            continue
+        bg = glyf[bname]
+        bg.recalcBounds(glyf)
+        gap = 50 if base.isupper() else 70
+        parts = []
+        for name, x, y in (
+            (bname, 0, 0),
+            (macron, round((bg.xMin + bg.xMax - mg.xMin - mg.xMax) / 2), round(bg.yMax + gap - mg.yMin)),
+        ):
+            c = GlyphComponent()
+            c.glyphName, c.x, c.y, c.flags = name, x, y, 0x4
+            parts.append(c)
+        g = Glyph()
+        g.numberOfContours = -1
+        g.components = parts
+        name = f"uni{ord(ch):04X}"
+        glyf[name] = g
+        g.recalcBounds(glyf)
+        hmtx[name] = (hmtx[bname][0], g.xMin)
+        if "vmtx" in font:
+            font["vmtx"][name] = font["vmtx"][bname]
+        order.append(name)
+        added[ord(ch)] = name
+    font.setGlyphOrder(order)
+    glyf.glyphOrder = order
+    for table in font["cmap"].tables:
+        if table.isUnicode():
+            table.cmap.update(added)
+    maxp = font["maxp"]
+    maxp.maxComponentElements = max(getattr(maxp, "maxComponentElements", 0), 2)
+    maxp.maxComponentDepth = max(getattr(maxp, "maxComponentDepth", 0), 1)
 
 
 def main() -> int:
@@ -57,6 +111,7 @@ def main() -> int:
         opts.name_IDs = ["*"]
         opts.notdef_outline = True
         font = subset.load_font(str(src), opts)
+        add_macrons(font)
         sub = subset.Subsetter(opts)
         sub.populate(text=text)
         sub.subset(font)

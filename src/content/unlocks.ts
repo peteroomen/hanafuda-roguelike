@@ -3,6 +3,7 @@
  * against the player's profile (lifetime stats), never the run, so they're data here and the
  * checking lives with the profile (src/ui/state/meta.ts).
  */
+import type { LandText } from './lands';
 import type { OmamoriId } from './omamori';
 import type { SpiritId } from './spirits';
 import type { YakuFamily, YakuId } from './yaku';
@@ -27,7 +28,7 @@ export type UnlockCondition =
 
 export interface CharmUnlock {
   readonly unlock: UnlockCondition;
-  readonly unlockText: string;
+  readonly unlockText: LandText;
 }
 
 /**
@@ -37,16 +38,16 @@ export interface CharmUnlock {
 export const CHARM_UNLOCKS: Partial<Record<OmamoriId, CharmUnlock>> = {
   leafPile: {
     unlock: { kind: 'scoreYaku', id: 'kasu', times: 10 },
-    unlockText: 'Score Kasu 10 times.',
+    unlockText: (t) => `Score ${t.y.kasu} 10 times.`,
   },
   bonsai: { unlock: { kind: 'reachMonth', month: 6 }, unlockText: 'Reach June.' },
   almanac: {
     unlock: { kind: 'scoreYaku', id: 'tsukifuda', times: 1 },
-    unlockText: 'Score Tsukifuda.',
+    unlockText: (t) => `Score ${t.y.tsukifuda}.`,
   },
   phoenixPlume: {
     unlock: { kind: 'scoreYaku', id: 'sanko', times: 3 },
-    unlockText: 'Score Sankō 3 times.',
+    unlockText: (t) => `Score ${t.y.sanko} 3 times.`,
   },
   koiPond: {
     unlock: { kind: 'koikoiTotal', calls: 25 },

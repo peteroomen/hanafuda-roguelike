@@ -2,7 +2,7 @@
  * Where everything sits on the portrait stage (logical width 390, height ≥ 640).
  * Cards are positioned absolutely from these numbers and animate between them.
  */
-import { CARDS, type CardId, TYPE_ORDER } from '@/content/cards';
+import { ALL_CARDS, type CardId, TYPE_ORDER } from '@/content/cards';
 import type { Seat } from '@/engine/types';
 import { typeGroup, type Visual } from './visual';
 
@@ -201,7 +201,7 @@ function capPos(st: Stage, v: Visual, seat: Seat, id: CardId): { x: number; y: n
 /** The player's hand, as shown: by month (January first), then Bright, Animal, Ribbon, Chaff. */
 export function sortHand(ids: readonly CardId[]): CardId[] {
   const key = (id: CardId) => {
-    const c = CARDS[id];
+    const c = ALL_CARDS[id];
     return c ? c.month * 10 + TYPE_ORDER[c.type] : id;
   };
   return ids.slice().sort((a, b) => key(a) - key(b) || a - b);

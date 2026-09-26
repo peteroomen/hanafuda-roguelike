@@ -139,4 +139,17 @@ Node 22. In the Claude Code remote container Chromium is pre-installed at `/opt/
   - All seven triage PRs are merged (#7–#14). Everything still open (the design pass, including
     HP visible while deciding; the mechanics to model; a greed-aware sim bot and a charm
     re-audit) lives in `docs/roadmap.md`. Start there next session.
+- **Lands (2026-09-26):** a year is played in **Nippon** (the traditional deck) or **Aotearoa**
+  (the user's New Zealand deck, Te Reo names, NZ seasons). See `docs/work/2026-09-26-aotearoa-deck.md`.
+  - All cards of both lands are in `ALL_CARDS` (Nippon ids 0..47, Aotearoa 48..95). Walk one
+    land with `landCards(land)`; there is no global "the deck". `RunState.land` picks it.
+  - Aotearoa cards carry the role tags of the cards they replace (kiwi = `boar`, kete =
+    `sakeCup`, Ua = `rainMan`), so rules are land-free. Months and seasons: `monthDef(m, land)`.
+  - Words that name a yaku or card are per land: `yakuText(id, land)`, and content text is a
+    `LandText` rendered with `landText(text, land)` (`src/content/lands.ts`). A LandText inside a
+    template string is not a type error, so grep when adding one. Kanji seals become the kiwi
+    (`Seal` in `src/ui/art/Kiwi.tsx`).
+  - Art: `scripts/aotearoa-cards.ts` converts `art-source/cards/aotearoa/*.svg`. Fonts get
+    macron vowels built in by `scripts/subset-fonts.py`: rerun it after adding new non-ASCII text.
+  - Open: a fluent speaker's check of the draft Te Reo yaku names, and the art's licence.
 - Deploy: static Vite build on Vercel (`vercel.json`), production branch `main`.

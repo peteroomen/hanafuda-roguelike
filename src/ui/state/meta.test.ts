@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { landText } from '@/content/lands';
 import { CHARM_UNLOCKS, LOCKED_AT_START } from '@/content/unlocks';
 import { lockedCharms, met, refreshUnlocks } from './meta';
 import { DEFAULT_PROFILE, getState, type Profile, setState } from './store';
@@ -59,6 +60,7 @@ describe('charm unlocks', () => {
   });
 
   it('describes every locked charm', () => {
-    for (const id of LOCKED_AT_START) expect(CHARM_UNLOCKS[id]?.unlockText).toMatch(/\.$/);
+    for (const id of LOCKED_AT_START)
+      expect(landText(CHARM_UNLOCKS[id]?.unlockText ?? '', 'nippon')).toMatch(/\.$/);
   });
 });

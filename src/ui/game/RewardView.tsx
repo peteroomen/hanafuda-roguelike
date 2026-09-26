@@ -29,7 +29,7 @@ export function RewardView({ api }: { api: GameApi }) {
     <div className="reward screen-pad" data-testid="reward">
       <img
         className="reward-face calmed"
-        src={spiritUrl(s.id, seasonOf(run.month), s.boss, 'full')}
+        src={spiritUrl(s.id, seasonOf(run.month, run.land), s.boss, 'full')}
         alt=""
       />
       <div className="reward-title display">{s.name} is calmed</div>

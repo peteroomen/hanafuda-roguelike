@@ -1,6 +1,7 @@
 /**
  * Meta progression: records runs in the profile and works out what unlocked.
  */
+import { landText } from '@/content/lands';
 import { DECKS, deckDef, OMENS } from '@/content/decks';
 import { omamoriDef, type OmamoriId } from '@/content/omamori';
 import { CHARM_UNLOCKS, LOCKED_AT_START, type UnlockCondition } from '@/content/unlocks';
@@ -70,6 +71,7 @@ export function recordRun(run: RunState, finished: boolean): string[] {
             won,
             month: run.month,
             deck: run.deckId,
+            land: run.land,
             omen: run.omen,
             hit: run.stats.biggestHit,
             date: new Date().toISOString().slice(0, 10),
@@ -97,13 +99,16 @@ export function recordRun(run: RunState, finished: boolean): string[] {
   const charms = newCharmUnlocks(next, run);
   if (charms.length) {
     next = { ...next, unlockedCharms: [...next.unlockedCharms, ...charms] };
-    for (const id of charms) unlocks.push(`Charm: ${omamoriDef(id).name}. ${omamoriDef(id).text}`);
+    for (const id of charms)
+      unlocks.push(`Charm: ${omamoriDef(id).name}. ${landText(omamoriDef(id).text, run.land)}`);
   }
   const decks = new Set(next.unlockedDecks);
   for (const d of DECKS) {
     if (!decks.has(d.id) && met(d.unlock, next, run)) {
       decks.add(d.id);
-      unlocks.push(`${deckDef(d.id).name}: ${deckDef(d.id).text}`);
+      unlocks.push(
+        `${landText(deckDef(d.id).name, run.land)}: ${landText(deckDef(d.id).text, run.land)}`,
+      );
     }
   }
   next = { ...next, unlockedDecks: [...decks] };

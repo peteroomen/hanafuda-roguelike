@@ -1,15 +1,19 @@
 import { useState } from 'react';
+import { cardWithTag, LANDS } from '@/content/cards';
 import { DECKS, type DeckId, OMENS } from '@/content/decks';
+import { landDef, landText } from '@/content/lands';
 import { omamoriDef } from '@/content/omamori';
 import { newRun } from '@/engine/run';
-import { cardBackUrl } from '@/ui/art/images';
+import { cardBackUrl, cardFaceUrl } from '@/ui/art/images';
+import { Seal } from '@/ui/art/Kiwi';
 import * as sfx from '@/ui/audio/audio';
 import { lockedCharms } from '@/ui/state/meta';
-import { setState, updateProfile, useStore } from '@/ui/state/store';
+import { setState, updateProfile, updateSettings, useStore } from '@/ui/state/store';
 import { Viewport } from '@/ui/game/Viewport';
 
 export function Setup() {
   const profile = useStore((s) => s.profile);
+  const land = useStore((s) => s.settings.land);
   const [deck, setDeck] = useState<DeckId>('pine');
   const maxOmen = Math.min(OMENS.length - 1, profile.maxOmenWon + 1);
   const [omen, setOmen] = useState(0);
@@ -20,6 +24,7 @@ export function Setup() {
     const { state } = newRun({
       seed,
       deckId: deck,
+      land,
       omen,
       guided,
       lockedCharms: lockedCharms(profile),
@@ -41,6 +46,23 @@ export function Setup() {
             </button>
             <div className="display setup-title">A new year</div>
           </div>
+          <div className="setup-label">Land</div>
+          <div className="lands" role="radiogroup" aria-label="Land">
+            {LANDS.map((l) => (
+              <button
+                key={l}
+                role="radio"
+                aria-checked={land === l}
+                className={`land ${land === l ? 'on' : ''}`}
+                onClick={() => updateSettings({ land: l })}
+                data-testid={`land-${l}`}
+              >
+                <img src={cardFaceUrl(cardWithTag('crane', l))} alt="" />
+                <b>{landDef(l).name}</b>
+              </button>
+            ))}
+          </div>
+          <div className="land-text">{landDef(land).text}</div>
           <div className="setup-label">Deck</div>
           <div className="decks scroll">
             {DECKS.map((d) => {
@@ -53,11 +75,13 @@ export function Setup() {
                   onClick={() => setDeck(d.id)}
                   data-testid={`deck-${d.id}`}
                 >
-                  <img src={cardBackUrl(d.hue)} alt="" />
-                  <span className="deck-kanji display">{d.kanji}</span>
+                  <img src={cardBackUrl(d.hue, land)} alt="" />
+                  <span className="deck-kanji display">
+                    <Seal land={land} kanji={d.kanji} />
+                  </span>
                   <span className="deck-text">
-                    <b>{d.name}</b>
-                    <small>{locked ? `Locked. ${d.unlockText}` : d.text}</small>
+                    <b>{landText(d.name, land)}</b>
+                    <small>{locked ? `Locked. ${d.unlockText}` : landText(d.text, land)}</small>
                     {!locked && d.start.omamori && (
                       <small className="deck-start">
                         Starts with {d.start.omamori.map((id) => omamoriDef(id).name).join(', ')}

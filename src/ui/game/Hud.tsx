@@ -1,6 +1,6 @@
 import { type OfudaId } from '@/content/ofuda';
 import { spiritDef } from '@/content/spirits';
-import { yakuDef, type YakuId } from '@/content/yaku';
+import { yakuDef, type YakuId, yakuText } from '@/content/yaku';
 import type { Intent } from '@/engine/ai';
 import type { HandState } from '@/engine/hand';
 import type { FightState, RunState } from '@/engine/run';
@@ -10,6 +10,8 @@ import { detectYaku, yakuProgress } from '@/engine/yaku';
 import { spiritUrl } from '@/ui/art/images';
 import { CoinIcon, OfudaIcon, OmamoriIcon, PetalIcon } from '@/ui/art/Icons';
 import { seasonOf } from '@/content/cards';
+import { Seal } from '@/ui/art/Kiwi';
+import { useLand } from '@/ui/state/store';
 import { CARD_H, capLayout, capY, SPIRIT_HAND_X, type Stage } from './layout';
 import { shortFlower } from './labels';
 import { typeGroup, type Visual } from './visual';
@@ -48,7 +50,7 @@ export function SpiritBar(props: {
         data-testid="spirit-portrait"
         key={props.shaking}
       >
-        <img src={spiritUrl(s.id, seasonOf(run.month), s.boss)} alt={s.name} />
+        <img src={spiritUrl(s.id, seasonOf(run.month, run.land), s.boss)} alt={s.name} />
       </button>
       <div className="spirit-info">
         <div className="spirit-name">
@@ -77,7 +79,7 @@ export function SpiritBar(props: {
               <span>
                 {/* The red eye already says "it wants": the name alone fits the long ones. */}
                 <span className="intent-name">
-                  <b>{yakuDef(props.intent.id).name}</b>
+                  <b>{yakuText(props.intent.id, run.land).name}</b>
                 </span>
                 <span className="intent-count">
                   {props.intent.have}/{props.intent.need}
@@ -117,7 +119,7 @@ export function SpiritBar(props: {
       <div className="top-buttons">
         <div className="month-chip">
           <span className="display">{run.month}</span>
-          <span>{shortFlower(run.month)}</span>
+          <span>{shortFlower(run.month, run.land)}</span>
         </div>
         <button
           className="icon-btn"
@@ -125,7 +127,9 @@ export function SpiritBar(props: {
           aria-label="Yaku book"
           data-testid="open-book"
         >
-          <span className="book-glyph">役</span>
+          <span className="book-glyph">
+            <Seal land={run.land} kanji="役" />
+          </span>
         </button>
         <button
           className="icon-btn"
@@ -190,6 +194,7 @@ export function Tracker({
   onOpen: () => void;
   onYaku: OnYaku;
 }) {
+  const land = useLand();
   const ctx = yakuContext(hand, 0);
   const formed = detectYaku(hand.captured[0], ctx);
   const prog = yakuProgress(
@@ -206,7 +211,7 @@ export function Tracker({
     <div className="tracker" data-testid="tracker">
       {empty && (
         <button className="tracker-empty" aria-label="Yaku book" onClick={onOpen}>
-          役
+          <Seal land={land} kanji="役" />
         </button>
       )}
       {formed.map((h) => (
@@ -216,7 +221,7 @@ export function Tracker({
           data-gloss
           onClick={(e) => onYaku(h.id, e.currentTarget)}
         >
-          {yakuDef(h.id).name} <b>{h.points}</b>
+          {yakuText(h.id, land).name} <b>{h.points}</b>
         </button>
       ))}
       {prog.map((p) => (
@@ -226,7 +231,7 @@ export function Tracker({
           data-gloss
           onClick={(e) => onYaku(p.id, e.currentTarget)}
         >
-          {yakuDef(p.id).name}{' '}
+          {yakuText(p.id, land).name}{' '}
           <b>
             {p.have}/{p.need}
           </b>
@@ -266,7 +271,7 @@ export function BottomBar(props: {
               key={i}
               className={`slot charm ${inst ? '' : 'empty'}`}
               onClick={() => inst && props.onCharm(i)}
-              aria-label={inst ? omamoriText(inst) : 'Empty charm slot'}
+              aria-label={inst ? omamoriText(inst, run.land) : 'Empty charm slot'}
               data-testid={`charm-${i}`}
             >
               {inst && <OmamoriIcon id={inst.id} size={26} />}

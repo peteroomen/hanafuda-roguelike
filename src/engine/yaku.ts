@@ -1,7 +1,7 @@
 /**
  * Yaku detection and progress. Pure functions of a captured pile plus context.
  */
-import { CARDS, type CardId, type Month } from '@/content/cards';
+import { ALL_CARDS, type CardId, type Month } from '@/content/cards';
 import type { RuleSet } from '@/content/rules';
 import { yakuDef, type YakuId } from '@/content/yaku';
 import type { YakuHit, YakuMods } from './types';
@@ -64,7 +64,7 @@ function tally(captured: readonly CardId[], ctx: YakuContext): Tally {
   };
   const dbl = ctx.doubleCount;
   for (const id of captured) {
-    const c = CARDS[id];
+    const c = ALL_CARDS[id];
     if (!c) continue;
     const w = dbl && dbl.has(id) ? 2 : 1;
     switch (c.type) {
@@ -264,17 +264,17 @@ export function yakuProgress(input: ProgressInput, ctx: YakuContext): YakuProgre
   const weight = (id: CardId) => (dbl && dbl.has(id) ? 2 : 1);
 
   const isBright = (id: CardId) => {
-    const c = CARDS[id];
+    const c = ALL_CARDS[id];
     if (!c) return false;
     return c.type === 'bright' || (mods.lightningIsBright && c.tags.includes('lightning'));
   };
   const isChaff = (id: CardId) => {
-    const c = CARDS[id];
+    const c = ALL_CARDS[id];
     if (!c) return false;
     return c.type === 'chaff' || (ctx.rules.sakeCupIsChaff && c.tags.includes('sakeCup'));
   };
   const tagged = (tag: string) =>
-    inGame.filter((id) => (CARDS[id]?.tags as readonly string[]).includes(tag));
+    inGame.filter((id) => (ALL_CARDS[id]?.tags as readonly string[]).includes(tag));
 
   const setYaku = (id: YakuId, required: CardId[][], need: number) => {
     // `required` is a list of alternatives per slot; a slot is filled if any alternative is owned.
@@ -372,12 +372,12 @@ export function yakuProgress(input: ProgressInput, ctx: YakuContext): YakuProgre
 
   countYaku(
     'tane',
-    inGame.filter((id) => CARDS[id]?.type === 'animal'),
+    inGame.filter((id) => ALL_CARDS[id]?.type === 'animal'),
     needOf('tane', mods),
   );
   countYaku(
     'tan',
-    inGame.filter((id) => CARDS[id]?.type === 'ribbon'),
+    inGame.filter((id) => ALL_CARDS[id]?.type === 'ribbon'),
     needOf('tan', mods),
   );
   countYaku('kasu', inGame.filter(isChaff), needOf('kasu', mods));

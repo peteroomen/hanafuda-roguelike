@@ -7,7 +7,7 @@
  * `step` never mutates its input: it clones, applies one action and returns the
  * new state plus the events a UI needs to animate what happened.
  */
-import { ALL_CARD_IDS, CARDS, type CardId, type Month, nextMonth } from '@/content/cards';
+import { ALL_CARDS, landCardIds, type CardId, type Month, nextMonth } from '@/content/cards';
 import type { RuleSet } from '@/content/rules';
 import type { YakuId } from '@/content/yaku';
 import { Rng, type RngState } from './rng';
@@ -197,7 +197,7 @@ export function yakuContext(s: HandState, seat: Seat): YakuContext {
   ) {
     return hit.pair[seat];
   }
-  const monthCards = s.deckIds.filter((id) => CARDS[id]?.month === s.month);
+  const monthCards = s.deckIds.filter((id) => ALL_CARDS[id]?.month === s.month);
   const torn = Object.entries(s.enhancements)
     .filter(([, e]) => e === 'torn')
     .map(([id]) => Number(id));
@@ -226,7 +226,7 @@ export function currentYaku(s: HandState, seat: Seat): YakuHit[] {
 
 /** The months a card matches as (Inked cards also match the next month). */
 export function matchMonths(s: HandState, id: CardId): readonly Month[] {
-  const c = CARDS[id];
+  const c = ALL_CARDS[id];
   if (!c) return [];
   return s.enhancements[id] === 'inked' ? [c.month, nextMonth(c.month)] : [c.month];
 }
@@ -252,7 +252,7 @@ export function fieldMatches(s: HandState, id: CardId): CardId[] {
 export function apparentMonth(s: HandState, id: CardId, viewer: Seat): Month {
   const fake = s.disguised[String(id)];
   if (fake !== undefined && s.boss.disguise?.victim === viewer) return fake;
-  return (CARDS[id] as { month: Month }).month;
+  return (ALL_CARDS[id] as { month: Month }).month;
 }
 
 /** Field cards that *look* like matches to a viewer (for highlights and bots). */
@@ -293,7 +293,7 @@ function clone(s: HandState): HandState {
 function hasFourOfAMonth(ids: readonly CardId[]): boolean {
   const counts = new Array<number>(13).fill(0);
   for (const id of ids) {
-    const m = CARDS[id]?.month ?? 0;
+    const m = ALL_CARDS[id]?.month ?? 0;
     counts[m] = (counts[m] ?? 0) + 1;
     if ((counts[m] ?? 0) >= 4) return true;
   }
@@ -302,7 +302,7 @@ function hasFourOfAMonth(ids: readonly CardId[]): boolean {
 
 export function newHand(setup: HandSetup): StepResult {
   const rules = setup.rules;
-  const deckIds = setup.deck ? setup.deck.slice() : ALL_CARD_IDS.slice();
+  const deckIds = setup.deck ? setup.deck.slice() : landCardIds('nippon');
   const rng = new Rng(setup.seed);
   const handSize = rules.handSize;
   const fieldSize = rules.fieldSize;
@@ -374,10 +374,10 @@ function maybeDisguise(s: HandState, id: CardId, events: HandEvent[]): void {
     s.rng = rng.state;
     return;
   }
-  const trueMonth = (CARDS[id] as { month: Month }).month;
+  const trueMonth = (ALL_CARDS[id] as { month: Month }).month;
   // Tempt the victim: prefer a month they hold in hand.
   const tempting = [
-    ...new Set(s.hands[d.victim].map((h) => (CARDS[h] as { month: Month }).month)),
+    ...new Set(s.hands[d.victim].map((h) => (ALL_CARDS[h] as { month: Month }).month)),
   ].filter((m) => m !== trueMonth);
   let fake: Month;
   if (tempting.length) fake = rng.pick(tempting);
@@ -401,14 +401,14 @@ function afterTurnBoss(s: HandState, seat: Seat, events: HandEvent[]): void {
   const fz = s.boss.freeze;
   if (fz && fz.by === seat) {
     const victim = other(seat);
-    const victimMonths = new Set(s.hands[victim].map((h) => CARDS[h]?.month));
+    const victimMonths = new Set(s.hands[victim].map((h) => ALL_CARDS[h]?.month));
     const candidates = s.field.filter((f) => !s.frozen.includes(f));
     if (candidates.length > 0) {
       const rng = new Rng(s.rng);
       let best = candidates[0] as CardId;
       let bestScore = -Infinity;
       for (const f of candidates) {
-        const c = CARDS[f];
+        const c = ALL_CARDS[f];
         if (!c) continue;
         const score = TYPE_WEIGHT[c.type] * 2 + (victimMonths.has(c.month) ? 3 : 0) + rng.next();
         if (score > bestScore) {
@@ -464,7 +464,7 @@ function capture(s: HandState, seat: Seat, ids: readonly CardId[], events: HandE
 
   const thiefVictim = s.boss.stealFirstBrightFrom;
   if (thiefVictim === seat && !s.stolen) {
-    const bright = ids.find((id) => CARDS[id]?.type === 'bright');
+    const bright = ids.find((id) => ALL_CARDS[id]?.type === 'bright');
     if (bright !== undefined) {
       // The Tengu snatches it and hides it at the bottom of the draw pile.
       s.stolen = true;

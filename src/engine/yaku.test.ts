@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { CARDS, type CardId, type CardTag, cardWithTag, type Month } from '@/content/cards';
+import {
+  type CardId,
+  type CardTag,
+  cardWithTag,
+  type Land,
+  landCards,
+  type Month,
+} from '@/content/cards';
 import { DEFAULT_RULES, withRules } from '@/content/rules';
 import type { YakuId } from '@/content/yaku';
 import { DEFAULT_YAKU_MODS, type YakuMods } from './types';
 import { detectYaku, totalPoints, yakuProgress, type YakuContext } from './yaku';
 
-const T = (tag: CardTag): CardId => cardWithTag(tag);
+const CARDS = landCards('nippon');
+const T = (tag: CardTag, land: Land = 'nippon'): CardId => cardWithTag(tag, land);
 const ofType = (type: string) => CARDS.filter((c) => c.type === type).map((c) => c.id);
 const plainChaff = CARDS.filter((c) => c.type === 'chaff' && c.tags.length === 0).map((c) => c.id);
 const monthCards = (m: number) => CARDS.filter((c) => c.month === m).map((c) => c.id);
@@ -204,5 +212,56 @@ describe('progress', () => {
     // 24 chaff plus the sake cup.
     expect(kasu?.wanted).toHaveLength(25);
     expect(ofType('bright')).toHaveLength(5);
+  });
+});
+
+describe('Aotearoa: the same yaku with the redrawn deck', () => {
+  const A = (tag: CardTag) => T(tag, 'aotearoa');
+  const aCards = landCards('aotearoa');
+  const aMonth = (m: number) => aCards.filter((c) => c.month === m).map((c) => c.id);
+  const actx = (month: Month): YakuContext => ({
+    ...ctx({ month, rules: { tsukifuda: true } }),
+    monthCards: aMonth(month),
+  });
+
+  it('scores the Brights, with Ua as the rain card', () => {
+    const [kotuku, kowhai, moon, ua, matariki] = [
+      A('crane'),
+      A('curtain'),
+      A('moon'),
+      A('rainMan'),
+      A('phoenix'),
+    ];
+    expect(yaku([kotuku, kowhai, moon, ua, matariki])).toEqual({ goko: 10 });
+    expect(yaku([kotuku, moon, matariki])).toEqual({ sanko: 5 });
+    expect(yaku([kotuku, moon, ua])).toEqual({});
+    expect(yaku([kotuku, kowhai, moon, ua])).toEqual({ ameShiko: 7 });
+  });
+
+  it('scores moon and kōwhai viewing with the kete', () => {
+    expect(yaku([A('moon'), A('sakeCup')])).toEqual({ tsukimi: 5 });
+    expect(yaku([A('curtain'), A('sakeCup')])).toEqual({ hanami: 5 });
+  });
+
+  it('scores Te Pō: kiwi, ruru and wētā', () => {
+    expect(yaku([A('boar'), A('deer'), A('butterflies')])).toEqual({ inoshikacho: 5 });
+  });
+
+  it('scores kōkōwai and pounamu ribbons', () => {
+    const red = aCards.filter((c) => c.tags.includes('redPoetry')).map((c) => c.id);
+    const green = aCards.filter((c) => c.tags.includes('blueRibbon')).map((c) => c.id);
+    expect(yaku(red)).toEqual({ akatan: 5 });
+    expect(yaku(green)).toEqual({ aotan: 5 });
+    expect(yaku([...red, ...green])).toEqual({ akaao: 10, tan: 2 });
+  });
+
+  it('counts the kete as Chaff toward Kasu', () => {
+    const plain = aCards.filter((c) => c.type === 'chaff' && c.tags.length === 0).map((c) => c.id);
+    expect(yaku([...plain.slice(0, 9), A('sakeCup')])).toEqual({ kasu: 1 });
+  });
+
+  it('scores Tsukifuda with the four cards of an Aotearoa month', () => {
+    expect(yaku(aMonth(6), actx(6))).toEqual({ tsukifuda: 4 });
+    expect(yaku(aMonth(6), actx(7))).toEqual({});
   });
 });

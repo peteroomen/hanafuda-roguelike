@@ -6,7 +6,16 @@
  * one step at a time so each move can be animated.
  */
 import { BALANCE } from '@/content/balance';
-import { CARDS, type CardId, cardWithTag, type Month, seasonOf } from '@/content/cards';
+import { landText } from '@/content/lands';
+import {
+  ALL_CARDS,
+  type CardId,
+  cardWithTag,
+  type Land,
+  landCardIds,
+  type Month,
+  seasonOf,
+} from '@/content/cards';
 import { deckDef, type DeckId, omenEffects } from '@/content/decks';
 import { enhancementDef } from '@/content/enhancements';
 import { ofudaDef, type OfudaId } from '@/content/ofuda';
@@ -134,6 +143,8 @@ export interface RunState {
   readonly version: number;
   readonly seed: number;
   readonly deckId: DeckId;
+  /** Which card set the run plays with. Saves from before lands existed are Nippon. */
+  readonly land: Land;
   readonly omen: number;
   readonly guided: boolean;
   /** Charms the shop never offers (not yet unlocked). Missing on old saves and sims = none. */
@@ -209,6 +220,7 @@ export interface RunStepResult {
 export interface NewRunOptions {
   readonly seed: number;
   readonly deckId?: DeckId;
+  readonly land?: Land;
   readonly omen?: number;
   readonly guided?: boolean;
   /** Charms the player hasn't unlocked yet; the shop never offers them. Omitted = all. */
@@ -255,12 +267,13 @@ function emptyStats(): RunStats {
 
 export function newRun(opts: NewRunOptions): RunStepResult {
   const deck = deckDef(opts.deckId ?? 'pine');
+  const land = opts.land ?? 'nippon';
   const omen = opts.omen ?? 0;
   const oe = omenEffects(omen);
   const maxHp = BALANCE.playerHp + (deck.start.hpDelta ?? 0) + oe.startHpDelta;
   const enhancements: Record<string, EnhancementId> = {};
   for (const e of deck.start.enhance ?? [])
-    enhancements[String(cardWithTag(e.tag))] = e.enhancement;
+    enhancements[String(cardWithTag(e.tag, land))] = e.enhancement;
   const poems: Partial<Record<YakuId, number>> = {};
   if (deck.start.poemLevels) {
     const rng = new Rng(deriveSeed(opts.seed, 'poems'));
@@ -273,6 +286,7 @@ export function newRun(opts: NewRunOptions): RunStepResult {
     version: RUN_VERSION,
     seed: opts.seed,
     deckId: deck.id,
+    land,
     omen,
     guided: opts.guided ?? false,
     ...(opts.lockedCharms?.length ? { lockedCharms: opts.lockedCharms.slice() } : {}),
@@ -286,7 +300,7 @@ export function newRun(opts: NewRunOptions): RunStepResult {
     ofudaSlots: deck.start.ofudaSlots ?? 2,
     poems,
     enhancements,
-    deck: CARDS.map((c) => c.id),
+    deck: landCardIds(land),
     schedule: makeSchedule(opts.seed, opts.guided ?? false),
     phase: 'fight',
     fight: null,
@@ -652,7 +666,7 @@ function afterHandEvents(run: RunState, he: readonly HandEvent[], events: RunEve
       }
       if (f.stage === 'matching') {
         let dmg = 0;
-        for (const id of e.cards) dmg += f.hand.rules.chips[CARDS[id]?.type ?? 'chaff'];
+        for (const id of e.cards) dmg += f.hand.rules.chips[ALL_CARDS[id]?.type ?? 'chaff'];
         strikeSpirit(run, dmg, 'capture', events);
       }
     } else if (f.stage === 'matching') {
@@ -770,7 +784,10 @@ function fightWon(run: RunState, events: RunEvent[]): void {
   if (f.handNo === 1 && f.outcome?.kind !== 'spiritStop')
     lines.push({ label: 'Swift victory', mon: BALANCE.reward.swift });
   if (spirit.passive?.bonusMon)
-    lines.push({ label: spirit.passive.text.replace(/\.$/, ''), mon: spirit.passive.bonusMon });
+    lines.push({
+      label: landText(spirit.passive.text, run.land).replace(/\.$/, ''),
+      mon: spirit.passive.bonusMon,
+    });
   for (const inst of run.omamori) {
     for (const e of omamoriDef(inst.id).effects) {
       if (e.kind === 'economy' && e.perFight)
@@ -1042,5 +1059,5 @@ export function runStep(state: RunState, action: RunAction): RunStepResult {
 }
 
 export function season(run: RunState) {
-  return seasonOf(run.month);
+  return seasonOf(run.month, run.land);
 }

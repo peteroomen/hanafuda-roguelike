@@ -2,7 +2,7 @@
  * The visual model of the table: where every card is *shown*. It trails the
  * engine state while events are animated, one event at a time.
  */
-import { CARDS, type CardId, type Month } from '@/content/cards';
+import { ALL_CARDS, type CardId, type Month } from '@/content/cards';
 import type { HandEvent, HandState } from '@/engine/hand';
 import type { Seat } from '@/engine/types';
 
@@ -305,7 +305,7 @@ export function reconcile(v: Visual, h: HandState): Visual {
 }
 
 export function typeGroup(id: CardId): number {
-  const t = CARDS[id]?.type;
+  const t = ALL_CARDS[id]?.type;
   return t === 'bright' ? 0 : t === 'animal' ? 1 : t === 'ribbon' ? 2 : 3;
 }
 

@@ -10,7 +10,7 @@
  *            whim, and shops like the smart bot but never sells or restocks. Balance targets
  *            for fight length are set against this bot, not the smart one.
  */
-import { CARDS, type CardId } from '@/content/cards';
+import { ALL_CARDS, type CardId } from '@/content/cards';
 import { ENHANCEMENTS } from '@/content/enhancements';
 import type { OfudaId } from '@/content/ofuda';
 import { type Archetype, omamoriDef, type OmamoriId } from '@/content/omamori';
@@ -275,9 +275,9 @@ export function makeBot(config: BotConfig, seed: number): Bot {
           // Take a bright off the field if nothing in hand can match it.
           const target = h.field.find(
             (c) =>
-              CARDS[c]?.type === 'bright' &&
+              ALL_CARDS[c]?.type === 'bright' &&
               !h.frozen.includes(c) &&
-              !h.hands[0].some((x) => CARDS[x]?.month === CARDS[c]?.month),
+              !h.hands[0].some((x) => ALL_CARDS[x]?.month === ALL_CARDS[c]?.month),
           );
           const give = h.hands[0].slice().sort((a, b) => rank(a) - rank(b))[0];
           if (target !== undefined && give !== undefined)
@@ -313,7 +313,7 @@ export function makeBot(config: BotConfig, seed: number): Bot {
 }
 
 function rank(c: CardId): number {
-  const t = CARDS[c]?.type;
+  const t = ALL_CARDS[c]?.type;
   return t === 'bright' ? 4 : t === 'animal' ? 3 : t === 'ribbon' ? 2 : 1;
 }
 
@@ -439,7 +439,7 @@ function enhanceTarget(run: RunState, enh: string, archetype: Archetype | null):
           : archetype === 'animals'
             ? 'animal'
             : 'chaff';
-    const c = run.deck.find((id) => CARDS[id]?.type === fam && !run.enhancements[String(id)]);
+    const c = run.deck.find((id) => ALL_CARDS[id]?.type === fam && !run.enhancements[String(id)]);
     return c ?? null;
   }
   if (enh === 'inked' || enh === 'lucky') return null;
@@ -451,6 +451,8 @@ function enhanceTarget(run: RunState, enh: string, archetype: Archetype | null):
         : archetype === 'chaff'
           ? 'chaff'
           : 'bright';
-  const c = run.deck.find((id) => CARDS[id]?.type === wantType && !run.enhancements[String(id)]);
+  const c = run.deck.find(
+    (id) => ALL_CARDS[id]?.type === wantType && !run.enhancements[String(id)],
+  );
   return c ?? null;
 }

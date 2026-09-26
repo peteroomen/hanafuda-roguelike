@@ -3,6 +3,7 @@
  * current run. A tiny external store read with useSyncExternalStore.
  */
 import { useSyncExternalStore } from 'react';
+import type { Land } from '@/content/cards';
 import type { DeckId } from '@/content/decks';
 import type { OmamoriId } from '@/content/omamori';
 import type { SpiritId } from '@/content/spirits';
@@ -27,7 +28,10 @@ export interface Settings {
   haptics: boolean;
   speed: Speed;
   reduceMotion: boolean;
+  /** Card faces for Nippon. Aotearoa has one style, its own. */
   cardStyle: CardStyle;
+  /** The land picked last on the Setup screen, and shown outside a run (collection). */
+  land: Land;
 }
 
 export interface Profile {
@@ -45,7 +49,15 @@ export interface Profile {
   tipsSeen: string[];
   yakuScored: Partial<Record<YakuId, number>>;
   guidedDone: boolean;
-  history: { won: boolean; month: number; deck: DeckId; omen: number; hit: number; date: string }[];
+  history: {
+    won: boolean;
+    month: number;
+    deck: DeckId;
+    land?: Land;
+    omen: number;
+    hit: number;
+    date: string;
+  }[];
   /** Charms that started locked and have since been unlocked. */
   unlockedCharms: OmamoriId[];
   /** Your record with each deck: years finished, years completed, highest omen completed. */
@@ -77,6 +89,7 @@ export const DEFAULT_SETTINGS: Settings = {
   speed: 'normal',
   reduceMotion: false,
   cardStyle: 'traditional',
+  land: 'nippon',
 };
 
 export const DEFAULT_PROFILE: Profile = {
@@ -125,7 +138,12 @@ function loadRun(): RunState | null {
   const run = load<RunState | null>(KEYS.run, null);
   if (!run || run.version !== RUN_VERSION) return null;
   if (run.phase === 'victory' || run.phase === 'defeat') return null;
-  return run;
+  return migrateRun(run);
+}
+
+/** Runs saved before lands existed are Nippon runs. */
+export function migrateRun(run: RunState): RunState {
+  return run.land ? run : { ...run, land: 'nippon' };
 }
 
 /** Settings saved by older versions: training wheels used to be on or off. */
@@ -171,6 +189,19 @@ export function useStore<T>(select: (s: AppState) => T): T {
     () => select(state),
     () => select(state),
   );
+}
+
+/** The land being shown: the current run's, or else the one last picked. */
+export function landOf(s: AppState): Land {
+  return s.run?.land ?? s.settings.land;
+}
+
+export function currentLand(): Land {
+  return landOf(state);
+}
+
+export function useLand(): Land {
+  return useStore(landOf);
 }
 
 export function updateSettings(patch: Partial<Settings>): void {

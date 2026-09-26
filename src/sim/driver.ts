@@ -5,6 +5,7 @@ import type { DeckId } from '@/content/decks';
 import type { OmamoriId } from '@/content/omamori';
 import type { SpiritId } from '@/content/spirits';
 import type { YakuId } from '@/content/yaku';
+import type { Land } from '@/content/cards';
 import { newRun, type RunEvent, type RunState, runStep } from '@/engine/run';
 import { type BotConfig, makeBot } from './bots';
 
@@ -44,6 +45,7 @@ export interface RunSummary {
 export interface RunOptions {
   readonly seed: number;
   readonly deckId?: DeckId;
+  readonly land?: Land;
   readonly omen?: number;
   readonly guided?: boolean;
   /** Charms kept out of the shop (a new player's starter set). Default: everything unlocked. */
@@ -56,6 +58,7 @@ export function playRun(opts: RunOptions): RunSummary {
   let { state } = newRun({
     seed: opts.seed,
     deckId: opts.deckId ?? 'pine',
+    land: opts.land ?? 'nippon',
     omen: opts.omen ?? 0,
     guided: opts.guided ?? false,
     ...(opts.lockedCharms ? { lockedCharms: opts.lockedCharms } : {}),

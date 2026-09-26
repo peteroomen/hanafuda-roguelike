@@ -2,7 +2,14 @@
  * Helpers for tests and the simulator: build hands with exact layouts and play
  * them out with simple policies.
  */
-import { CARDS, type CardId, cardWithTag, type CardTag, type Month } from '@/content/cards';
+import {
+  type CardId,
+  cardWithTag,
+  type CardTag,
+  type Land,
+  landCards,
+  type Month,
+} from '@/content/cards';
 import { DEFAULT_RULES, type RuleSet } from '@/content/rules';
 import {
   type HandAction,
@@ -15,11 +22,15 @@ import {
 import { Rng } from './rng';
 import type { Seat } from './types';
 
-export const tag = (t: CardTag): CardId => cardWithTag(t);
-export const monthIds = (m: number): CardId[] =>
-  CARDS.filter((c) => c.month === m).map((c) => c.id);
-export const chaffOf = (m: number): CardId[] =>
-  CARDS.filter((c) => c.month === m && c.type === 'chaff').map((c) => c.id);
+export const tag = (t: CardTag, land: Land = 'nippon'): CardId => cardWithTag(t, land);
+export const monthIds = (m: number, land: Land = 'nippon'): CardId[] =>
+  landCards(land)
+    .filter((c) => c.month === m)
+    .map((c) => c.id);
+export const chaffOf = (m: number, land: Land = 'nippon'): CardId[] =>
+  landCards(land)
+    .filter((c) => c.month === m && c.type === 'chaff')
+    .map((c) => c.id);
 
 export interface Layout {
   hands?: [CardId[], CardId[]];
